@@ -38,7 +38,7 @@ module DBInst
           @#{str_name} = __param
         end
       ")
-      metaclass.alias_method "#{str_name}=".intern, str_name.intern
+      metaclass.send(:alias_method, "#{str_name}=".intern, str_name.intern)
     end
 
 
