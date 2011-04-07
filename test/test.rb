@@ -22,6 +22,13 @@ class TestConfig < Test::Unit::TestCase
     installer.load_config("environment('foo') { } \n environment('bar') { }")
     assert(installer.config.environments.has_key?('foo'))
     assert(installer.config.environments.has_key?('bar'))
-    assert(installer.config.environments.has_key?('foof'))
   end
+
+  def test_can_set_param_in_environment
+    installer = DBInst::Base.new
+    installer.load_config("environment('foo') {
+      some_param 'foobar'
+    }")
+    assert_equal(installer.config.environments['foo'].some_param, 'foobar')
+
 end
