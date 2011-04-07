@@ -36,6 +36,7 @@ module DBInst
       end
       env = Environment.new(name)
       block.arity < 1 ? env.instance_eval(&block) : block.call(env)
+      env.lock
       @environments[name] = env
     end
   end

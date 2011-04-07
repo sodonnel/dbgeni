@@ -30,5 +30,17 @@ class TestConfig < Test::Unit::TestCase
       some_param 'foobar'
     }")
     assert_equal(installer.config.environments['foo'].some_param, 'foobar')
+  end
+
+
+  def test_can_set_param_in_one_environment_only
+    installer = DBInst::Base.new
+    installer.load_config("environment('foo') {
+      some_param 'foobar'
+    }
+    environment('bar') { }")
+    assert_equal(installer.config.environments['foo'].some_param, 'foobar')
+    assert_equal(false, installer.config.environments['bar'].respond_to?(:some_param))
+  end
 
 end
