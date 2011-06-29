@@ -1,12 +1,31 @@
 module DBInst
+
+  # Config understands the following:
+
+  # migrations_directory 'value' # This will be checked to ensure its a valid dir
+  #                              # and defaults to 'migrations'
+  # environment('development') {
+  #   username 'user' # this must be here, or it will error
+  #   database 'MYDB.WORLD'     # this must be here, or it will error. For Oracle, this is the TNS Name
+  #   password ''     # If this value is missing, it will be promoted for if the env is used.
+  # }
+  #
+  # environment('other environment') {
+  #   username '' # the environment block can be repeated for many environments
+  # }
+  #
+  # global_parameters { # These are common parameters to all environments, but they can be
+  #                     # overriden. Basically take global, merge in environment
+  #   param_name 'value'
+  # }
+
   class Config
-    attr_accessor :migration_dir, :plsq_dir, :environments
+    attr_accessor :environments
 
     def initialize
 #      @config_filename = config_filename
-      @migration_dir   = 'migrations'
-      @plsql_dir       = 'plsql'
-      @environments    = Hash.new
+      @migration_directory  = 'migrations'
+      @environments         = Hash.new
     end
 
     def load_config_from_file
@@ -21,6 +40,22 @@ module DBInst
       self.instance_eval(raw_config)
       self
     end
+
+    def migrations_directory(*p)
+      if p.length == 0
+        @migration_directory
+      else
+        @migration_directory = p[0]
+      end
+    end
+
+    # For some reason I cannot work out, this method is never getting
+    # call in the evaluated block
+#    def migrations_directory=(value)
+#      puts "called the equals one"
+#      @migration_directory = value
+#    end
+
 
     # Given a block of environment details, generate a new environment
     # object. eg

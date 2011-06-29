@@ -12,35 +12,62 @@ class TestConfig < Test::Unit::TestCase
   end
 
   def test_single_environment_loaded
-    installer = DBInst::Base.new
-    installer.load_config("environment('foo') { }")
-    assert(installer.config.environments.has_key?('foo'))
+    cfg = DBInst::Config.new #Base.new
+    cfg.load("environment('foo') { }")
+    assert(cfg.environments.has_key?('foo'))
   end
 
+  # This test does not pass!
+#  def test_single_environment_loaded_no_brackets
+#    installer = DBInst::Base.new
+#    installer.load_config("environment 'foo' { }")
+#    assert(installer.config.environments.has_key?('foo'))
+#  end
+
   def test_many_environments_loaded
-    installer = DBInst::Base.new
-    installer.load_config("environment('foo') { } \n environment('bar') { }")
-    assert(installer.config.environments.has_key?('foo'))
-    assert(installer.config.environments.has_key?('bar'))
+    cfg = DBInst::Config.new
+    cfg.load("environment('foo') { } \n environment('bar') { }")
+    assert(cfg.environments.has_key?('foo'))
+    assert(cfg.environments.has_key?('bar'))
   end
 
   def test_can_set_param_in_environment
-    installer = DBInst::Base.new
-    installer.load_config("environment('foo') {
+    cfg = DBInst::Config.new
+    cfg.load("environment('foo') {
       some_param 'foobar'
     }")
-    assert_equal(installer.config.environments['foo'].some_param, 'foobar')
+    assert_equal(cfg.environments['foo'].some_param, 'foobar')
   end
 
-
   def test_can_set_param_in_one_environment_only
-    installer = DBInst::Base.new
-    installer.load_config("environment('foo') {
+    cfg = DBInst::Config.new
+    cfg.load("environment('foo') {
       some_param 'foobar'
     }
     environment('bar') { }")
-    assert_equal(installer.config.environments['foo'].some_param, 'foobar')
-    assert_equal(false, installer.config.environments['bar'].respond_to?(:some_param))
+    assert_equal(cfg.environments['foo'].some_param, 'foobar')
+    assert_raises NoMethodError do
+      assert_equal(false, cfg.environments['bar'].some_param)
+    end
   end
+
+  def test_after_loading_environment_raises_no_method
+    cfg = DBInst::Config.new
+    cfg.load("environment('foo') {
+    }")
+    assert_raises NoMethodError do
+      assert_equal(false, cfg.environments['foo'].some_param)
+    end
+  end
+
+  def test_can_set_get_migrations_directory
+    cfg = DBInst::Config.new
+    cfg.load("environment('foo') {
+    }\n
+    migrations_directory 'some directory'")
+    assert_equal('some directory', cfg.migrations_directory)
+  end
+
+
 
 end
