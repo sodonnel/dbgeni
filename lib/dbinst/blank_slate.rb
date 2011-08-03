@@ -1,3 +1,14 @@
+# TODO - put this somewhere more sensible
+module Kernel
+  def suppress_warnings
+    original_verbosity = $VERBOSE
+    $VERBOSE = nil
+    result = yield
+    $VERBOSE = original_verbosity
+    return result
+  end
+end
+
 module DBInst
 
   class ::BlankSlate
@@ -14,10 +25,11 @@ module DBInst
                     :send,
                     :alias_method
                     ]
-
-    (instance_methods - KEEP_METHODS).each do |m|
-      undef_method(m)
-    end
+    suppress_warnings {
+      (instance_methods - KEEP_METHODS).each do |m|
+        undef_method(m)
+      end
+    }
   end
 
 end

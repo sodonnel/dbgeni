@@ -44,12 +44,15 @@ begin
   conf.puts <<-EOF
 
 # This directory specifies the location of the migrations directory
-migration_directory "./migrations"
+migrations_directory "./migrations"
 
-# Define the database connection details for each environment this application
-# will be installed on. Typically development, test and production will be present
-# but any number of environments are valid with the limitation that there is at least
-# one
+# Environment Section
+#
+# There must be at least one environment, and at a minimum each environment
+# should define a username, database and password.
+#
+# Typically there will be more than one enviroment block detailling development,
+# test and production but any number of environments are valid provided there is at least one.
 
 # environment('development') {
 #   username 'user'        # this must be here, or it will error
@@ -65,6 +68,15 @@ migration_directory "./migrations"
 #   database 'TEST.WORLD'  # this must be here, or it will error. For Oracle, this is the TNS Name
 #   password ''            # If this value is missing, it will be promoted for if the env is used.
 # }
+#
+#
+# Global Parameters
+#
+# There can only be one Global Parameter block.
+#
+# This is used to define parameters that are common to all environments.
+# If the parameter is redefined in an environment block, then the value in the environment block
+# overrides the global parameter.
 #
 # global_parameters { # These are common parameters to all environments, but they can be
 #                     # overriden. Basically take global, merge in environment

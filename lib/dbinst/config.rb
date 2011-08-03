@@ -28,6 +28,20 @@ module DBInst
       @environments         = Hash.new
     end
 
+    def self.load_from_file(filename)
+      cfg = self.new
+      cfg.load_from_file(filename)
+    end
+
+    def load_from_file(filename)
+      raw_config = ''
+      File.open(filename) do |f|
+        raw_config = f.read
+      end
+      load(raw_config)
+    end
+
+    ## TODO remove this method ...
     def load_config_from_file
       raw_config = ''
       File.open("./.dbinst") do |f|
@@ -40,6 +54,20 @@ module DBInst
       self.instance_eval(raw_config)
       self
     end
+
+    def to_s
+      str = ''
+      str << "migrations_directory => #{@migration_directory}\n"
+      @environments.keys.sort.each do |k|
+        str << "Environment: #{k}\n"
+        @environments[k].keys.sort.each do |ek|
+          str << "#{ek} => #{@environments[k][ek]}\n"
+        end
+      end
+      str
+    end
+
+    # Methods below here are for the DSL
 
     def migrations_directory(*p)
       if p.length == 0
@@ -73,6 +101,9 @@ module DBInst
       block.arity < 1 ? env.instance_eval(&block) : block.call(env)
       env.lock
       @environments[name] = env
+    end
+
+    def global_parameters(name, &block)
     end
   end
 end
