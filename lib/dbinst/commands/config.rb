@@ -29,6 +29,9 @@ end
 require 'dbinst'
 
 cfg = DBInst::Config.load_from_file(config_file)
+puts "-----------------------------\n"
+puts "| Current Parameter Details |\n"
+puts "-----------------------------\n\n"
 puts cfg.to_s
 
 

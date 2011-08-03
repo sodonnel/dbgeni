@@ -59,10 +59,9 @@ module DBInst
       str = ''
       str << "migrations_directory => #{@migration_directory}\n"
       @environments.keys.sort.each do |k|
-        str << "Environment: #{k}\n"
-        @environments[k].keys.sort.each do |ek|
-          str << "#{ek} => #{@environments[k][ek]}\n"
-        end
+        str << "\n\nEnvironment: #{k}\n"
+        str <<     "=============#{(1..k.length).map do "=" end.join}\n\n"
+        str << @environments[k].__to_s
       end
       str
     end

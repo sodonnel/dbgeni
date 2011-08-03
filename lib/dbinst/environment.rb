@@ -34,6 +34,15 @@ module DBInst
       end
     end
 
+    def __to_s
+      str = ''
+      # get the longest key length to pad the keys
+      max_length = @params.keys.map{ |k| k.length }.sort.last
+      @params.keys.sort.each do |k|
+        str << "#{k.ljust(max_length, ' ')} => #{@params[k]}\n"
+      end
+      str
+    end
 
     private
 
