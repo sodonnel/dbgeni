@@ -46,18 +46,14 @@ class TestConfig < Test::Unit::TestCase
     }
     environment('bar') { }")
     assert_equal(cfg.environments['foo'].some_param, 'foobar')
-    assert_raises NoMethodError do
-      assert_equal(false, cfg.environments['bar'].some_param)
-    end
+    assert_equal(nil, cfg.environments['bar'].some_param)
   end
 
   def test_after_loading_environment_raises_no_method
     cfg = DBInst::Config.new
     cfg.load("environment('foo') {
     }")
-    assert_raises NoMethodError do
-      assert_equal(false, cfg.environments['foo'].some_param)
-    end
+    assert_equal(nil, cfg.environments['foo'].some_param)
   end
 
   def test_can_set_get_migrations_directory

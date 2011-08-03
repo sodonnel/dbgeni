@@ -99,7 +99,7 @@ module DBInst
       end
       env = Environment.new(name)
       block.arity < 1 ? env.instance_eval(&block) : block.call(env)
-      env.lock
+      env.__completed_loading
       @environments[name] = env
     end
 
