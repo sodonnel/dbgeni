@@ -20,6 +20,10 @@ module DBInst
       @loading
     end
 
+    def __environment_name
+      @environment_name
+    end
+
     def __merge_defaults(default_params)
       all_params = default_params.merge(@params)
       @params = all_params

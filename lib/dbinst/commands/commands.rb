@@ -9,6 +9,8 @@ case command
 
   when 'config'
   require 'dbinst/commands/config.rb'
+  when 'migrations'
+  require 'dbinst/commands/migrations.rb'
   else
   puts "Error: Command not recognized" unless %w(-h --help).include?(command)
   puts <<-EOT

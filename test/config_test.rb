@@ -64,6 +64,19 @@ class TestConfig < Test::Unit::TestCase
     assert_equal('some directory', cfg.migrations_directory)
   end
 
+  def test_missing_environment_raises_exception
+    cfg = DBInst::Config.new
+    cfg.load("environment('foo') { } \n environment('bar') { }")
+    assert_raises(DBInst::EnvironmentNotExist) do
+      cfg.get_environment('not_there')
+    end
+  end
 
+  def test_correct_environment_is_returned
+    cfg = DBInst::Config.new
+    cfg.load("environment('foo') { } \n environment('bar') { }")
+    env = cfg.get_environment('foo')
+    assert_equal('foo', env.__environment_name)
+  end
 
 end

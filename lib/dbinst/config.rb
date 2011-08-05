@@ -41,14 +41,21 @@ module DBInst
       load(raw_config)
     end
 
-    ## TODO remove this method ...
-    def load_config_from_file
-      raw_config = ''
-      File.open("./.dbinst") do |f|
-        raw_config = f.read
+    def get_environment(name)
+      unless @environments.has_key?(name)
+        raise DBInst::EnvironmentNotExist
       end
-      load(raw_config)
+      @environments[name]
     end
+
+    ## TODO remove this method ...
+    #def load_config_from_file
+    #  raw_config = ''
+    #  File.open("./.dbinst") do |f|
+    #    raw_config = f.read
+    #  end
+    #  load(raw_config)
+    #end
 
     def load(raw_config)
       self.instance_eval(raw_config)
