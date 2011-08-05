@@ -4,11 +4,11 @@ command = ARGV.shift
 
 case command
   when 'new'
-    require 'dbinst/commands/new.rb'
+  require 'dbinst/commands/new.rb'
   when 'initialize'
 
   when 'config'
-    require 'dbinst/commands/config.rb'
+  require 'dbinst/commands/config.rb'
   else
   puts "Error: Command not recognized" unless %w(-h --help).include?(command)
   puts <<-EOT
