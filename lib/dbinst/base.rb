@@ -14,8 +14,12 @@ module DBInst
     attr_reader :selected_environment
    # attr_reader :migrations
 
-    def self.installer_for_environment(config_file, environment_name)
+    def self.installer_for_environment(config_file, environment_name=nil)
       installer = self.new(config_file)
+      # If environment is nil, then it assumes there is only a single environment
+      # defined. So pass the nil value to select_environment - if there is more than
+      # one environment then select_environment will error out after making a call
+      # to get_environment.
       installer.select_environment(environment_name)
       installer
     end
@@ -34,8 +38,7 @@ module DBInst
     end
 
     def migrations
-   #   @migration_list = DBInst::MigrationList(
-   #   @migrations =
+      @migration_list = DBInst::MigrationList.new(@config.migration_directory).migrations
     end
 
     def outstanding_migrations
@@ -57,7 +60,7 @@ module DBInst
     end
 
     def load_config(config)
-      @config = Config.new.load(config)
+      @config = Config.load_from_file(config)
     end
 
   end

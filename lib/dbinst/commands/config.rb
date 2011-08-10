@@ -13,26 +13,23 @@ To list the config for only a specific environment:
 To use a different config_file, specify the config_file switch:
   dbinst config environment_name --config_file </path/to/config/file>
 EOF
-  exit
+  exit(0)
 end
 
-config_file = './.dbinst'
-if ARGV.include?('--config-file')
-  config_file = ARGV[ARGV.index('--config-file')+1]
-end
-
-if ! File.exists?(config_file)
-  puts "error: The config file #{config_file} does not exist"
-  exit
+if ! File.exists?($config_file)
+  puts "error: The config file #{$config_file} does not exist"
+  exit(1)
 end
 
 require 'dbinst'
 
-cfg = DBInst::Config.load_from_file(config_file)
+cfg = DBInst::Config.load_from_file($config_file)
 puts "-----------------------------\n"
 puts "| Current Parameter Details |\n"
 puts "-----------------------------\n\n"
 puts cfg.to_s
+
+exit(0)
 
 
 

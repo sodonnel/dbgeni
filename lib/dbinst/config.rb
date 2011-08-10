@@ -20,47 +20,74 @@ module DBInst
   # }
 
   class Config
-    attr_accessor :environments
+    attr_reader   :environments
+    attr_reader   :migration_directory
+    attr_reader   :config_file
+    attr_reader   :base_directory
 
     def initialize
-#      @config_filename = config_filename
       @migration_directory  = 'migrations'
       @environments         = Hash.new
     end
+
 
     def self.load_from_file(filename)
       cfg = self.new
       cfg.load_from_file(filename)
     end
 
+
     def load_from_file(filename)
       raw_config = ''
-      File.open(filename) do |f|
-        raw_config = f.read
+      self.base_directory = File.expand_path(File.dirname(filename))
+      @config_file     = File.expand_path(filename)
+      begin
+        File.open(@config_file) do |f|
+          raw_config = f.read
+        end
+      rescue Errno::ENOENT
+        raise DBInst::ConfigFileNotExist, "#{@config_location} (expanded from #{filename}) does not exist"
       end
       load(raw_config)
     end
 
-    def get_environment(name)
-      unless @environments.has_key?(name)
-        raise DBInst::EnvironmentNotExist
+
+    # Normally this is assumed to be the location the config file is in.
+    # All relative file operations come from this directory
+    def base_directory=(dir)
+      @base_directory = dir
+      # If change the base directory, then unless migration dir is
+      # an absolute path, it will need to change too.
+      if is_absolute_path?(@migration_dir)
+        # TODO - need to take off the actual migration directory and join to new base_dir
+      else
+        @migration_directory = File.join(@base_directory, @migration_directory)
       end
-      @environments[name]
     end
 
-    ## TODO remove this method ...
-    #def load_config_from_file
-    #  raw_config = ''
-    #  File.open("./.dbinst") do |f|
-    #    raw_config = f.read
-    #  end
-    #  load(raw_config)
-    #end
+
+    def get_environment(name)
+      if name == nil
+        # if there is only a single environment defined, then return it
+        if @environments.keys.length == 1
+          @environments[@environments.keys.first]
+        else
+          raise DBInst::ConfigAmbiguousEnvironment, "More than one environment is defined"
+        end
+      else
+        unless @environments.has_key?(name)
+          raise DBInst::EnvironmentNotExist
+        end
+        @environments[name]
+      end
+    end
+
 
     def load(raw_config)
       self.instance_eval(raw_config)
       self
     end
+
 
     def to_s
       str = ''
@@ -73,22 +100,41 @@ module DBInst
       str
     end
 
-    # Methods below here are for the DSL
+    ######################################
+    # Methods below here are for the DSL #
+    ######################################
 
+    # mig_dir could be defined as a file in current directory 'migrations'
+    # or it could be a relative directory './somedir/migrations'
+    # or it could be a full path '/somedir/migrations' or in windows 'C:\somedir\migrations'
+    # To use the migrations it needs to be expanded to a full path *somehow*.
+    # If it begins / or <LETTER>:\ then assume its full path, otherwise concatenate
+    # to the full path of the config file.
     def migrations_directory(*p)
       if p.length == 0
         @migration_directory
       else
-        @migration_directory = p[0]
+        if is_absolute_path?(p[0])
+          # it looks like an absolute path
+          @migration_directory = p[0]
+        else
+          # it looks like a relative path
+          if @base_directory
+            @migration_directory = File.join(@base_directory, p[0])
+          else
+            @migration_directory = p[0]
+          end
+        end
       end
     end
 
     # For some reason I cannot work out, this method is never getting
-    # call in the evaluated block
-#    def migrations_directory=(value)
-#      puts "called the equals one"
-#      @migration_directory = value
-#    end
+    # call in the evaluated block. Ideally wanted to have migrations_directory
+    # and migrations_directory= so that it doesn't matter which is called.
+    # def migrations_directory=(value)
+    #   puts "called the equals one"
+    #   @migration_directory = value
+    # end
 
 
     # Given a block of environment details, generate a new environment
@@ -110,6 +156,16 @@ module DBInst
     end
 
     def global_parameters(name, &block)
+    end
+
+    private
+
+    def is_absolute_path?(path)
+      if path =~ /^\/|[a-zA-Z]:\\/
+        true
+      else
+        false
+      end
     end
   end
 end

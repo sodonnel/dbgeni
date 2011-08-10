@@ -20,6 +20,7 @@ The available dbinst commands are:
   new        Generate a new default application directory structure
   initialize Create the dbinst_migrations table in the database
   config     List the current config for a given environment
+  migrations List and Apply Migrations
 
 All commands can be run with -h for more information.
 EOT

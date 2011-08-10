@@ -79,4 +79,68 @@ class TestConfig < Test::Unit::TestCase
     assert_equal('foo', env.__environment_name)
   end
 
+  def test_only_environment_is_returned_when_no_param
+    cfg = DBInst::Config.new
+    cfg.load("environment('foo') { }")
+    env = cfg.get_environment(nil)
+    assert_equal('foo', env.__environment_name)
+  end
+
+  def test_exception_when_no_environment_passed_and_many_defined
+    cfg = DBInst::Config.new
+    cfg.load("environment('foo') { }\n environment('bar') { }")
+    assert_raises( DBInst::ConfigAmbiguousEnvironment) do
+      env = cfg.get_environment(nil)
+    end
+  end
+
+  def test_migrations_directory_defaults
+    cfg = DBInst::Config.new
+    cfg.load("environment('foo') { }\n environment('bar') { }")
+    assert_equal('migrations', cfg.migration_directory)
+  end
+
+  def test_migrations_dir_settable_via_config
+    cfg = DBInst::Config.new
+    cfg.load("migrations_directory 'other_dir'\nenvironment('foo') { }\n environment('bar') { }")
+    assert_equal('other_dir', cfg.migration_directory)
+  end
+
+  def test_absolution_migrations_dir_not_modified_windows
+    cfg = DBInst::Config.new
+    cfg.base_directory = "c:\\somedir\\"
+    # !! need to escape backslashes as they are escape character!
+    cfg.load("migrations_directory 'c:\\other_dir'\nenvironment('foo') { }\n environment('bar') { }")
+    assert_equal('c:\other_dir', cfg.migration_directory)
+  end
+
+  def test_absolution_migrations_dir_not_modified_unix
+    cfg = DBInst::Config.new
+    cfg.base_directory = "c:\\somedir\\"
+    cfg.load("migrations_directory '/other_dir'\nenvironment('foo') { }\n environment('bar') { }")
+    assert_equal('/other_dir', cfg.migration_directory)
+  end
+
+  def test_relative_migrations_dir_added_to_base_windows
+    cfg = DBInst::Config.new
+    cfg.base_directory = "c:\\somedir\\"
+    cfg.load("migrations_directory 'other_dir'\nenvironment('foo') { }\n environment('bar') { }")
+    assert_equal("c:\\somedir\\other_dir", cfg.migration_directory)
+  end
+
+  def test_relative_migrations_dir_added_to_base_unix
+    cfg = DBInst::Config.new
+    cfg.base_directory = '/somedir'
+    cfg.load("migrations_directory 'other_dir'\nenvironment('foo') { }\n environment('bar') { }")
+    assert_equal('/somedir/other_dir', cfg.migration_directory)
+  end
+
+  def test_migrations_dir_changes_when_base_dir_changed
+    cfg = DBInst::Config.new
+    cfg.base_directory = '/somedir'
+    assert_equal('/somedir/migrations', cfg.migration_directory)
+  end
+
+
+
 end

@@ -86,5 +86,7 @@ migrations_directory "./migrations"
 EOF
 rescue Exception => e
   puts "error: failed to create #{directory}/.dbinst - #{e.to_s}"
+  raise
 end
 
+exit(0)
