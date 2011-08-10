@@ -51,7 +51,7 @@ installer = DBInst::Base.installer_for_environment($config_file, $environment_na
 case command
 when 'list'
   migrations = installer.migrations
-  if migrations.length
+  if migrations.length == 0
     puts "There are no migrations in #{installer.config.migration_directory}"
   end
   migrations.each do |m|

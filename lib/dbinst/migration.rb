@@ -34,6 +34,10 @@ module DBInst
     def verify!(environment)
     end
 
+    def to_s
+      "#{sequence}::#{name}"
+    end
+
     private
 
     def parse_file

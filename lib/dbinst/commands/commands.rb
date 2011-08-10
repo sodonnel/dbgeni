@@ -4,11 +4,13 @@ command = ARGV.shift
 
 case command
   when 'new'
-  require 'dbinst/commands/new.rb'
+  require 'dbinst/commands/new'
   when 'initialize'
 
   when 'config'
-  require 'dbinst/commands/config.rb'
+  require 'dbinst/commands/config'
+  when 'generate'
+  require 'dbinst/commands/generate'
   when 'migrations'
   require 'dbinst/commands/migrations.rb'
   else
@@ -21,6 +23,7 @@ The available dbinst commands are:
   initialize Create the dbinst_migrations table in the database
   config     List the current config for a given environment
   migrations List and Apply Migrations
+  generate   Generate migrations and code files
 
 All commands can be run with -h for more information.
 EOT
