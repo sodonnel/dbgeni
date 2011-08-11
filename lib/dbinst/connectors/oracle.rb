@@ -42,6 +42,15 @@ module DBInst
         end
       end
 
+      def commit
+        @connection.commit
+      end
+
+      def rollback
+        @connection.rollback
+      end
+
+
       private
 
       def initialize(user, password, database)

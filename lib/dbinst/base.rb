@@ -62,6 +62,11 @@ module DBInst
         @connection = DBInst::Connector::Oracle.connect(@selected_environment.username,
                                                         @selected_environment.password,
                                                         @selected_environment.database)
+      elsif config.db_type == 'sqlite'
+        require 'dbinst/connectors/sqlite'
+        @connection = DBInst::Connector::Oracle.connect(nil,
+                                                        nil,
+                                                        @selected_environment.database)
       else
         raise "invalid database type"
       end
