@@ -1,0 +1,5 @@
+Working on wiring up the installer to actually connect to the database and then the initialize command so it can create the required table on the database to log all the migrations.
+
+initialize db
+
+

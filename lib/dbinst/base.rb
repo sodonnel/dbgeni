@@ -12,6 +12,7 @@ module DBInst
   class Base
     attr_reader :config
     attr_reader :selected_environment
+    attr_reader :connection
    # attr_reader :migrations
 
     def self.installer_for_environment(config_file, environment_name=nil)
@@ -51,6 +52,19 @@ module DBInst
     end
 
     def apply_migration(name)
+    end
+
+    def connect
+      raise DBInst::NoEnvironmentSelected unless @selected_environment
+
+      if config.db_type == 'oracle'
+        require 'dbinst/connectors/oracle'
+        @connection = DBInst::Connector::Oracle.connect(@selected_environment.username,
+                                                        @selected_environment.password,
+                                                        @selected_environment.database)
+      else
+        raise "invalid database type"
+      end
     end
 
     private

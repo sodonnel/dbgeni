@@ -22,11 +22,15 @@ module DBInst
   class Config
     attr_reader   :environments
     attr_reader   :migration_directory
+    attr_reader   :db_type  # oracle, mysql, sqlite etc
+    attr_reader   :db_table # defaults to dbinst_migrations
     attr_reader   :config_file
     attr_reader   :base_directory
 
     def initialize
       @migration_directory  = 'migrations'
+      @db_type              = 'oracle'
+      @db_table             = 'dbinst_migrations'
       @environments         = Hash.new
     end
 
@@ -126,6 +130,16 @@ module DBInst
           end
         end
       end
+    end
+
+    def database_type(*p)
+      # TODO - consider putting validation here
+      @db_type = p[0]
+    end
+
+    def database_table(*p)
+      # TODO - consider putting validation here
+      @db_table = p[0]
     end
 
     # For some reason I cannot work out, this method is never getting

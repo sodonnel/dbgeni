@@ -141,6 +141,28 @@ class TestConfig < Test::Unit::TestCase
     assert_equal('/somedir/migrations', cfg.migration_directory)
   end
 
+  def test_database_table_defaults_to_correct_value
+    cfg = DBInst::Config.new
+    cfg.load("environment('foo') { }\n environment('bar') { }")
+    assert_equal('dbinst_migrations', cfg.db_table)
+  end
 
+  def test_database_table_settable_in_config
+    cfg = DBInst::Config.new
+    cfg.load("database_table \"other_table\"\nenvironment('foo') { }\n environment('bar') { }")
+    assert_equal('other_table', cfg.db_table)
+  end
+
+  def test_database_type_defaults_to_correct_value
+    cfg = DBInst::Config.new
+    cfg.load("environment('foo') { }\n environment('bar') { }")
+    assert_equal('oracle', cfg.db_type)
+  end
+
+  def test_database_type_settable_in_config
+    cfg = DBInst::Config.new
+    cfg.load("database_type \"sqlite\"\nenvironment('foo') { }\n environment('bar') { }")
+    assert_equal('sqlite', cfg.db_type)
+  end
 
 end

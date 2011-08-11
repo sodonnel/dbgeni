@@ -46,6 +46,17 @@ begin
 # This directory specifies the location of the migrations directory
 migrations_directory "./migrations"
 
+# This specifies the type of database this installer is applied against
+# Valid values are oracle, mysql, sqlite however this is not validated
+# to enable different database plugins to easily be added.
+# Default is oracle
+# database_type "oracle"
+
+# This is the table the installer logs applied migrations in the database
+# The default is dbinst_migrations
+# database_table "dbinst_migrations"
+
+
 # Environment Section
 #
 # There must be at least one environment, and at a minimum each environment

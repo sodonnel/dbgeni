@@ -8,4 +8,6 @@ module DBInst
   class ConfigFileNotExist         < Exception; end
   class ConfigAmbiguousEnvironment < Exception; end
 
+  class NoEnvironmentSelected      < Exception; end
+
 end
