@@ -4,11 +4,10 @@ require "dbinst"
 require 'test/unit'
 require "dbinst/connectors/sqlite.rb"
 
-class TestOracleConnector < Test::Unit::TestCase
+class TestSqliteConnector < Test::Unit::TestCase
 
   def setup
     # TODO - handle these tests when database is not available
-    FileUtils.mkdir_p(temp_dir)
     temp_dir = File.expand_path(File.join(File.dirname(__FILE__), "temp"))
     FileUtils.mkdir_p(temp_dir)
     @conn = DBInst::Connector::Sqlite.connect(nil, nil, "#{temp_dir}/sqlite.db")

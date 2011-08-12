@@ -4,6 +4,7 @@ require 'dbinst/environment'
 require 'dbinst/migration_list'
 require 'dbinst/migration'
 require 'dbinst/exceptions/exception'
+require 'dbinst/initializers/initializer'
 
 require 'fileutils'
 
@@ -56,6 +57,7 @@ module DBInst
 
     def connect
       raise DBInst::NoEnvironmentSelected unless @selected_environment
+      return @connection if @connection
 
       if config.db_type == 'oracle'
         require 'dbinst/connectors/oracle'
@@ -64,12 +66,17 @@ module DBInst
                                                         @selected_environment.database)
       elsif config.db_type == 'sqlite'
         require 'dbinst/connectors/sqlite'
-        @connection = DBInst::Connector::Oracle.connect(nil,
+        @connection = DBInst::Connector::Sqlite.connect(nil,
                                                         nil,
                                                         @selected_environment.database)
       else
         raise "invalid database type"
       end
+      @connection
+    end
+
+    def initialize
+      DBInst::Initializer.initialize(@connection, @config)
     end
 
     private
