@@ -64,35 +64,93 @@ class TestConfig < Test::Unit::TestCase
     assert_equal('some directory', cfg.migrations_directory)
   end
 
-  def test_missing_environment_raises_exception
+
+  ## Set, get current_env tests ##
+
+  def test_single_environment_set_env_no_name
     cfg = DBInst::Config.new
-    cfg.load("environment('foo') { } \n environment('bar') { }")
-    assert_raises(DBInst::EnvironmentNotExist) do
-      cfg.get_environment('not_there')
+    cfg.load("environment('foo') { } \n")
+    cfg.set_env
+    assert_equal('foo', cfg.current_environment)
+  end
+
+  def test_single_environment_set_env_name
+    cfg = DBInst::Config.new
+    cfg.load("environment('foo') { } \n")
+    cfg.set_env('foo')
+    assert_equal('foo', cfg.current_environment)
+  end
+
+  def test_single_environment_set_env_name_not_exist
+    cfg = DBInst::Config.new
+    cfg.load("environment('foo') { } \n")
+    assert_raises DBInst::EnvironmentNotExist do
+      cfg.set_env('bar')
     end
   end
 
-  def test_correct_environment_is_returned
+  def test_many_environment_set_env_no_name
     cfg = DBInst::Config.new
-    cfg.load("environment('foo') { } \n environment('bar') { }")
-    env = cfg.get_environment('foo')
-    assert_equal('foo', env.__environment_name)
-  end
-
-  def test_only_environment_is_returned_when_no_param
-    cfg = DBInst::Config.new
-    cfg.load("environment('foo') { }")
-    env = cfg.get_environment(nil)
-    assert_equal('foo', env.__environment_name)
-  end
-
-  def test_exception_when_no_environment_passed_and_many_defined
-    cfg = DBInst::Config.new
-    cfg.load("environment('foo') { }\n environment('bar') { }")
-    assert_raises( DBInst::ConfigAmbiguousEnvironment) do
-      env = cfg.get_environment(nil)
+    cfg.load("environment('foo') { } \nenvironment('bar') { } \n")
+    assert_raises DBInst::ConfigAmbiguousEnvironment do
+      cfg.set_env
     end
   end
+
+  def test_many_environment_set_env_name
+    cfg = DBInst::Config.new
+    cfg.load("environment('foo') { } \nenvironment('bar') { } \n")
+    cfg.set_env('foo')
+    assert_equal('foo', cfg.current_environment)
+  end
+
+  def test_many_environment_set_env_name_not_exist
+    cfg = DBInst::Config.new
+    cfg.load("environment('foo') { } \nenvironment('bar') { } \n")
+    assert_raises DBInst::EnvironmentNotExist do
+      cfg.set_env('foobar')
+    end
+  end
+
+  def test_single_environment_get_current_env_not_set
+    cfg = DBInst::Config.new
+    cfg.load("environment('foo') { } \n")
+    assert_equal('foo', cfg.current_env.__environment_name)
+  end
+
+  def test_single_environment_get_current_env_set
+    cfg = DBInst::Config.new
+    cfg.load("environment('foo') { } \n")
+    cfg.set_env('foo')
+    assert_equal('foo', cfg.current_env.__environment_name)
+  end
+
+  def test_many_environment_get_current_env_not_set
+    cfg = DBInst::Config.new
+    cfg.load("environment('foo') { } \n environment('bar') { } \n")
+    assert_raises DBInst::ConfigAmbiguousEnvironment do
+      cfg.current_env
+    end
+  end
+
+  def test_many_environment_get_current_env_set
+    cfg = DBInst::Config.new
+    cfg.load("environment('foo') { } \n environment('bar') { } \n")
+    cfg.set_env('foo')
+    assert_equal('foo', cfg.current_env.__environment_name)
+  end
+
+  ## End get, set current_env tests ##
+
+
+  def test__environment_set_env_name_not_exist
+    cfg = DBInst::Config.new
+    cfg.load("environment('foo') { } \n")
+    assert_raises DBInst::EnvironmentNotExist do
+      cfg.set_env('bar')
+    end
+  end
+
 
   def test_migrations_directory_defaults
     cfg = DBInst::Config.new

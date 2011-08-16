@@ -12,6 +12,7 @@ module DBInst
 
   # If an attempt is made to load an initializer that doesn't exist
   class NoInitializerForDBType      < Exception; end
+  class NoConnectorForDBType        < Exception; end
   # If the initializer is not corretly defined, this will be raise.
   class InvalidInitializerForDBType < Exception; end
   class DatabaseAlreadyInitialized  < Exception; end

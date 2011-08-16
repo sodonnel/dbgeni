@@ -22,7 +22,9 @@ module DBInst
     def verify_file
     end
 
-    def applied?(environment)
+    def applied?(environment, connection)
+      "select migration_name
+      from #{environment.db_table} where migration_name = :migration"
     end
 
     def apply!(environment)

@@ -12,7 +12,6 @@ module DBInst
 
   class Base
     attr_reader :config
-    attr_reader :selected_environment
     attr_reader :connection
    # attr_reader :migrations
 
@@ -32,11 +31,15 @@ module DBInst
     end
 
     def select_environment(environment_name)
-      @selected_environment = @config.get_environment(environment_name)
+      @config.set_env(environment_name)
     end
 
     def selected_environment_name
-      @selected_environment ? @selected_environment.__environment_name : nil
+      begin
+        @config.env.__environment_name
+      rescue DBInst::ConfigAmbigiousEnvironment
+        nil
+      end
     end
 
     def migrations
@@ -56,26 +59,27 @@ module DBInst
     end
 
     def connect
-      raise DBInst::NoEnvironmentSelected unless @selected_environment
+      raise DBInst::NoEnvironmentSelected unless selected_environment_name
       return @connection if @connection
 
       if config.db_type == 'oracle'
         require 'dbinst/connectors/oracle'
-        @connection = DBInst::Connector::Oracle.connect(@selected_environment.username,
-                                                        @selected_environment.password,
-                                                        @selected_environment.database)
+        @connection = DBInst::Connector::Oracle.connect(@config.env.username,
+                                                        @config.env.password,
+                                                        @config.env.database)
       elsif config.db_type == 'sqlite'
         require 'dbinst/connectors/sqlite'
         @connection = DBInst::Connector::Sqlite.connect(nil,
                                                         nil,
-                                                        @selected_environment.database)
+                                                        @config.env.database)
       else
-        raise "invalid database type"
+        raise DBInst::NoConnectorForDBType, config.db_type
       end
       @connection
     end
 
-    def initialize
+    def initialize_database
+      self.connect
       DBInst::Initializer.initialize(@connection, @config)
     end
 

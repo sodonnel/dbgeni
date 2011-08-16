@@ -1,5 +1,12 @@
 Get Initialize command working for
- * Oracle
  * SQlite
+
+Migrations - list:
+ * all
+ * applied
+ * outstanding
+
+
+Connectors - automatically work like Initializers
 
 

@@ -6,13 +6,13 @@ case command
   when 'new'
   require 'dbinst/commands/new'
   when 'initialize'
-
+  require 'dbinst/commands/initialize'
   when 'config'
   require 'dbinst/commands/config'
   when 'generate'
   require 'dbinst/commands/generate'
   when 'migrations'
-  require 'dbinst/commands/migrations.rb'
+  require 'dbinst/commands/migrations'
   else
   puts "Error: Command not recognized" unless %w(-h --help).include?(command)
   puts <<-EOT

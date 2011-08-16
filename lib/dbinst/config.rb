@@ -21,6 +21,7 @@ module DBInst
 
   class Config
     attr_reader   :environments
+    attr_reader   :current_environment
     attr_reader   :migration_directory
     attr_reader   :db_type  # oracle, mysql, sqlite etc
     attr_reader   :db_table # defaults to dbinst_migrations
@@ -70,19 +71,50 @@ module DBInst
     end
 
 
-    def get_environment(name)
+#    def get_environment(name)
+#      if name == nil
+#        # if there is only a single environment defined, then return it
+#        if @environments.keys.length == 1
+#          @environments[@environments.keys.first]
+#        else
+#          raise DBInst::ConfigAmbiguousEnvironment, "More than one environment is defined"
+#        end
+#      else
+#        unless @environments.has_key?(name)
+#          raise DBInst::EnvironmentNotExist
+#        end
+#        @environments[name]
+#      end
+#    end
+
+
+    def env
+      current_env
+    end
+
+
+    def current_env
+      if @current_environment
+        @environments[@current_environment]
+      elsif @environments.keys.length == 1
+        @environments[@environments.keys.first]
+      else
+        raise DBInst::ConfigAmbiguousEnvironment, "More than one environment is defined"
+      end
+    end
+
+
+    def set_env(name=nil)
       if name == nil
-        # if there is only a single environment defined, then return it
         if @environments.keys.length == 1
-          @environments[@environments.keys.first]
+          @current_environment = @environments.keys.first
         else
           raise DBInst::ConfigAmbiguousEnvironment, "More than one environment is defined"
         end
+      elsif @environments.has_key?(name)
+        @current_environment = name
       else
-        unless @environments.has_key?(name)
-          raise DBInst::EnvironmentNotExist
-        end
-        @environments[name]
+        raise DBInst::EnvironmentNotExist
       end
     end
 
