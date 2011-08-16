@@ -22,9 +22,11 @@ module DBInst
     def verify_file
     end
 
-    def applied?(environment, connection)
-      "select migration_name
-      from #{environment.db_table} where migration_name = :migration"
+    def applied?(config, connection)
+      results = connection.execute("select migration_name
+                                    from #{config.db_table}
+                                    where migration_name = :migration", @migration_file)
+      results.length == 1 ? true : false
     end
 
     def apply!(environment)
@@ -37,7 +39,7 @@ module DBInst
     end
 
     def to_s
-      "#{sequence}::#{name}"
+      "#{@sequence}::#{@name}"
     end
 
     private

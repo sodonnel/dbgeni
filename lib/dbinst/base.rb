@@ -12,7 +12,6 @@ module DBInst
 
   class Base
     attr_reader :config
-    attr_reader :connection
    # attr_reader :migrations
 
     def self.installer_for_environment(config_file, environment_name=nil)
@@ -43,13 +42,16 @@ module DBInst
     end
 
     def migrations
-      @migration_list = DBInst::MigrationList.new(@config.migration_directory).migrations
+      @migration_list ||= DBInst::MigrationList.new(@config.migration_directory) unless @migration_list
+      @migration_list.migrations
     end
 
     def outstanding_migrations
+      migrations.reject {|m| m.applied?(@config, connection) }
     end
 
     def applied_migrations
+      migrations.select {|m| m.applied?(@config, connection) }
     end
 
     def apply_all_migrations
@@ -78,9 +80,12 @@ module DBInst
       @connection
     end
 
+    def connection
+      @connection ||= connect
+    end
+
     def initialize_database
-      self.connect
-      DBInst::Initializer.initialize(@connection, @config)
+      DBInst::Initializer.initialize(connection, @config)
     end
 
     private

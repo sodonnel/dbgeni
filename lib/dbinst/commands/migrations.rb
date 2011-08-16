@@ -58,8 +58,21 @@ when 'list'
     puts m.to_s
   end
 when 'applied'
-
+  applied = installer.applied_migrations
+  if applied.length == 0
+    puts "There are no applied migrations in #{installer.config.migration_directory}"
+  end
+  applied.each do |m|
+    puts m.to_s
+  end
 when 'outstanding'
+  outstanding = installer.outstanding_migrations
+  if outstanding.length == 0
+    puts "There are no applied migrations in #{installer.config.migration_directory}"
+  end
+  outstanding.each do |m|
+    puts m.to_s
+  end
 
 else
   puts "error: #{command} is not a valid command"

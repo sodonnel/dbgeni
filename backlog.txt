@@ -2,9 +2,7 @@ Get Initialize command working for
  * SQlite
 
 Migrations - list:
- * all
- * applied
- * outstanding
+ * tests for applied migrations
 
 
 Connectors - automatically work like Initializers
