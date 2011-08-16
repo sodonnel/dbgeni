@@ -1,1 +1,1 @@
-require 'dbinst/base'
+require 'dbgeni/base'
