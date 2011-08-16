@@ -1,11 +1,11 @@
-# Expects only one parameter, the directory of the new dbinst directory structure
+# Expects only one parameter, the directory of the new dbgeni directory structure
 
 ARGV << '--help' if ARGV.empty?
 
 if ARGV.length > 1 or %w(-h --help).include? ARGV[0]
   puts "Error: only one parameter is allowed for the new command" if ARGV.length > 1
   puts <<-EOF
-Usage: dbinst new <path/to/directory/for/new/installer/structure>
+Usage: dbgeni new <path/to/directory/for/new/installer/structure>
 EOF
   exit
 end
@@ -39,8 +39,8 @@ end
 
 # Create the initial version of the configuration file
 begin
-  puts "creating file: #{directory}/.dbinst"
-  conf = File.open("#{directory}/.dbinst", "w")
+  puts "creating file: #{directory}/.dbgeni"
+  conf = File.open("#{directory}/.dbgeni", "w")
   conf.puts <<-EOF
 
 # This directory specifies the location of the migrations directory
@@ -53,8 +53,8 @@ migrations_directory "./migrations"
 # database_type "oracle"
 
 # This is the table the installer logs applied migrations in the database
-# The default is dbinst_migrations
-# database_table "dbinst_migrations"
+# The default is dbgeni_migrations
+# database_table "dbgeni_migrations"
 
 
 # Environment Section
@@ -96,7 +96,7 @@ migrations_directory "./migrations"
 
 EOF
 rescue Exception => e
-  puts "error: failed to create #{directory}/.dbinst - #{e.to_s}"
+  puts "error: failed to create #{directory}/.dbgeni - #{e.to_s}"
   raise
 end
 

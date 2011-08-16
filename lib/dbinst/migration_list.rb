@@ -1,4 +1,4 @@
-module DBInst
+module DBGeni
 
   class MigrationList
 
@@ -20,7 +20,7 @@ module DBInst
         files = Dir.entries(@migration_directory).grep(/^\d{12}_up_.+\.sql$/).sort
       rescue Exception => e
         puts "Migrations directory: #{@migrations_directory}"
-        raise DBInst::MigrationDirectoryNotExist, "Migrations directory: #{@migrations_directory}"
+        raise DBGeni::MigrationDirectoryNotExist, "Migrations directory: #{@migrations_directory}"
       end
       @migrations = Array.new
       files.each do |f|

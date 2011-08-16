@@ -1,14 +1,14 @@
 $:.unshift File.expand_path(File.join(File.dirname(__FILE__), "..", "lib"))
 
-require "dbinst"
+require "dbgeni"
 require 'test/unit'
-require "dbinst/connectors/oracle.rb"
+require "dbgeni/connectors/oracle.rb"
 
 class TestOracleConnector < Test::Unit::TestCase
 
   def setup
     # TODO - handle these tests when database is not available
-    @conn = DBInst::Connector::Oracle.connect('sodonnel', 'sodonnel', 'LOCAL11G')
+    @conn = DBGeni::Connector::Oracle.connect('sodonnel', 'sodonnel', 'LOCAL11G')
   end
 
   def teardown

@@ -1,14 +1,14 @@
-require 'dbinst/blank_slate'
-require 'dbinst/config'
-require 'dbinst/environment'
-require 'dbinst/migration_list'
-require 'dbinst/migration'
-require 'dbinst/exceptions/exception'
-require 'dbinst/initializers/initializer'
+require 'dbgeni/blank_slate'
+require 'dbgeni/config'
+require 'dbgeni/environment'
+require 'dbgeni/migration_list'
+require 'dbgeni/migration'
+require 'dbgeni/exceptions/exception'
+require 'dbgeni/initializers/initializer'
 
 require 'fileutils'
 
-module DBInst
+module DBGeni
 
   class Base
     attr_reader :config
@@ -36,13 +36,13 @@ module DBInst
     def selected_environment_name
       begin
         @config.env.__environment_name
-      rescue DBInst::ConfigAmbigiousEnvironment
+      rescue DBGeni::ConfigAmbigiousEnvironment
         nil
       end
     end
 
     def migrations
-      @migration_list ||= DBInst::MigrationList.new(@config.migration_directory) unless @migration_list
+      @migration_list ||= DBGeni::MigrationList.new(@config.migration_directory) unless @migration_list
       @migration_list.migrations
     end
 
@@ -61,21 +61,21 @@ module DBInst
     end
 
     def connect
-      raise DBInst::NoEnvironmentSelected unless selected_environment_name
+      raise DBGeni::NoEnvironmentSelected unless selected_environment_name
       return @connection if @connection
 
       if config.db_type == 'oracle'
-        require 'dbinst/connectors/oracle'
-        @connection = DBInst::Connector::Oracle.connect(@config.env.username,
+        require 'dbgeni/connectors/oracle'
+        @connection = DBGeni::Connector::Oracle.connect(@config.env.username,
                                                         @config.env.password,
                                                         @config.env.database)
       elsif config.db_type == 'sqlite'
-        require 'dbinst/connectors/sqlite'
-        @connection = DBInst::Connector::Sqlite.connect(nil,
+        require 'dbgeni/connectors/sqlite'
+        @connection = DBGeni::Connector::Sqlite.connect(nil,
                                                         nil,
                                                         @config.env.database)
       else
-        raise DBInst::NoConnectorForDBType, config.db_type
+        raise DBGeni::NoConnectorForDBType, config.db_type
       end
       @connection
     end
@@ -85,7 +85,7 @@ module DBInst
     end
 
     def initialize_database
-      DBInst::Initializer.initialize(connection, @config)
+      DBGeni::Initializer.initialize(connection, @config)
     end
 
     private

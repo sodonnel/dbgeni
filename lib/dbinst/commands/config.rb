@@ -1,17 +1,17 @@
 if %w(-h --help).include? ARGV[0]
   puts <<-EOF
 Usage:
-By default, dbinst will search in the current directory for a config file
-called .dbinst
+By default, dbgeni will search in the current directory for a config file
+called .dbgeni
 
 To list all the config for all environments:
-  dbinst config environment_name
+  dbgeni config environment_name
 
 To list the config for only a specific environment:
-  dbinst config environment_name
+  dbgeni config environment_name
 
 To use a different config_file, specify the config_file switch:
-  dbinst config environment_name --config_file </path/to/config/file>
+  dbgeni config environment_name --config_file </path/to/config/file>
 EOF
   exit(0)
 end
@@ -21,9 +21,9 @@ if ! File.exists?($config_file)
   exit(1)
 end
 
-require 'dbinst'
+require 'dbgeni'
 
-cfg = DBInst::Config.load_from_file($config_file)
+cfg = DBGeni::Config.load_from_file($config_file)
 puts "-----------------------------\n"
 puts "| Current Parameter Details |\n"
 puts "-----------------------------\n\n"

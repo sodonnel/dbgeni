@@ -1,4 +1,4 @@
-module DBInst
+module DBGeni
 
   module Connector
 

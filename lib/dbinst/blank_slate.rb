@@ -9,7 +9,7 @@ module Kernel
   end
 end
 
-module DBInst
+module DBGeni
 
   class ::BlankSlate
     KEEP_METHODS = [

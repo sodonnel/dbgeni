@@ -4,23 +4,23 @@ command = ARGV.shift
 
 case command
   when 'new'
-  require 'dbinst/commands/new'
+  require 'dbgeni/commands/new'
   when 'initialize'
-  require 'dbinst/commands/initialize'
+  require 'dbgeni/commands/initialize'
   when 'config'
-  require 'dbinst/commands/config'
+  require 'dbgeni/commands/config'
   when 'generate'
-  require 'dbinst/commands/generate'
+  require 'dbgeni/commands/generate'
   when 'migrations'
-  require 'dbinst/commands/migrations'
+  require 'dbgeni/commands/migrations'
   else
   puts "Error: Command not recognized" unless %w(-h --help).include?(command)
   puts <<-EOT
-Usage: dbinst COMMAND [ARGS]
+Usage: dbgeni COMMAND [ARGS]
 
-The available dbinst commands are:
+The available dbgeni commands are:
   new        Generate a new default application directory structure
-  initialize Create the dbinst_migrations table in the database
+  initialize Create the dbgeni_migrations table in the database
   config     List the current config for a given environment
   migrations List and Apply Migrations
   generate   Generate migrations and code files

@@ -1,7 +1,7 @@
 # hack to get the CLI working witout being properly installed as a gem
 $:.unshift File.expand_path(File.join(File.dirname(__FILE__), "..", "..", "lib"))
 
-$config_file      = './.dbinst'
+$config_file      = './.dbgeni'
 $environment_name = nil
 
 if index = ARGV.index('--config-file') or index = ARGV.index('-c')
@@ -26,4 +26,4 @@ if index = ARGV.index('--environment-name') or index = ARGV.index('-e')
   ARGV.delete_at(index)
 end
 
-require 'dbinst/commands/commands'
+require 'dbgeni/commands/commands'

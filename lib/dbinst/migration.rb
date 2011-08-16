@@ -1,4 +1,4 @@
-module DBInst
+module DBGeni
 
   class Migration
 
@@ -53,7 +53,7 @@ module DBInst
       #     201107011644_up_my_shiny_new_table.sql
       #
       unless @migration_file =~ /^(\d{12})_up_(.+)\.sql$/
-        raise DBInst::MigrationFilenameInvalid
+        raise DBGeni::MigrationFilenameInvalid
       end
       @sequence = $1
       @name     = $2

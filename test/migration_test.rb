@@ -1,6 +1,6 @@
 $:.unshift File.expand_path(File.join(File.dirname(__FILE__), "..", "lib"))
 
-require "dbinst"
+require "dbgeni"
 require 'test/unit'
 
 class TestMigration < Test::Unit::TestCase
@@ -13,7 +13,7 @@ class TestMigration < Test::Unit::TestCase
   end
 
   def test_valid_filename_ok
-    m = DBInst::Migration.new('anydir', @valid_migration)
+    m = DBGeni::Migration.new('anydir', @valid_migration)
     assert_equal('this_is_a_test_migration', m.name)
     assert_equal('201101011615', m.sequence)
   end
@@ -26,8 +26,8 @@ class TestMigration < Test::Unit::TestCase
     # no sql prefix
     invalid = %w(gfgffg 20110101000_up_title.sql 201101010000_title.sql 201101010000_up_.sql 201101010000_up_title)
     invalid.each do |f|
-      assert_raises(DBInst::MigrationFilenameInvalid) do
-        m = DBInst::Migration.new('anydir', f)
+      assert_raises(DBGeni::MigrationFilenameInvalid) do
+        m = DBGeni::Migration.new('anydir', f)
       end
     end
   end

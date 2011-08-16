@@ -1,4 +1,4 @@
-module DBInst
+module DBGeni
 
   # Config understands the following:
 
@@ -24,14 +24,14 @@ module DBInst
     attr_reader   :current_environment
     attr_reader   :migration_directory
     attr_reader   :db_type  # oracle, mysql, sqlite etc
-    attr_reader   :db_table # defaults to dbinst_migrations
+    attr_reader   :db_table # defaults to dbgeni_migrations
     attr_reader   :config_file
     attr_reader   :base_directory
 
     def initialize
       @migration_directory  = 'migrations'
       @db_type              = 'oracle'
-      @db_table             = 'dbinst_migrations'
+      @db_table             = 'dbgeni_migrations'
       @environments         = Hash.new
     end
 
@@ -51,7 +51,7 @@ module DBInst
           raw_config = f.read
         end
       rescue Errno::ENOENT
-        raise DBInst::ConfigFileNotExist, "#{@config_location} (expanded from #{filename}) does not exist"
+        raise DBGeni::ConfigFileNotExist, "#{@config_location} (expanded from #{filename}) does not exist"
       end
       load(raw_config)
     end
@@ -77,11 +77,11 @@ module DBInst
 #        if @environments.keys.length == 1
 #          @environments[@environments.keys.first]
 #        else
-#          raise DBInst::ConfigAmbiguousEnvironment, "More than one environment is defined"
+#          raise DBGeni::ConfigAmbiguousEnvironment, "More than one environment is defined"
 #        end
 #      else
 #        unless @environments.has_key?(name)
-#          raise DBInst::EnvironmentNotExist
+#          raise DBGeni::EnvironmentNotExist
 #        end
 #        @environments[name]
 #      end
@@ -99,7 +99,7 @@ module DBInst
       elsif @environments.keys.length == 1
         @environments[@environments.keys.first]
       else
-        raise DBInst::ConfigAmbiguousEnvironment, "More than one environment is defined"
+        raise DBGeni::ConfigAmbiguousEnvironment, "More than one environment is defined"
       end
     end
 
@@ -109,12 +109,12 @@ module DBInst
         if @environments.keys.length == 1
           @current_environment = @environments.keys.first
         else
-          raise DBInst::ConfigAmbiguousEnvironment, "More than one environment is defined"
+          raise DBGeni::ConfigAmbiguousEnvironment, "More than one environment is defined"
         end
       elsif @environments.has_key?(name)
         @current_environment = name
       else
-        raise DBInst::EnvironmentNotExist
+        raise DBGeni::EnvironmentNotExist
       end
     end
 

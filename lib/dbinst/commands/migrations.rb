@@ -1,8 +1,8 @@
 if %w(-h --help).include? ARGV[0]
   puts <<-EOF
-Usage: dbinst migrations command <--environment-name env_name> <--config-file path/to/config>
+Usage: dbgeni migrations command <--environment-name env_name> <--config-file path/to/config>
 
-If config-file is not specified, then a file called .dbinst in the current directory will be
+If config-file is not specified, then a file called .dbgeni in the current directory will be
 used if it exists, otherwise an error will occurr
 
 If there is more than one environment defined in the config file, then environment-name must
@@ -17,13 +17,13 @@ Readonly
 --------
 
 list        Prints out all available migrations
-            dbinst migrations list --config-file /home/myapp/.dbinst
+            dbgeni migrations list --config-file /home/myapp/.dbgeni
 
 applied     Prints all migrations which have been applied to an environment
-            dbinst migrations applied --environment-name test --config-file /home/myapp/.dbinst
+            dbgeni migrations applied --environment-name test --config-file /home/myapp/.dbgeni
 
 outstanding Prints all migrations which have not been applied to an environment
-            dbinst migrations outstanding --environment-name test --config-file /home/myapp/.dbinst
+            dbgeni migrations outstanding --environment-name test --config-file /home/myapp/.dbgeni
 
 
 Destructive
@@ -35,18 +35,18 @@ apply       Apply migrations to the given environment. Can specify:
               next    Apply only the next migration and stop
               specific migrations to apply
 
-            dbinst migrations apply all  --environment-name test --config-file /home/myapp/.dbinst
-            dbinst migrations apply next --environment-name test --config-file /home/myapp/.dbinst
-            dbinst migrations apply file1.sql file2.sql file6.sql --environment-name test --config-file /home/myapp/.dbinst
+            dbgeni migrations apply all  --environment-name test --config-file /home/myapp/.dbgeni
+            dbgeni migrations apply next --environment-name test --config-file /home/myapp/.dbgeni
+            dbgeni migrations apply file1.sql file2.sql file6.sql --environment-name test --config-file /home/myapp/.dbgeni
 
 EOF
   exit
 end
 
-require 'dbinst'
+require 'dbgeni'
 command = ARGV.shift
 
-installer = DBInst::Base.installer_for_environment($config_file, $environment_name)
+installer = DBGeni::Base.installer_for_environment($config_file, $environment_name)
 
 case command
 when 'list'

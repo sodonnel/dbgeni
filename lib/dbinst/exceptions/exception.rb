@@ -1,4 +1,4 @@
-module DBInst
+module DBGeni
 
   class MigrationDirectoryNotExist < Exception; end
   class MigrationFilenameInvalid   < Exception; end

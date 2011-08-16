@@ -1,6 +1,6 @@
 $:.unshift File.expand_path(File.join(File.dirname(__FILE__), "..", "lib"))
 
-require "dbinst"
+require "dbgeni"
 require 'test/unit'
 
 
@@ -21,19 +21,19 @@ class TestMigrationList < Test::Unit::TestCase
   end
 
   def test_exception_raise_when_migration_does_exist
-    assert_raises DBInst::MigrationDirectoryNotExist do
-      ml = DBInst::MigrationList.new('directoryNotExist')
+    assert_raises DBGeni::MigrationDirectoryNotExist do
+      ml = DBGeni::MigrationList.new('directoryNotExist')
     end
   end
 
   def test_migration_list_loads_migrations
     assert_nothing_raised do
-      ml = DBInst::MigrationList.new(@migration_directory)
+      ml = DBGeni::MigrationList.new(@migration_directory)
     end
   end
 
   def test_correct_number_of_migration_loaded
-    ml = DBInst::MigrationList.new(@migration_directory)
+    ml = DBGeni::MigrationList.new(@migration_directory)
     assert_equal(2, ml.migrations.length)
   end
 
