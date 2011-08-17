@@ -1,16 +1,37 @@
 $:.unshift File.expand_path(File.join(File.dirname(__FILE__), "..", "lib"))
 
 require "dbgeni"
+require "dbgeni/connectors/sqlite"
 require 'test/unit'
 
 class TestMigration < Test::Unit::TestCase
 
   def setup
     @valid_migration = '201101011615_up_this_is_a_test_migration.sql'
+
+    @temp_dir = File.expand_path(File.join(File.dirname(__FILE__), "temp"))
+    FileUtils.mkdir_p(@temp_dir)
+
+    @connection = DBGeni::Connector::Sqlite.connect(nil, nil, "#{@temp_dir}/sqlite.db")
+    @config     = DBGeni::Config.new.load("database_type 'sqlite'
+                                       environment('development') {
+                                         user     ''
+                                         password ''
+                                         database '#{@temp_dir}/sqlite.db'
+                                       }
+                                      ")
+    begin
+      DBGeni::Initializer.initialize(@connection, @config)
+    rescue DBGeni::DatabaseAlreadyInitialized
+    end
   end
 
   def teardown
+    @connection.disconnect
+    FileUtils.rm_rf("#{@temp_dir}/sqlite.db")
   end
+
+
 
   def test_valid_filename_ok
     m = DBGeni::Migration.new('anydir', @valid_migration)
@@ -32,4 +53,79 @@ class TestMigration < Test::Unit::TestCase
     end
   end
 
+  def test_insert_pending_details_for_migration
+    m = DBGeni::Migration.new('anydir', @valid_migration)
+    m.set_pending(@config, @connection)
+    assert_equal('Pending', get_state(m))
+  end
+
+  def test_insert_failed_details_for_migration
+    m = DBGeni::Migration.new('anydir', @valid_migration)
+    m.set_failed(@config, @connection)
+    assert_equal('Failed', get_state(m))
+  end
+
+  def test_insert_rolledback_details_for_migration
+    m = DBGeni::Migration.new('anydir', @valid_migration)
+    m.set_rolledback(@config, @connection)
+    assert_equal('Rolledback', get_state(m))
+  end
+
+  def test_insert_completed_details_for_migration
+    m = DBGeni::Migration.new('anydir', @valid_migration)
+    m.set_completed(@config, @connection)
+    assert_equal('Completed', get_state(m))
+  end
+
+  def test_update_details_from_pending_to_complete_for_migration
+    m = DBGeni::Migration.new('anydir', @valid_migration)
+    m.set_pending(@config, @connection)
+    m.set_completed(@config, @connection)
+    assert_equal('Completed', get_state(m))
+  end
+
+  def test_not_applied_migration_is_not_applied
+    m = DBGeni::Migration.new('anydir', @valid_migration)
+    assert_equal(false, m.applied?(@config, @connection))
+  end
+
+  def test_pending_migration_is_not_applied
+    m = DBGeni::Migration.new('anydir', @valid_migration)
+    m.set_pending(@config, @connection)
+    assert_equal(false, m.applied?(@config, @connection))
+  end
+
+  def test_completed_migration_is_applied
+    m = DBGeni::Migration.new('anydir', @valid_migration)
+    m.set_completed(@config, @connection)
+    assert_equal(true, m.applied?(@config, @connection))
+  end
+
+  def test_get_migration_state
+    m = DBGeni::Migration.new('anydir', @valid_migration)
+    assert_equal('New', m.status(@config, @connection))
+    m.set_pending(@config, @connection)
+    assert_equal('Pending', m.status(@config, @connection))
+    m.set_failed(@config, @connection)
+    assert_equal('Failed', m.status(@config, @connection))
+    m.set_completed(@config, @connection)
+    assert_equal('Completed', m.status(@config, @connection))
+    m.set_rolledback(@config, @connection)
+    assert_equal('Rolledback', m.status(@config, @connection))
+  end
+
+
+  private
+
+  def get_state(m)
+    results = @connection.execute("select migration_state
+                                   from #{@config.db_table}
+                                   where sequence_or_hash = :seq
+                                   and   migration_name   = :migration", m.sequence, m.name)
+    if results.length == 1
+      results[0][0]
+    else
+      nil
+    end
+  end
 end

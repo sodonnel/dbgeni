@@ -1,7 +1,9 @@
-Migrations - list:
- * tests for applied migrations
+Migrations - 
+ * actually run in migrations
 
 
 Connectors - automatically work like Initializers
+
+Dates are different in Oracle and sqlite - so start_dtm etc is being skipped in database.
 
 
