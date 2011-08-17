@@ -8,6 +8,17 @@ module DBGeni
 
       attr_reader :connection
 
+      def self.db_file_path(base, file)
+        # starts with a ., eg ./filename, or does not
+        # contain any forward or backslashes, eg db.sqlite3
+        if file =~ /^\./ || file !~ /\/|\\/
+          # it is a relative path, so join to base directory
+          File.join(base, file)
+        else
+          file
+        end
+      end
+
       def self.connect(user, password, database)
         self.new(database)
       end

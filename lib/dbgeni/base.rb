@@ -73,7 +73,7 @@ module DBGeni
         require 'dbgeni/connectors/sqlite'
         @connection = DBGeni::Connector::Sqlite.connect(nil,
                                                         nil,
-                                                        @config.env.database)
+                                                        DBGeni::Connector::Sqlite.db_file_path(@config.base_directory, @config.env.database))
       else
         raise DBGeni::NoConnectorForDBType, config.db_type
       end

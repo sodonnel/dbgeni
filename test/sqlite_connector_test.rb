@@ -48,4 +48,26 @@ class TestSqliteConnector < Test::Unit::TestCase
     results = @conn.execute(sql)
     assert_equal(0, results.length)
   end
+
+  def test_db_file_path_plain_filename
+    path = DBGeni::Connector::Sqlite.db_file_path('/base', 'db.sqlite')
+    assert_equal('/base/db.sqlite', path)
+  end
+
+  def test_db_file_path_relative_filename
+    path = DBGeni::Connector::Sqlite.db_file_path('/base', './db.sqlite')
+    assert_equal('/base/./db.sqlite', path)
+  end
+
+  def test_db_file_path_absolute_filename
+    path = DBGeni::Connector::Sqlite.db_file_path('/base', '/db.sqlite')
+    assert_equal('/db.sqlite', path)
+  end
+
+  def test_db_file_path_absolute_filename_windows
+    path = DBGeni::Connector::Sqlite.db_file_path('/base', 'C:\db.sqlite')
+    assert_equal('C:\db.sqlite', path)
+  end
+
+
 end

@@ -1,6 +1,3 @@
-Get Initialize command working for
- * SQlite
-
 Migrations - list:
  * tests for applied migrations
 
