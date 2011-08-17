@@ -5,6 +5,7 @@ require 'dbgeni/migration_list'
 require 'dbgeni/migration'
 require 'dbgeni/exceptions/exception'
 require 'dbgeni/initializers/initializer'
+require 'dbgeni/migrators/migrator'
 
 require 'fileutils'
 

@@ -2,6 +2,7 @@ module DBGeni
 
   class MigrationDirectoryNotExist < Exception; end
   class MigrationFilenameInvalid   < Exception; end
+  class MigrationAlreadyApplied    < Exception; end
 
   class EnvironmentNotExist        < Exception; end
 
@@ -16,5 +17,6 @@ module DBGeni
   # If the initializer is not corretly defined, this will be raise.
   class InvalidInitializerForDBType < Exception; end
   class DatabaseAlreadyInitialized  < Exception; end
+
 
 end

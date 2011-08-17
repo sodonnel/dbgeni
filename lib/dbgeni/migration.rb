@@ -47,6 +47,19 @@ module DBGeni
     end
 
     def apply!(config, connection)
+      set_env(config, connection)
+      if applied?(config, connection)
+        raise DBGeni::MigrationAlreadyApplied
+      end
+      migrator = DBGeni::Migrator.initialize(config, connection)
+      set_pending!
+#      lock!
+      begin
+        migrator.run(self)
+        set_completed!
+      rescue
+        set_failed!
+      end
     end
 
     def rollback!(config, connection)
@@ -83,18 +96,22 @@ module DBGeni
 
     def set_pending!
       insert_or_set_state(PENDING)
+   #   @connection.commit
     end
 
     def set_completed!
       insert_or_set_state(COMPLETED)
+  #    @connection.commit
     end
 
     def set_failed!
       insert_or_set_state(FAILED)
+ #     @connection.commit
     end
 
     def set_rolledback!
       insert_or_set_state(ROLLEDBACK)
+#      @connection.commit
     end
 
     def set_env(config, connection)
@@ -111,11 +128,11 @@ module DBGeni
       end
     end
 
-    def existing_db_record
+    def existing_db_record(lock=false)
       results = @connection.execute("select sequence_or_hash, migration_name, migration_type, migration_state
                                     from #{@config.db_table}
                                     where sequence_or_hash = :seq
-                                    and migration_name = :migration", @sequence, @name)
+                                    and migration_name = :migration #{lock ? 'for update' : ''}", @sequence, @name)
     end
 
 

@@ -1,25 +1,19 @@
 $:.unshift File.expand_path(File.join(File.dirname(__FILE__), "..", "lib"))
+$:.unshift File.expand_path(File.dirname(__FILE__))
 
+require 'helper'
 require "dbgeni"
-require "dbgeni/connectors/sqlite"
 require 'test/unit'
 
 class TestMigration < Test::Unit::TestCase
 
+  include TestHelper
+
   def setup
     @valid_migration = '201101011615_up_this_is_a_test_migration.sql'
 
-    @temp_dir = File.expand_path(File.join(File.dirname(__FILE__), "temp"))
-    FileUtils.mkdir_p(@temp_dir)
-
-    @connection = DBGeni::Connector::Sqlite.connect(nil, nil, "#{@temp_dir}/sqlite.db")
-    @config     = DBGeni::Config.new.load("database_type 'sqlite'
-                                       environment('development') {
-                                         user     ''
-                                         password ''
-                                         database '#{@temp_dir}/sqlite.db'
-                                       }
-                                      ")
+    @connection = helper_sqlite_connection
+    @config     = helper_sqlite_config
     begin
       DBGeni::Initializer.initialize(@connection, @config)
     rescue DBGeni::DatabaseAlreadyInitialized
@@ -27,11 +21,7 @@ class TestMigration < Test::Unit::TestCase
   end
 
   def teardown
-    @connection.disconnect
-    FileUtils.rm_rf("#{@temp_dir}/sqlite.db")
   end
-
-
 
   def test_valid_filename_ok
     m = DBGeni::Migration.new('anydir', @valid_migration)
@@ -113,6 +103,7 @@ class TestMigration < Test::Unit::TestCase
     m.set_rolledback(@config, @connection)
     assert_equal('Rolledback', m.status(@config, @connection))
   end
+
 
 
   private

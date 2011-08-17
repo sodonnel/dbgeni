@@ -1,16 +1,17 @@
 $:.unshift File.expand_path(File.join(File.dirname(__FILE__), "..", "lib"))
+$:.unshift File.expand_path(File.dirname(__FILE__))
 
+require 'helper'
 require "dbgeni"
 require 'test/unit'
-require "dbgeni/connectors/sqlite.rb"
 
 class TestSqliteConnector < Test::Unit::TestCase
 
+  include TestHelper
+
   def setup
     # TODO - handle these tests when database is not available
-    temp_dir = File.expand_path(File.join(File.dirname(__FILE__), "temp"))
-    FileUtils.mkdir_p(temp_dir)
-    @conn = DBGeni::Connector::Sqlite.connect(nil, nil, "#{temp_dir}/sqlite.db")
+    @conn = helper_sqlite_connection
     begin
       # Create a fake DUAL table so the tests can behave in the same way as the Oracle
       # tests work.

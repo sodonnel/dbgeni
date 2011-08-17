@@ -1,27 +1,27 @@
 $:.unshift File.expand_path(File.join(File.dirname(__FILE__), "..", "lib"))
+$:.unshift File.expand_path(File.dirname(__FILE__))
 
+require 'helper'
 require "dbgeni"
 require 'test/unit'
-require 'dbgeni/connectors/oracle'
+
 
 class TestInitializerOracle < Test::Unit::TestCase
 
+  include TestHelper
+
   def setup
     # connect to database and drop the default named migrations table
-    @db_connection = DBGeni::Connector::Oracle.connect('sodonnel', 'sodonnel', 'LOCAL11G')
+    @db_connection = helper_oracle_connection #DBGeni::Connector::Oracle.connect('sodonnel', 'sodonnel', 'LOCAL11G')
     begin
       @db_connection.execute("drop table dbgeni_migrations")
     rescue Exception => e
       # warn "Failed to drop dbgeni_migrations: #{e.to_s}"
     end
-    @config = DBGeni::Config.new
+    @config = helper_oracle_config
   end
 
   def teardown
-    begin
-      @db_connection.execute("drop table dbgeni_migrations")
-    rescue
-    end
   end
 
   def test_not_initialized_returns_false_when_not_initialized

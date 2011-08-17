@@ -1,31 +1,27 @@
 $:.unshift File.expand_path(File.join(File.dirname(__FILE__), "..", "lib"))
+$:.unshift File.expand_path(File.dirname(__FILE__))
+
+require 'helper'
 
 require "dbgeni"
 require 'test/unit'
-require 'dbgeni/connectors/sqlite'
 
 class TestInitializerSqlite < Test::Unit::TestCase
 
-  def setup
-    temp_dir = File.expand_path(File.join(File.dirname(__FILE__), "temp"))
-    FileUtils.mkdir_p(temp_dir)
+  include TestHelper
 
-    # connect to database and drop the default named migrations table
-    @db_connection = DBGeni::Connector::Sqlite.connect(nil, nil, "#{temp_dir}/sqlite.db")
+  def setup
+    @db_connection = helper_sqlite_connection # DBGeni::Connector::Sqlite.connect(nil, nil, "#{temp_dir}/sqlite.db")
+
     begin
       @db_connection.execute("drop table dbgeni_migrations")
     rescue Exception => e
     #   warn "Failed to drop dbgeni_migrations: #{e.to_s}"
     end
-    @config = DBGeni::Config.new
-    @config.database_type 'sqlite'
+    @config = helper_sqlite_config
   end
 
   def teardown
-    begin
-      @db_connection.execute("drop table dbgeni_migrations")
-    rescue
-    end
   end
 
   def test_not_initialized_returns_false_when_not_initialized

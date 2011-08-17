@@ -28,6 +28,9 @@ module DBGeni
       end
 
       def execute(sql, *binds)
+#        unless @connection.transaction_active?
+#          @connection.transaction
+#        end
         query = @connection.prepare(sql)
         binds.each_with_index do |b, i|
           query.bind_param(i+1, b)
