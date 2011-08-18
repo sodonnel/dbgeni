@@ -73,6 +73,25 @@ when 'outstanding'
   outstanding.each do |m|
     puts m.to_s
   end
+when 'apply'
+  sub_command = ARGV.shift
+  case sub_command
+  when 'all'
+    begin
+      installer.apply_all_migrations
+    rescue DBGeni::NoOutstandingMigrations
+      puts "There are no outstanding migrations to apply"
+    end
+  when 'next'
+    begin
+      installer.apply_next_migration
+    rescue DBGeni::NoOutstandingMigrations
+      puts "There are no outstanding migrations to apply"
+    end
+ # when ~= /\.sql$/
+  else
+    puts "error: #{sub_command} is not a valid command"
+  end
 
 else
   puts "error: #{command} is not a valid command"

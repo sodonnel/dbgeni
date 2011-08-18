@@ -6,7 +6,13 @@ module DBGeni
       def initialize(config, connection)
       end
 
-      def run
+      def apply(migration)
+      end
+
+      def rollback(migration)
+      end
+
+      def verify(migration)
       end
 
     end

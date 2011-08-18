@@ -53,9 +53,8 @@ module DBGeni
       end
       migrator = DBGeni::Migrator.initialize(config, connection)
       set_pending!
-#      lock!
       begin
-        migrator.run(self)
+        migrator.apply(self)
         set_completed!
       rescue
         set_failed!
@@ -128,11 +127,11 @@ module DBGeni
       end
     end
 
-    def existing_db_record(lock=false)
+    def existing_db_record
       results = @connection.execute("select sequence_or_hash, migration_name, migration_type, migration_state
                                     from #{@config.db_table}
                                     where sequence_or_hash = :seq
-                                    and migration_name = :migration #{lock ? 'for update' : ''}", @sequence, @name)
+                                    and migration_name = :migration", @sequence, @name)
     end
 
 

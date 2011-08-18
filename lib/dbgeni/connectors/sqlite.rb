@@ -37,6 +37,11 @@ module DBGeni
         end
         results = query.execute!
         query.close
+        # This shouldn't even be needed, as there are never transactions started.
+        # by default everthing in sqlite is autocommit
+        if @connection.transaction_active?
+          @connection.commit
+        end
         results
       end
 

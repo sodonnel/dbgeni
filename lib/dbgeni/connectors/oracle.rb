@@ -29,6 +29,9 @@ module DBGeni
             results.push r
           end
           query.close
+        else
+          # everthing is auto commit right now ...
+          @connection.commit
         end
         results
       end

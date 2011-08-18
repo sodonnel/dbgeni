@@ -56,9 +56,35 @@ module DBGeni
     end
 
     def apply_all_migrations
+      migrations = outstanding_migrations
+      if migrations.length == 0
+        raise DBGeni::NoOutstandingMigrations
+      end
+      migrations.each do |m|
+        begin
+          m.apply!(@config, connection)
+        rescue Exception => e
+          puts "Migration #{m.to_s} failed #{e.to_s}"
+          raise
+        end
+      end
     end
 
-    def apply_migration(name)
+
+    def apply_next_migration
+      migrations = outstanding_migrations
+      if migrations.length == 0
+        raise DBGeni::NoOutstandingMigrations
+      end
+      begin
+        migrations.first.apply!(@config, connection)
+      rescue Exception => e
+        puts "Migration #{m.to_s} failed #{e.to_s}"
+        raise
+      end
+    end
+
+    def apply_migration(migration)
     end
 
     def connect

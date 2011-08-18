@@ -17,6 +17,7 @@ module DBGeni
   # If the initializer is not corretly defined, this will be raise.
   class InvalidInitializerForDBType < Exception; end
   class DatabaseAlreadyInitialized  < Exception; end
+  class NoOutstandingMigrations     < Exception; end
 
 
 end
