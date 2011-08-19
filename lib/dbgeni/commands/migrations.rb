@@ -81,12 +81,16 @@ when 'apply'
       installer.apply_all_migrations
     rescue DBGeni::NoOutstandingMigrations
       puts "There are no outstanding migrations to apply"
+    rescue DBGeni::MigrationApplyFailed
+      puts "There was a problem applying a migration"
     end
   when 'next'
     begin
       installer.apply_next_migration
     rescue DBGeni::NoOutstandingMigrations
       puts "There are no outstanding migrations to apply"
+    rescue DBGeni::MigrationApplyFailed
+      puts "There was a problem applying a migration"
     end
  # when ~= /\.sql$/
   else

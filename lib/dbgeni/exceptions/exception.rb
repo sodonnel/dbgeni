@@ -3,6 +3,8 @@ module DBGeni
   class MigrationDirectoryNotExist < Exception; end
   class MigrationFilenameInvalid   < Exception; end
   class MigrationAlreadyApplied    < Exception; end
+  class MigrationApplyFailed       < Exception; end
+  class MigrationContainsErrors    < Exception; end
 
   class EnvironmentNotExist        < Exception; end
 

@@ -56,8 +56,9 @@ module DBGeni
       begin
         migrator.apply(self)
         set_completed!
-      rescue
+      rescue Exception => e
         set_failed!
+        raise DBGeni::MigrationApplyFailed, @migration_file
       end
     end
 
