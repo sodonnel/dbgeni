@@ -1,8 +1,10 @@
 Migrations - 
- * migrations for sqlite
  * Rollbacks, last, until
+ * Log output of migration commands
 
 Logger
+
+Milestones
 
 Connectors - automatically work like Initializers
 

@@ -18,7 +18,7 @@ module DBGeni
     ROLLEDBACK  = 'Rolledback'
     # TODO - add verified state?
 
-    attr_reader :migration_file, :name, :sequence
+    attr_reader :directory, :migration_file, :name, :sequence
 
     def initialize(directory, migration)
       @directory      = directory

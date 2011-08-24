@@ -7,6 +7,7 @@ module DBGeni
       require 'oci8'
 
       attr_reader :connection
+      attr_reader :database
 
       def self.connect(user, password, database)
         self.new(user, password, database)
@@ -57,6 +58,7 @@ module DBGeni
       private
 
       def initialize(user, password, database)
+        @database = database
         @connection = OCI8.new(user, password, database)
       end
 

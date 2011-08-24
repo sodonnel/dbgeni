@@ -7,6 +7,7 @@ module DBGeni
       require 'sqlite3'
 
       attr_reader :connection
+      attr_reader :database
 
       def self.db_file_path(base, file)
         # starts with a ., eg ./filename, or does not
@@ -61,6 +62,7 @@ module DBGeni
 
       def initialize(database)
         @connection = SQLite3::Database.new(database)
+        @database   = database
       end
 
     end

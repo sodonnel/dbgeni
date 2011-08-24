@@ -47,11 +47,31 @@ module TestHelper
     DBGeni::Migration.new(File.join(TEMP_DIR, 'migrations'), filename)
   end
 
+  def helper_good_sqlite_migration
+    FileUtils.rm_rf(File.join(TEMP_DIR, 'migrations', "*.sql"))
+    filename ='201108190000_up_test_migration.sql'
+    File.open(File.join(TEMP_DIR, 'migrations', filename), 'w') do |f|
+      f.puts "select * from sqlite_master;"
+    end
+    DBGeni::Migration.new(File.join(TEMP_DIR, 'migrations'), filename)
+  end
+
+
   def helper_bad_oracle_migration
     FileUtils.rm_rf(File.join(TEMP_DIR, 'migrations', "*.sql"))
     filename ='201108190000_up_test_migration.sql'
     File.open(File.join(TEMP_DIR, 'migrations', filename), 'w') do |f|
       f.puts "select * from dua;"
+    end
+    DBGeni::Migration.new(File.join(TEMP_DIR, 'migrations'), filename)
+  end
+
+  def helper_bad_sqlite_migration
+    FileUtils.rm_rf(File.join(TEMP_DIR, 'migrations', "*.sql"))
+    filename ='201108190000_up_test_migration.sql'
+    File.open(File.join(TEMP_DIR, 'migrations', filename), 'w') do |f|
+      f.puts "select * from tab_not_exist;"
+      f.puts "create table foo (c1 integer);"
     end
     DBGeni::Migration.new(File.join(TEMP_DIR, 'migrations'), filename)
   end
@@ -62,6 +82,10 @@ module TestHelper
     File.open(File.join(TEMP_DIR, 'migrations', filename), 'w') do |f|
     end
     DBGeni::Migration.new(File.join(TEMP_DIR, 'migrations'), filename)
+  end
+
+  def helper_empty_sqlite_migration
+    helper_empty_oracle_migration
   end
 
 
