@@ -14,7 +14,6 @@ class TestMigratorOracle < Test::Unit::TestCase
   def setup
     @connection = helper_oracle_connection
     @config     = helper_oracle_config
-    @config.base_directory = TestHelper::TEMP_DIR
     @connection.execute("delete from #{@config.db_table}")
     @migrator = DBGeni::Migrator.initialize(@config, @connection)
   end

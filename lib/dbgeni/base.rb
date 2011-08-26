@@ -83,6 +83,22 @@ module DBGeni
       end
     end
 
+    def rollback_all_migrations
+    end
+
+    def rollback_last_migration
+    end
+
+    def rollback_migration(migration)
+      begin
+        migration.rollback!(@config, connect)
+        puts "Rolledback #{migration.to_s}"
+      rescue DBGeni::MigrationApplyFailed
+        puts "Failed #{migration.to_s}"
+        raise DBGeni::MigrationApplyFailed
+      end
+    end
+
     def connect
       raise DBGeni::NoEnvironmentSelected unless selected_environment_name
       return @connection if @connection

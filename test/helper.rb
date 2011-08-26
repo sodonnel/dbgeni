@@ -23,6 +23,8 @@ module TestHelper
                                          password ''
                                          database '#{TEMP_DIR}/#{SQLITE_DB_NAME}'
                                      }")
+    config.base_directory = TEMP_DIR
+    config
   end
 
   def helper_oracle_connection
@@ -36,6 +38,8 @@ module TestHelper
                                          password '#{ORA_PASSWORD}'
                                          database '#{ORA_DB}'
                                      }")
+    config.base_directory = TEMP_DIR
+    config
   end
 
   def helper_good_oracle_migration
@@ -44,16 +48,19 @@ module TestHelper
     File.open(File.join(TEMP_DIR, 'migrations', filename), 'w') do |f|
       f.puts "select * from dual;"
     end
+    FileUtils.touch(File.join(TEMP_DIR, filename.gsub(/up/, 'down')))
     DBGeni::Migration.new(File.join(TEMP_DIR, 'migrations'), filename)
   end
 
   def helper_good_sqlite_migration
     FileUtils.rm_rf(File.join(TEMP_DIR, 'migrations', "*.sql"))
-    filename ='201108190000_up_test_migration.sql'
-    File.open(File.join(TEMP_DIR, 'migrations', filename), 'w') do |f|
-      f.puts "select * from sqlite_master;"
+    filenames = %w(201108190000_up_test_migration.sql 201108190000_down_test_migration.sql)
+    filenames.each do |fn|
+      File.open(File.join(TEMP_DIR, 'migrations', fn), 'w') do |f|
+        f.puts "select * from sqlite_master;"
+      end
     end
-    DBGeni::Migration.new(File.join(TEMP_DIR, 'migrations'), filename)
+    DBGeni::Migration.new(File.join(TEMP_DIR, 'migrations'), filenames[0])
   end
 
 

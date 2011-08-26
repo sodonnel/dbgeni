@@ -18,12 +18,13 @@ module DBGeni
     ROLLEDBACK  = 'Rolledback'
     # TODO - add verified state?
 
-    attr_reader :directory, :migration_file, :name, :sequence
+    attr_reader :directory, :migration_file, :rollback_file, :name, :sequence
 
     def initialize(directory, migration)
       @directory      = directory
       @migration_file = migration
       parse_file
+      @rollback_file  = "#{sequence}_down_#{name}.sql"
     end
 
 #    def rollback_file
@@ -63,6 +64,20 @@ module DBGeni
     end
 
     def rollback!(config, connection)
+      set_env(config, connection)
+      if status(config, connection) == NEW
+        raise DBGeni::MigrationNotApplied
+      end
+      migrator = DBGeni::Migrator.initialize(config, connection)
+      set_pending!
+      begin
+        migrator.rollback(self)
+        set_rolledback!()
+      rescue Exception => e
+        set_failed!
+        raise DBGeni::MigrationApplyFailed, @migration_file
+      end
+
     end
 
     def verify!(config, connection)
@@ -96,22 +111,18 @@ module DBGeni
 
     def set_pending!
       insert_or_set_state(PENDING)
-   #   @connection.commit
     end
 
     def set_completed!
       insert_or_set_state(COMPLETED)
-  #    @connection.commit
     end
 
     def set_failed!
       insert_or_set_state(FAILED)
- #     @connection.commit
     end
 
     def set_rolledback!
       insert_or_set_state(ROLLEDBACK)
-#      @connection.commit
     end
 
     def set_env(config, connection)

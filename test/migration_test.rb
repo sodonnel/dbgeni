@@ -18,6 +18,7 @@ class TestMigration < Test::Unit::TestCase
       DBGeni::Initializer.initialize(@connection, @config)
     rescue DBGeni::DatabaseAlreadyInitialized
     end
+    @connection.execute('delete from dbgeni_migrations')
   end
 
   def teardown
@@ -42,6 +43,21 @@ class TestMigration < Test::Unit::TestCase
       end
     end
   end
+
+  def test_rollback_file_correct
+    m = DBGeni::Migration.new('anydir', @valid_migration)
+    assert_equal(@valid_migration.gsub(/up/, 'down'), m.rollback_file)
+  end
+
+  def test_migration_file_correct
+    m = DBGeni::Migration.new('anydir', @valid_migration)
+    assert_equal(@valid_migration, m.migration_file)
+  end
+
+
+  #####################################################
+  # set_* (pending, failed, rolledback, completed etc #
+  #####################################################
 
   def test_insert_pending_details_for_migration
     m = DBGeni::Migration.new('anydir', @valid_migration)
@@ -74,6 +90,24 @@ class TestMigration < Test::Unit::TestCase
     assert_equal('Completed', get_state(m))
   end
 
+  def test_get_migration_state
+    m = DBGeni::Migration.new('anydir', @valid_migration)
+    assert_equal('New', m.status(@config, @connection))
+    m.set_pending(@config, @connection)
+    assert_equal('Pending', m.status(@config, @connection))
+    m.set_failed(@config, @connection)
+    assert_equal('Failed', m.status(@config, @connection))
+    m.set_completed(@config, @connection)
+    assert_equal('Completed', m.status(@config, @connection))
+    m.set_rolledback(@config, @connection)
+    assert_equal('Rolledback', m.status(@config, @connection))
+  end
+
+
+  ############
+  # applied? #
+  ############
+
   def test_not_applied_migration_is_not_applied
     m = DBGeni::Migration.new('anydir', @valid_migration)
     assert_equal(false, m.applied?(@config, @connection))
@@ -91,17 +125,40 @@ class TestMigration < Test::Unit::TestCase
     assert_equal(true, m.applied?(@config, @connection))
   end
 
-  def test_get_migration_state
-    m = DBGeni::Migration.new('anydir', @valid_migration)
-    assert_equal('New', m.status(@config, @connection))
+  #############
+  # apply!   #
+  #############
+
+  def test_apply_good_migration
+    m = helper_good_sqlite_migration
+    assert_nothing_raised do
+      m.apply!(@config, @connection)
+    end
+  end
+
+  #############
+  # rollback! #
+  #############
+
+  def test_not_applied_migration_will_not_rollback
+    # if a migration is partly applied, then it will still rollback, eg if it is PENDING etc
+    m = helper_good_sqlite_migration
+    puts m.status(@config, @connection)
+    assert_raises DBGeni::MigrationNotApplied do
+      m.rollback!(@config, @connection)
+    end
     m.set_pending(@config, @connection)
-    assert_equal('Pending', m.status(@config, @connection))
+    assert_nothing_raised do
+      m.rollback!(@config, @connection)
+    end
     m.set_failed(@config, @connection)
-    assert_equal('Failed', m.status(@config, @connection))
+    assert_nothing_raised do
+      m.rollback!(@config, @connection)
+    end
     m.set_completed(@config, @connection)
-    assert_equal('Completed', m.status(@config, @connection))
-    m.set_rolledback(@config, @connection)
-    assert_equal('Rolledback', m.status(@config, @connection))
+    assert_nothing_raised do
+      m.rollback!(@config, @connection)
+    end
   end
 
 

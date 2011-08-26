@@ -39,6 +39,16 @@ apply       Apply migrations to the given environment. Can specify:
             dbgeni migrations apply next --environment-name test --config-file /home/myapp/.dbgeni
             dbgeni migrations apply file1.sql file2.sql file6.sql --environment-name test --config-file /home/myapp/.dbgeni
 
+rollback    Run the rollback script for a given migration. Can specify:
+
+            all       Rollback everything that has even been applied
+            last      Rollback the last migration applied
+            specific migrations to rollback
+
+            dbgeni migrations rollback all  --environment-name test --config-file /home/myapp/.dbgeni
+            dbgeni migrations rollback last --environment-name test --config-file /home/myapp/.dbgeni
+            dbgeni migrations rollback file1.sql file2.sql file6.sql --environment-name test --config-file /home/myapp/.dbgeni
+
 EOF
   exit
 end
@@ -93,6 +103,17 @@ when 'apply'
       puts "There was a problem applying a migration"
     end
  # when ~= /\.sql$/
+  else
+    puts "error: #{sub_command} is not a valid command"
+  end
+when 'rollback'
+  sub_command = ARGV.shift
+  case sub_command
+  when 'all'
+    installer.rollback_all_migrations
+  when 'last'
+    installer.rollback_last_migration
+  # when ~= /\.sql$/
   else
     puts "error: #{sub_command} is not a valid command"
   end

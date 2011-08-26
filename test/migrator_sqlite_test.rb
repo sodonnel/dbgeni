@@ -14,7 +14,6 @@ class TestMigratorSqlite < Test::Unit::TestCase
   def setup
     @connection = helper_sqlite_connection
     @config     = helper_sqlite_config
-    @config.base_directory = TestHelper::TEMP_DIR
     unless DBGeni::Initializer::Sqlite.initialized?(@connection, @config)
       DBGeni::Initializer::Sqlite.initialize(@connection, @config)
     end

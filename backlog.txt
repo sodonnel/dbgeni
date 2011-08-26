@@ -1,6 +1,9 @@
+In the middle or wiring up the rollbacks, but unfinished!! Lost track of my place :(
+
 Migrations - 
  * Rollbacks, last, until
  * Log output of migration commands
+ * Test for Oracle migration to ensure it stops when error
 
 Logger
 
