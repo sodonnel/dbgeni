@@ -6,6 +6,7 @@ require 'dbgeni/migration'
 require 'dbgeni/exceptions/exception'
 require 'dbgeni/initializers/initializer'
 require 'dbgeni/migrators/migrator'
+require 'dbgeni/connectors/connector'
 
 require 'fileutils'
 
@@ -118,20 +119,7 @@ module DBGeni
       raise DBGeni::NoEnvironmentSelected unless selected_environment_name
       return @connection if @connection
 
-      if config.db_type == 'oracle'
-        require 'dbgeni/connectors/oracle'
-        @connection = DBGeni::Connector::Oracle.connect(@config.env.username,
-                                                        @config.env.password,
-                                                        @config.env.database)
-      elsif config.db_type == 'sqlite'
-        require 'dbgeni/connectors/sqlite'
-        @connection = DBGeni::Connector::Sqlite.connect(nil,
-                                                        nil,
-                                                        DBGeni::Connector::Sqlite.db_file_path(@config.base_directory, @config.env.database))
-      else
-        raise DBGeni::NoConnectorForDBType, config.db_type
-      end
-      @connection
+      @connection = DBGeni::Connector.initialize(@config)
     end
 
     def connection

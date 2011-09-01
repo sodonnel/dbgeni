@@ -14,11 +14,21 @@ module DBGeni
 
   class NoEnvironmentSelected      < Exception; end
 
+  ## Initializer
+
   # If an attempt is made to load an initializer that doesn't exist
   class NoInitializerForDBType      < Exception; end
-  class NoConnectorForDBType        < Exception; end
   # If the initializer is not corretly defined, this will be raise.
   class InvalidInitializerForDBType < Exception; end
+
+  ## Connectors
+  class NoConnectorForDBType        < Exception; end
+  class InvalidConnectorForDBType   < Exception; end
+
+  ## Migrators
+  class NoMigratorForDBType         < Exception; end
+  class InvalidMigratorForDBType    < Exception; end
+
   class DatabaseAlreadyInitialized  < Exception; end
   class NoOutstandingMigrations     < Exception; end
   class NoAppliedMigrations         < Exception; end

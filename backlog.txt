@@ -3,7 +3,6 @@ Logs for migration runs
 Specific migrations to apply and rollback
 Dates are different in Oracle and sqlite - so start_dtm etc is being skipped in database.
 Milestones
-Connectors - automatically work like Initializers
 Tests for DBGeni::Base
 Tests for CLI
 
