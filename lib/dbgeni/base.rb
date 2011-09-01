@@ -48,11 +48,13 @@ module DBGeni
     end
 
     def outstanding_migrations
-      migrations.reject {|m| m.applied?(@config, connection) }
+      migrations
+      @migration_list.outstanding(@config, connection)
     end
 
     def applied_migrations
-      migrations.select {|m| m.applied?(@config, connection) }
+      migrations
+      @migration_list.applied(@config, connection)
     end
 
     def apply_all_migrations
@@ -84,9 +86,22 @@ module DBGeni
     end
 
     def rollback_all_migrations
+      migrations = applied_migrations.reverse
+      if migrations.length == 0
+        raise DBGeni::NoAppliedMigrations
+      end
+      migrations.each do |m|
+        rollback_migration(m)
+      end
     end
 
     def rollback_last_migration
+      migrations = applied_migrations
+      if migrations.length == 0
+        raise DBGeni::NoAppliedMigrations
+      end
+      # the most recent one is at the end of the array!!
+      rollback_migration(migrations.last)
     end
 
     def rollback_migration(migration)

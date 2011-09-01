@@ -43,59 +43,40 @@ module TestHelper
   end
 
   def helper_good_oracle_migration
-    FileUtils.rm_rf(File.join(TEMP_DIR, 'migrations', "*.sql"))
-    filename ='201108190000_up_test_migration.sql'
-    File.open(File.join(TEMP_DIR, 'migrations', filename), 'w') do |f|
-      f.puts "select * from dual;"
-    end
-    FileUtils.touch(File.join(TEMP_DIR, filename.gsub(/up/, 'down')))
-    DBGeni::Migration.new(File.join(TEMP_DIR, 'migrations'), filename)
+    create_migration_files("select * from dual;")
   end
 
   def helper_good_sqlite_migration
-    FileUtils.rm_rf(File.join(TEMP_DIR, 'migrations', "*.sql"))
-    filenames = %w(201108190000_up_test_migration.sql 201108190000_down_test_migration.sql)
-    filenames.each do |fn|
-      File.open(File.join(TEMP_DIR, 'migrations', fn), 'w') do |f|
-        f.puts "select * from sqlite_master;"
-      end
-    end
-    DBGeni::Migration.new(File.join(TEMP_DIR, 'migrations'), filenames[0])
+    create_migration_files("select * from sqlite_master;")
   end
 
-
   def helper_bad_oracle_migration
-    FileUtils.rm_rf(File.join(TEMP_DIR, 'migrations', "*.sql"))
-    filename ='201108190000_up_test_migration.sql'
-    File.open(File.join(TEMP_DIR, 'migrations', filename), 'w') do |f|
-      f.puts "select * from dua;"
-    end
-    DBGeni::Migration.new(File.join(TEMP_DIR, 'migrations'), filename)
+    create_migration_files("select * from dua;\ncreate table foo (c1 integer);")
   end
 
   def helper_bad_sqlite_migration
-    FileUtils.rm_rf(File.join(TEMP_DIR, 'migrations', "*.sql"))
-    filename ='201108190000_up_test_migration.sql'
-    File.open(File.join(TEMP_DIR, 'migrations', filename), 'w') do |f|
-      f.puts "select * from tab_not_exist;"
-      f.puts "create table foo (c1 integer);"
-    end
-    DBGeni::Migration.new(File.join(TEMP_DIR, 'migrations'), filename)
+    create_migration_files("select * from tab_not_exist;\ncreate table foo (c1 integer);")
   end
 
   def helper_empty_oracle_migration
-    FileUtils.rm_rf(File.join(TEMP_DIR, 'migrations', "*.sql"))
-    filename ='201108190000_up_test_migration.sql'
-    File.open(File.join(TEMP_DIR, 'migrations', filename), 'w') do |f|
-    end
-    DBGeni::Migration.new(File.join(TEMP_DIR, 'migrations'), filename)
+    create_migration_files('')
   end
 
   def helper_empty_sqlite_migration
     helper_empty_oracle_migration
   end
 
+  private
 
-
+  def create_migration_files(content)
+    FileUtils.rm_rf(File.join(TEMP_DIR, 'migrations', "*.sql"))
+    filenames = %w(201108190000_up_test_migration.sql 201108190000_down_test_migration.sql)
+    filenames.each do |fn|
+      File.open(File.join(TEMP_DIR, 'migrations', fn), 'w') do |f|
+        f.puts content
+      end
+    end
+    DBGeni::Migration.new(File.join(TEMP_DIR, 'migrations'), filenames[0])
+  end
 
 end

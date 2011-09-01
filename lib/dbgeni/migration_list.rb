@@ -10,6 +10,16 @@ module DBGeni
       file_list
     end
 
+    # Returns an array of MIGRATIONS that have been applied
+    # ordered by oldest first
+    def applied(config, connection)
+      @migrations.select {|m| m.applied?(config, connection) }.sort {|x,y| x.migration_file <=> y.migration_file }
+    end
+
+    def outstanding(config, connection)
+      migrations.reject {|m| m.applied?(config, connection) }.sort {|x,y| x.migration_file <=> y.migration_file }
+    end
+
     private
 
     def file_list

@@ -10,8 +10,6 @@ module DBGeni
       end
 
       def apply(migration)
-        puts @config.migration_directory
-        puts migration.migration_file
         filename = File.join(@config.migration_directory, migration.migration_file)
         run_in_sqlite(filename)
       end

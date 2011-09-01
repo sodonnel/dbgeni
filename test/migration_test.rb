@@ -134,7 +134,28 @@ class TestMigration < Test::Unit::TestCase
     assert_nothing_raised do
       m.apply!(@config, @connection)
     end
+    assert_equal('Completed', m.status(@config, @connection))
   end
+
+  def test_apply_already_applied_migration_errors
+    m = helper_good_sqlite_migration
+    assert_nothing_raised do
+      m.apply!(@config, @connection)
+    end
+    assert_raises DBGeni::MigrationAlreadyApplied do
+      m.apply!(@config, @connection)
+    end
+  end
+
+  def test_apply_migration_with_errors
+    m = helper_bad_sqlite_migration
+    assert_raises DBGeni::MigrationApplyFailed do
+      m.apply!(@config, @connection)
+    end
+    assert_equal(false, m.applied?(@config, @connection))
+    assert_equal('Failed', m.status(@config, @connection))
+  end
+
 
   #############
   # rollback! #
@@ -143,25 +164,37 @@ class TestMigration < Test::Unit::TestCase
   def test_not_applied_migration_will_not_rollback
     # if a migration is partly applied, then it will still rollback, eg if it is PENDING etc
     m = helper_good_sqlite_migration
-    puts m.status(@config, @connection)
     assert_raises DBGeni::MigrationNotApplied do
       m.rollback!(@config, @connection)
     end
     m.set_pending(@config, @connection)
     assert_nothing_raised do
       m.rollback!(@config, @connection)
+      assert_equal('Rolledback', m.status(@config, @connection))
     end
     m.set_failed(@config, @connection)
     assert_nothing_raised do
       m.rollback!(@config, @connection)
+      assert_equal('Rolledback', m.status(@config, @connection))
     end
     m.set_completed(@config, @connection)
     assert_nothing_raised do
       m.rollback!(@config, @connection)
+      assert_equal('Rolledback', m.status(@config, @connection))
     end
   end
 
 
+  def test_apply_rollback_with_errors_raises_exception
+    m2 = helper_good_sqlite_migration
+    assert_nothing_raised do
+      m2.apply!(@config, @connection)
+    end
+    m  = helper_bad_sqlite_migration
+    assert_raises DBGeni::MigrationApplyFailed do
+      m.rollback!(@config, @connection)
+    end
+  end
 
   private
 

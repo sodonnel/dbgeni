@@ -1,16 +1,17 @@
-In the middle or wiring up the rollbacks, but unfinished!! Lost track of my place :(
-
-Migrations - 
- * Rollbacks, last, until
- * Log output of migration commands
- * Test for Oracle migration to ensure it stops when error
-
 Logger
-
-Milestones
-
-Connectors - automatically work like Initializers
-
+Logs for migration runs
+Specific migrations to apply and rollback
 Dates are different in Oracle and sqlite - so start_dtm etc is being skipped in database.
+Milestones
+Connectors - automatically work like Initializers
+Tests for DBGeni::Base
+Tests for CLI
+
+
+
+
+set ORACLE_HOME=C:\app\sodonnell\product\11.2.0\dbhome_1
+
+
 
 

@@ -21,6 +21,7 @@ module DBGeni
   class InvalidInitializerForDBType < Exception; end
   class DatabaseAlreadyInitialized  < Exception; end
   class NoOutstandingMigrations     < Exception; end
+  class NoAppliedMigrations         < Exception; end
 
 
 end

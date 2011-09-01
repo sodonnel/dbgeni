@@ -26,6 +26,10 @@ class TestMigratorOracle < Test::Unit::TestCase
     assert_nothing_raised do
       @migrator.apply(migration)
     end
+    assert_nothing_raised do
+      @migrator.rollback(migration)
+    end
+
   end
 
   def test_bad_migration_runs_with_error
@@ -33,6 +37,14 @@ class TestMigratorOracle < Test::Unit::TestCase
     assert_raises DBGeni::MigrationContainsErrors do
       @migrator.apply(migration)
     end
+    # ensure the migration steps after error don't run
+    results = @connection.execute("SELECT table_name FROM user_tables WHERE table_name = :t", 'foo')
+    assert_equal(0, results.length)
+    assert_raises DBGeni::MigrationContainsErrors do
+      @migrator.rollback(migration)
+    end
+    results = @connection.execute("SELECT table_name FROM user_tables WHERE table_name = :t", 'foo')
+    assert_equal(0, results.length)
   end
 
   def test_empty_migration_runs_without_error
@@ -40,6 +52,10 @@ class TestMigratorOracle < Test::Unit::TestCase
     assert_nothing_raised do
       @migrator.apply(migration)
     end
+    assert_nothing_raised do
+      @migrator.rollback(migration)
+    end
+
   end
 
 end

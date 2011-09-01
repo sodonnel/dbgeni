@@ -29,6 +29,9 @@ class TestMigratorSqlite < Test::Unit::TestCase
     assert_nothing_raised do
       @migrator.apply(migration)
     end
+    assert_nothing_raised do
+      @migrator.rollback(migration)
+    end
   end
 
   def test_bad_migration_runs_with_error
@@ -39,12 +42,20 @@ class TestMigratorSqlite < Test::Unit::TestCase
     # also ensure that the command after the bad command does not get run
     results = @connection.execute("SELECT name FROM sqlite_master WHERE name = :t", 'foo')
     assert_equal(0, results.length)
+    assert_raises DBGeni::MigrationContainsErrors do
+      @migrator.rollback(migration)
+    end
+    results = @connection.execute("SELECT name FROM sqlite_master WHERE name = :t", 'foo')
+    assert_equal(0, results.length)
   end
 
   def test_empty_migration_runs_without_error
     migration = helper_empty_sqlite_migration
     assert_nothing_raised do
       @migrator.apply(migration)
+    end
+    assert_nothing_raised do
+      @migrator.rollback(migration)
     end
   end
 

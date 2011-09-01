@@ -108,16 +108,21 @@ when 'apply'
   end
 when 'rollback'
   sub_command = ARGV.shift
-  case sub_command
-  when 'all'
-    installer.rollback_all_migrations
-  when 'last'
-    installer.rollback_last_migration
-  # when ~= /\.sql$/
-  else
-    puts "error: #{sub_command} is not a valid command"
+  begin
+    case sub_command
+    when 'all'
+      installer.rollback_all_migrations
+    when 'last'
+      installer.rollback_last_migration
+      # when ~= /\.sql$/
+    else
+      puts "error: #{sub_command} is not a valid command"
+    end
+  rescue DBGeni::NoAppliedMigrations
+    puts "There are no applied migrations to rollback"
+  rescue DBGeni::MigrationApplyFailed
+    puts "There was a problem rolling back the migration"
   end
-
 else
   puts "error: #{command} is not a valid command"
 end

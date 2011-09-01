@@ -15,6 +15,8 @@ module DBGeni
       end
 
       def rollback(migration)
+        filename = File.join(@config.migration_directory, migration.rollback_file)
+        run_in_sqlplus(filename)
       end
 
       def verify(migration)
