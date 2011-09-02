@@ -1,13 +1,11 @@
 Logger
 Logs for migration runs
-Specific migrations to apply and rollback
 Dates are different in Oracle and sqlite - so start_dtm etc is being skipped in database.
-Milestones
 Tests for DBGeni::Base
 Tests for CLI
+Milestones
 
-
-
+For rollbacks, they can be rolled back many times as the check only checks for NEW and not rolledback
 
 set ORACLE_HOME=C:\app\sodonnell\product\11.2.0\dbhome_1
 

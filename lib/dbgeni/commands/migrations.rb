@@ -37,7 +37,7 @@ apply       Apply migrations to the given environment. Can specify:
 
             dbgeni migrations apply all  --environment-name test --config-file /home/myapp/.dbgeni
             dbgeni migrations apply next --environment-name test --config-file /home/myapp/.dbgeni
-            dbgeni migrations apply file1.sql file2.sql file6.sql --environment-name test --config-file /home/myapp/.dbgeni
+            dbgeni migrations apply YYYYMMDDHHMM::Name1 YYYYMMDDHHMM::Name2 YYYYMMDDHHMM::Name3 --environment-name test --config-file /home/myapp/.dbgeni
 
 rollback    Run the rollback script for a given migration. Can specify:
 
@@ -47,7 +47,7 @@ rollback    Run the rollback script for a given migration. Can specify:
 
             dbgeni migrations rollback all  --environment-name test --config-file /home/myapp/.dbgeni
             dbgeni migrations rollback last --environment-name test --config-file /home/myapp/.dbgeni
-            dbgeni migrations rollback file1.sql file2.sql file6.sql --environment-name test --config-file /home/myapp/.dbgeni
+            dbgeni migrations rollback YYYYMMDDHHMM::Name1 YYYYMMDDHHMM::Name2 YYYYMMDDHHMM::Name3 --environment-name test --config-file /home/myapp/.dbgeni
 
 EOF
   exit
@@ -83,29 +83,37 @@ when 'outstanding'
   outstanding.each do |m|
     puts m.to_s
   end
+
 when 'apply'
   sub_command = ARGV.shift
-  case sub_command
-  when 'all'
-    begin
+  begin
+    case sub_command
+    when 'all'
       installer.apply_all_migrations
-    rescue DBGeni::NoOutstandingMigrations
-      puts "There are no outstanding migrations to apply"
-    rescue DBGeni::MigrationApplyFailed
-      puts "There was a problem applying a migration"
-    end
-  when 'next'
-    begin
+    when 'next'
       installer.apply_next_migration
-    rescue DBGeni::NoOutstandingMigrations
-      puts "There are no outstanding migrations to apply"
-    rescue DBGeni::MigrationApplyFailed
-      puts "There was a problem applying a migration"
+    when /^(\d{12})::/
+      # The param list are specific migration files, but in the internal format. One is
+      # stored in sub_command and the rest are in ARGV. Grab all params that match the
+      # parameter name format
+      files = ARGV.select{ |f| f =~ /^(\d{12})::/ }
+      files.unshift sub_command
+      migrations = files.map {|f| DBGeni::Migration.initialize_from_internal_name(installer.config.migration_directory, f)}
+      # Now attempt to run each migration ... forwards for apply
+      migrations.sort{|x,y| x.migration_file <=> y.migration_file}.each do |m|
+        installer.apply_migration(m)
+      end
+    else
+      puts "error: #{sub_command} is not a valid command"
     end
- # when ~= /\.sql$/
-  else
-    puts "error: #{sub_command} is not a valid command"
+  rescue DBGeni::NoOutstandingMigrations => e
+    puts "There are no outstanding migrations to apply"
+  rescue DBGeni::MigrationApplyFailed => e
+    puts "There was a problem applying #{e.to_s}"
+  rescue DBGeni::MigrationAlreadyApplied => e
+    puts "The migration is already applied #{e.to_s}"
   end
+
 when 'rollback'
   sub_command = ARGV.shift
   begin
@@ -114,14 +122,26 @@ when 'rollback'
       installer.rollback_all_migrations
     when 'last'
       installer.rollback_last_migration
-      # when ~= /\.sql$/
+    when /^(\d{12})::/
+      # The param list are specific migration files, but in the internal format. One is
+      # stored in sub_command and the rest are in ARGV. Grab all params that match the
+      # parameter name format
+      files = ARGV.select{ |f| f =~ /^(\d{12})::/ }
+      files.unshift sub_command
+      migrations = files.map {|f| DBGeni::Migration.initialize_from_internal_name(installer.config.migration_directory, f)}
+      # Now attempt to run each migration ... backwards for rollback
+      migrations.sort{|x,y| y.migration_file <=> x.migration_file}.each do |m|
+        installer.rollback_migration(m)
+      end
     else
       puts "error: #{sub_command} is not a valid command"
     end
-  rescue DBGeni::NoAppliedMigrations
+  rescue DBGeni::NoAppliedMigrations => e
     puts "There are no applied migrations to rollback"
-  rescue DBGeni::MigrationApplyFailed
-    puts "There was a problem rolling back the migration"
+  rescue DBGeni::MigrationApplyFailed => e
+    puts "There was a problem rolling back #{e.to_s}"
+  rescue DBGeni::MigrationNotApplied
+    puts "#{e.to_s} has not been applied so cannot be rolledback"
   end
 else
   puts "error: #{command} is not a valid command"

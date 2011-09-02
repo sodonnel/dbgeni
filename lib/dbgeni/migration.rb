@@ -20,6 +20,11 @@ module DBGeni
 
     attr_reader :directory, :migration_file, :rollback_file, :name, :sequence
 
+    def self.initialize_from_internal_name(directory, name)
+      name =~ /^(\d{12})::(.+)$/
+      self.new(directory, "#{$1}_up_#{$2}.sql")
+    end
+
     def initialize(directory, migration)
       @directory      = directory
       @migration_file = migration
@@ -50,7 +55,7 @@ module DBGeni
     def apply!(config, connection)
       set_env(config, connection)
       if applied?(config, connection)
-        raise DBGeni::MigrationAlreadyApplied
+        raise DBGeni::MigrationAlreadyApplied, self.to_s
       end
       migrator = DBGeni::Migrator.initialize(config, connection)
       set_pending!
@@ -59,14 +64,14 @@ module DBGeni
         set_completed!
       rescue Exception => e
         set_failed!
-        raise DBGeni::MigrationApplyFailed, @migration_file
+        raise DBGeni::MigrationApplyFailed, self.to_s
       end
     end
 
     def rollback!(config, connection)
       set_env(config, connection)
       if status(config, connection) == NEW
-        raise DBGeni::MigrationNotApplied
+        raise DBGeni::MigrationNotApplied, self.to_s
       end
       migrator = DBGeni::Migrator.initialize(config, connection)
       set_pending!
@@ -75,7 +80,7 @@ module DBGeni
         set_rolledback!()
       rescue Exception => e
         set_failed!
-        raise DBGeni::MigrationApplyFailed, @migration_file
+        raise DBGeni::MigrationApplyFailed, self.to_s
       end
 
     end
@@ -182,7 +187,7 @@ module DBGeni
       #     201107011644_up_my_shiny_new_table.sql
       #
       unless @migration_file =~ /^(\d{12})_up_(.+)\.sql$/
-        raise DBGeni::MigrationFilenameInvalid
+        raise DBGeni::MigrationFilenameInvalid, self.migration_file
       end
       @sequence = $1
       @name     = $2
