@@ -1,5 +1,6 @@
 module DBGeni
 
+  class NoLoggerLocation           < Exception; end
   class MigrationDirectoryNotExist < Exception; end
   class MigrationFilenameInvalid   < Exception; end
   class MigrationAlreadyApplied    < Exception; end

@@ -1,3 +1,4 @@
+require 'dbgeni/logger'
 require 'dbgeni/blank_slate'
 require 'dbgeni/config'
 require 'dbgeni/environment'
@@ -27,8 +28,8 @@ module DBGeni
     end
 
     def initialize(config_file)
-      initialize_logger
       load_config(config_file)
+      initialize_logger
     end
 
     def select_environment(environment_name)
@@ -79,9 +80,9 @@ module DBGeni
     def apply_migration(migration)
       begin
         migration.apply!(@config, connection)
-        puts "Applied #{migration.to_s}"
+        @logger.info "Applied #{migration.to_s}"
       rescue DBGeni::MigrationApplyFailed
-        puts "Failed #{migration.to_s}"
+        @logger.error "Failed #{migration.to_s}"
         raise DBGeni::MigrationApplyFailed
       end
     end
@@ -108,9 +109,9 @@ module DBGeni
     def rollback_migration(migration)
       begin
         migration.rollback!(@config, connect)
-        puts "Rolledback #{migration.to_s}"
+        @logger.info  "Rolledback #{migration.to_s}"
       rescue DBGeni::MigrationApplyFailed
-        puts "Failed #{migration.to_s}"
+        @logger.error "Failed #{migration.to_s}"
         raise DBGeni::MigrationApplyFailed
       end
     end
@@ -133,7 +134,8 @@ module DBGeni
     private
 
     def initialize_logger
-      @logger = nil
+      puts @config.base_directory
+      @logger = DBGeni::Logger.instance("#{@config.base_directory}/log")
     end
 
     def load_config(config)

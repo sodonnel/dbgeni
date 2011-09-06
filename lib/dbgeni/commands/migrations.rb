@@ -54,15 +54,17 @@ EOF
 end
 
 require 'dbgeni'
+
 command = ARGV.shift
 
 installer = DBGeni::Base.installer_for_environment($config_file, $environment_name)
+logger    = DBGeni::Logger.instance
 
 case command
 when 'list'
   migrations = installer.migrations
   if migrations.length == 0
-    puts "There are no migrations in #{installer.config.migration_directory}"
+    logger.info "There are no migrations in #{installer.config.migration_directory}"
   end
   migrations.each do |m|
     puts m.to_s
@@ -70,7 +72,7 @@ when 'list'
 when 'applied'
   applied = installer.applied_migrations
   if applied.length == 0
-    puts "There are no applied migrations in #{installer.config.migration_directory}"
+    logger.info "There are no applied migrations in #{installer.config.migration_directory}"
   end
   applied.each do |m|
     puts m.to_s
@@ -78,7 +80,7 @@ when 'applied'
 when 'outstanding'
   outstanding = installer.outstanding_migrations
   if outstanding.length == 0
-    puts "There are no applied migrations in #{installer.config.migration_directory}"
+    logger.info "There are no applied migrations in #{installer.config.migration_directory}"
   end
   outstanding.each do |m|
     puts m.to_s
@@ -104,14 +106,14 @@ when 'apply'
         installer.apply_migration(m)
       end
     else
-      puts "error: #{sub_command} is not a valid command"
+      logger.error "#{sub_command} is not a valid command"
     end
   rescue DBGeni::NoOutstandingMigrations => e
-    puts "There are no outstanding migrations to apply"
+    logger.error "There are no outstanding migrations to apply"
   rescue DBGeni::MigrationApplyFailed => e
-    puts "There was a problem applying #{e.to_s}"
+    logger.error "There was a problem applying #{e.to_s}"
   rescue DBGeni::MigrationAlreadyApplied => e
-    puts "The migration is already applied #{e.to_s}"
+    logger.error "The migration is already applied #{e.to_s}"
   end
 
 when 'rollback'
@@ -134,17 +136,17 @@ when 'rollback'
         installer.rollback_migration(m)
       end
     else
-      puts "error: #{sub_command} is not a valid command"
+      logger.error "#{sub_command} is not a valid command"
     end
   rescue DBGeni::NoAppliedMigrations => e
-    puts "There are no applied migrations to rollback"
+    logger.error "There are no applied migrations to rollback"
   rescue DBGeni::MigrationApplyFailed => e
-    puts "There was a problem rolling back #{e.to_s}"
+    logger.error "There was a problem rolling back #{e.to_s}"
   rescue DBGeni::MigrationNotApplied
-    puts "#{e.to_s} has not been applied so cannot be rolledback"
+    logger.error "#{e.to_s} has not been applied so cannot be rolledback"
   end
 else
-  puts "error: #{command} is not a valid command"
+  logger.error "#{command} is not a valid command"
 end
 
 exit(0)

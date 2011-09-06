@@ -19,16 +19,17 @@ require 'dbgeni'
 
 begin
   installer = DBGeni::Base.installer_for_environment($config_file, $environment_name)
+  logger = DBGeni::Logger.instance
   installer.initialize_database
-  puts "Database initialized successfully"
+  logger.info "Database initialized successfully"
 rescue DBGeni::DatabaseAlreadyInitialized
-  puts "error: The Database has already been Initialized"
+  logger.error "The Database has already been Initialized"
   exit(1)
 rescue DBGeni::NoInitializerForDBType
-  puts "error: There is no initializer for the db_type setting"
+  logger.error "There is no initializer for the db_type setting"
   exit(1)
 rescue DBGeni::NoConnectorForDBType
-  puts "error: There is no connector defined for the db_type setting"
+  logger.error "There is no connector defined for the db_type setting"
   exit(1)
 end
 
