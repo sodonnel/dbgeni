@@ -44,6 +44,7 @@ module DBGeni
           #            end
           p.puts "whenever sqlerror exit sql.sqlcode"
           #            p.puts "START #{File.basename(file)} #{sql_parameters}"
+          p.puts "spool #{@config.base_directory}/log/#{DBGeni::Migrator.logfile(file)}"
           p.puts "START #{file}"
           p.puts "spool off"
           p.puts "exit"

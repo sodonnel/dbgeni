@@ -83,7 +83,7 @@ module DBGeni
         @logger.info "Applied #{migration.to_s}"
       rescue DBGeni::MigrationApplyFailed
         @logger.error "Failed #{migration.to_s}"
-        raise DBGeni::MigrationApplyFailed
+        raise DBGeni::MigrationApplyFailed, migration.to_s
       end
     end
 
@@ -112,7 +112,7 @@ module DBGeni
         @logger.info  "Rolledback #{migration.to_s}"
       rescue DBGeni::MigrationApplyFailed
         @logger.error "Failed #{migration.to_s}"
-        raise DBGeni::MigrationApplyFailed
+        raise DBGeni::MigrationApplyFailed, migration.to_s
       end
     end
 
@@ -134,7 +134,6 @@ module DBGeni
     private
 
     def initialize_logger
-      puts @config.base_directory
       @logger = DBGeni::Logger.instance("#{@config.base_directory}/log")
     end
 
