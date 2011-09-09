@@ -58,6 +58,14 @@ module DBGeni
         @connection.rollback
       end
 
+      def date_placeholder(bind_var)
+        "time(:#{bind_var})"
+      end
+
+      def date_as_string(dtm)
+        dtm.strftime '%Y-%m-%d %H:%M:%S'
+      end
+
       private
 
       def initialize(database)

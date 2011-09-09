@@ -1,14 +1,12 @@
-Dates are different in Oracle and sqlite - so start_dtm etc is being skipped in database.
 Tests for CLI
 Milestones
 Force option for migrations and consider making rollback default force
 Documentation!
+Syntax errors in config file
 
-
+Think about the migration workflow and the dates etc that are being set
 
 Logger (basic logger implemeneted. May need expanded as requirements develop)
-
-For rollbacks, they can be rolled back many times as the check only checks for NEW and not rolledback
 
 Migrators should really have a parent class to inherit shared methods from.
 

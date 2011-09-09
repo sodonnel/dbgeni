@@ -182,6 +182,10 @@ class TestMigration < Test::Unit::TestCase
       m.rollback!(@config, @connection)
       assert_equal('Rolledback', m.status(@config, @connection))
     end
+    m.set_rolledback(@config, @connection)
+    assert_raises DBGeni::MigrationNotApplied do
+      m.rollback!(@config, @connection)
+    end
   end
 
 

@@ -70,7 +70,7 @@ module DBGeni
 
     def rollback!(config, connection)
       set_env(config, connection)
-      if status(config, connection) == NEW
+      if [NEW, ROLLEDBACK].include? status(config, connection)
         raise DBGeni::MigrationNotApplied, self.to_s
       end
       migrator = DBGeni::Migrator.initialize(config, connection)
@@ -145,7 +145,7 @@ module DBGeni
     end
 
     def existing_db_record
-      results = @connection.execute("select sequence_or_hash, migration_name, migration_type, migration_state
+      results = @connection.execute("select sequence_or_hash, migration_name, migration_type, migration_state, start_dtm, completed_dtm
                                     from #{@config.db_table}
                                     where sequence_or_hash = :seq
                                     and migration_name = :migration", @sequence, @name)
@@ -158,23 +158,39 @@ module DBGeni
                                        sequence_or_hash,
                                        migration_name,
                                        migration_type,
-                                       migration_state
+                                       migration_state,
+                                       start_dtm
                                     )
                                     values
                                     (
                                        :sequence,
                                        :name,
                                        'Migration',
-                                       :state
-                                    )", @sequence, @name, state)
+                                       :state,
+                                       #{@connection.date_placeholder('sdtm')}
+                                    )", @sequence, @name, state, @connection.date_as_string(Time.now))
     end
 
 
     def update_db_state(state)
-      results = @connection.execute("update #{@config.db_table}
-                                    set migration_state = :state
+      # What to set the dates to?  If going to PENDING, then you want to make
+      # completed_dtm null and reset start_dtm to now.
+      #
+      # If going to anything else, then set completed_dtm to now
+      if state == PENDING
+        results = @connection.execute("update #{@config.db_table}
+                                       set migration_state = :state,
+                                           completed_dtm   = null,
+                                           start_dtm       = #{@connection.date_placeholder('sdtm')}
+                                       where sequence_or_hash = :sequence
+                                    and   migration_name   = :name", state, @connection.date_as_string(Time.now), @sequence, @name)
+      else
+        results = @connection.execute("update #{@config.db_table}
+                                    set migration_state = :state,
+                                        completed_dtm   = #{@connection.date_placeholder('sdtm')}
                                     where sequence_or_hash = :sequence
-                                    and   migration_name   = :name", state, @sequence, @name)
+                                    and   migration_name   = :name", state, @connection.date_as_string(Time.now), @sequence, @name)
+      end
     end
 
 
