@@ -10,6 +10,11 @@ module TestHelper
   ORA_PASSWORD = 'sodonnel'
   ORA_DB       = 'local11g'
 
+  def helper_clean_temp
+    FileUtils.rm_rf("#{TEMP_DIR}")
+    FileUtils.mkdir_p(File.join(TEMP_DIR, 'migrations'))
+  end
+
   def helper_sqlite_connection
     FileUtils.mkdir_p(TEMP_DIR)
     FileUtils.rm_rf(File.join(TEMP_DIR, SQLITE_DB_NAME))
@@ -40,6 +45,37 @@ module TestHelper
                                      }")
     config.base_directory = TEMP_DIR
     config
+  end
+
+  def helper_sqlite_single_environment_file
+    filename = "#{TEMP_DIR}/sqlite.conf"
+    File.open(filename, 'w') do |f|
+      f.puts "database_type 'sqlite'
+                                      environment('development') {
+                                         user     ''
+                                         password ''
+                                         database '#{TEMP_DIR}/#{SQLITE_DB_NAME}'
+                                     }"
+    end
+    filename
+  end
+
+  def helper_sqlite_multiple_environment_file
+    filename = "#{TEMP_DIR}/sqlite.conf"
+    File.open(filename, 'w') do |f|
+      f.puts "database_type 'sqlite'
+                                      environment('development') {
+                                         user     ''
+                                         password ''
+                                         database '#{TEMP_DIR}/#{SQLITE_DB_NAME}'
+                                     }"
+      f.puts "                        environment('test') {
+                                         user     ''
+                                         password ''
+                                         database '#{TEMP_DIR}/#{SQLITE_DB_NAME}'
+                                     }"
+    end
+    filename
   end
 
   def helper_good_oracle_migration

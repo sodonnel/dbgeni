@@ -12,6 +12,7 @@ module DBGeni
 
   class ConfigFileNotExist         < Exception; end
   class ConfigAmbiguousEnvironment < Exception; end
+  class ConfigFileNotSpecified     < Exception; end
 
   class NoEnvironmentSelected      < Exception; end
 
@@ -31,6 +32,7 @@ module DBGeni
   class InvalidMigratorForDBType    < Exception; end
 
   class DatabaseAlreadyInitialized  < Exception; end
+  class DatabaseNotInitialized      < Exception; end
   class NoOutstandingMigrations     < Exception; end
   class NoAppliedMigrations         < Exception; end
 

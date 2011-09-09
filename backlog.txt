@@ -1,13 +1,20 @@
 Dates are different in Oracle and sqlite - so start_dtm etc is being skipped in database.
-Tests for DBGeni::Base
 Tests for CLI
 Milestones
+Force option for migrations and consider making rollback default force
+Documentation!
+
+
 
 Logger (basic logger implemeneted. May need expanded as requirements develop)
 
 For rollbacks, they can be rolled back many times as the check only checks for NEW and not rolledback
+
 Migrators should really have a parent class to inherit shared methods from.
+
 SQLite doesn't seem to log the command or error to the logfile when it encounters an error. Just writes an empty log file
+
+Migration that fails to rollback makes it look like the migration failed has not been applied. Perhaps correct as the code is in limbo land, but not sure what the best thing to do with it is.
 
 
 set ORACLE_HOME=C:\app\sodonnell\product\11.2.0\dbhome_1

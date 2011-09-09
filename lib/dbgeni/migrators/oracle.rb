@@ -36,7 +36,6 @@ module DBGeni
 #        end
 
         IO.popen("sqlplus -L #{@config.env.username}/#{@config.env.password}@#{@config.env.database} > #{null_device}", "w") do |p|
-          #  p.puts "spool #{ENV['LOG_DIR1']}/#{File.basename(file)}.log"
           p.puts "set TERM on"
           p.puts "set ECHO on"
           #            if sql_parameters == ''

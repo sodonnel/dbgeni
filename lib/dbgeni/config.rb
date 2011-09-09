@@ -43,9 +43,12 @@ module DBGeni
 
 
     def load_from_file(filename)
+      if filename == nil
+        raise DBGeni::ConfigFileNotSpecified
+      end
       raw_config = ''
       self.base_directory = File.expand_path(File.dirname(filename))
-      @config_file     = File.expand_path(filename)
+      @config_file        = File.expand_path(filename)
       begin
         File.open(@config_file) do |f|
           raw_config = f.read

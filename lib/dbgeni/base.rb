@@ -33,13 +33,18 @@ module DBGeni
     end
 
     def select_environment(environment_name)
+      current_environment = selected_environment_name
+      if current_environment != nil && current_environment != environment_name
+        # disconnect from database as the connection may well have changed!
+        disconnect
+      end
       @config.set_env(environment_name)
     end
 
     def selected_environment_name
       begin
         @config.env.__environment_name
-      rescue DBGeni::ConfigAmbigiousEnvironment
+      rescue DBGeni::ConfigAmbiguousEnvironment
         nil
       end
     end
@@ -50,16 +55,19 @@ module DBGeni
     end
 
     def outstanding_migrations
+      ensure_initialized
       migrations
       @migration_list.outstanding(@config, connection)
     end
 
     def applied_migrations
+      ensure_initialized
       migrations
       @migration_list.applied(@config, connection)
     end
 
     def apply_all_migrations
+      ensure_initialized
       migrations = outstanding_migrations
       if migrations.length == 0
         raise DBGeni::NoOutstandingMigrations
@@ -70,6 +78,7 @@ module DBGeni
     end
 
     def apply_next_migration
+      ensure_initialized
       migrations = outstanding_migrations
       if migrations.length == 0
         raise DBGeni::NoOutstandingMigrations
@@ -78,6 +87,7 @@ module DBGeni
     end
 
     def apply_migration(migration)
+      ensure_initialized
       begin
         migration.apply!(@config, connection)
         @logger.info "Applied #{migration.to_s}"
@@ -88,6 +98,7 @@ module DBGeni
     end
 
     def rollback_all_migrations
+      ensure_initialized
       migrations = applied_migrations.reverse
       if migrations.length == 0
         raise DBGeni::NoAppliedMigrations
@@ -98,6 +109,7 @@ module DBGeni
     end
 
     def rollback_last_migration
+      ensure_initialized
       migrations = applied_migrations
       if migrations.length == 0
         raise DBGeni::NoAppliedMigrations
@@ -107,6 +119,7 @@ module DBGeni
     end
 
     def rollback_migration(migration)
+      ensure_initialized
       begin
         migration.rollback!(@config, connect)
         @logger.info  "Rolledback #{migration.to_s}"
@@ -123,6 +136,13 @@ module DBGeni
       @connection = DBGeni::Connector.initialize(@config)
     end
 
+    def disconnect
+      if @connection
+        @connection.disconnect
+      end
+      @connection = nil
+    end
+
     def connection
       @connection ||= connect
     end
@@ -132,6 +152,10 @@ module DBGeni
     end
 
     private
+
+    def ensure_initialized
+      raise DBGeni::DatabaseNotInitialized unless DBGeni::Initializer.initialized?(connection, @config)
+    end
 
     def initialize_logger
       @logger = DBGeni::Logger.instance("#{@config.base_directory}/log")
