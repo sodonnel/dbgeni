@@ -18,6 +18,10 @@ class TestMigratorSqlite < Test::Unit::TestCase
       DBGeni::Initializer::Sqlite.initialize(@connection, @config)
     end
     @connection.execute("delete from #{@config.db_table}")
+    begin
+      @connection.execute("drop table foo")
+    rescue Exception => e
+    end
     @migrator = DBGeni::Migrator.initialize(@config, @connection)
   end
 
@@ -48,6 +52,38 @@ class TestMigratorSqlite < Test::Unit::TestCase
     results = @connection.execute("SELECT name FROM sqlite_master WHERE name = :t", 'foo')
     assert_equal(0, results.length)
   end
+
+  def test_bad_migration_runs_with_error_force_off
+    migration = helper_bad_sqlite_migration
+    assert_raises DBGeni::MigrationContainsErrors do
+      @migrator.apply(migration, false)
+    end
+    # also ensure that the command after the bad command does not get run
+    results = @connection.execute("SELECT name FROM sqlite_master WHERE name = :t", 'foo')
+    assert_equal(0, results.length)
+    assert_raises DBGeni::MigrationContainsErrors do
+      @migrator.rollback(migration, false)
+    end
+    results = @connection.execute("SELECT name FROM sqlite_master WHERE name = :t", 'foo')
+    assert_equal(0, results.length)
+  end
+
+
+  def test_bad_migration_runs_to_completion_with_force_on
+    migration = helper_bad_sqlite_migration
+    assert_nothing_raised do
+      @migrator.apply(migration, true)
+    end
+    # also ensure that the command after the bad command does not get run
+    results = @connection.execute("SELECT name FROM sqlite_master WHERE name = :t", 'foo')
+    assert_equal(1, results.length)
+    assert_nothing_raised do
+      @migrator.rollback(migration, true)
+    end
+    results = @connection.execute("SELECT name FROM sqlite_master WHERE name = :t", 'foo')
+    assert_equal(1, results.length)
+  end
+
 
   def test_empty_migration_runs_without_error
     migration = helper_empty_sqlite_migration

@@ -32,12 +32,6 @@ module DBGeni
       @rollback_file  = "#{sequence}_down_#{name}.sql"
     end
 
-#    def rollback_file
-#    end
-#
-#    def verify_file
-#    end
-
     def applied?(config, connection)
       result = status(config, connection)
       result == COMPLETED ? true : false
@@ -52,7 +46,7 @@ module DBGeni
       results.length == 1 ? results[0][0] : NEW
     end
 
-    def apply!(config, connection)
+    def apply!(config, connection, force=nil)
       set_env(config, connection)
       if applied?(config, connection)
         raise DBGeni::MigrationAlreadyApplied, self.to_s
@@ -60,7 +54,7 @@ module DBGeni
       migrator = DBGeni::Migrator.initialize(config, connection)
       set_pending!
       begin
-        migrator.apply(self)
+        migrator.apply(self, force)
         set_completed!
       rescue Exception => e
         set_failed!
@@ -68,7 +62,7 @@ module DBGeni
       end
     end
 
-    def rollback!(config, connection)
+    def rollback!(config, connection, force=nil)
       set_env(config, connection)
       if [NEW, ROLLEDBACK].include? status(config, connection)
         raise DBGeni::MigrationNotApplied, self.to_s
@@ -76,13 +70,12 @@ module DBGeni
       migrator = DBGeni::Migrator.initialize(config, connection)
       set_pending!
       begin
-        migrator.rollback(self)
+        migrator.rollback(self, force)
         set_rolledback!()
       rescue Exception => e
         set_failed!
         raise DBGeni::MigrationApplyFailed, self.to_s
       end
-
     end
 
     def verify!(config, connection)

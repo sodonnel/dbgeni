@@ -9,14 +9,14 @@ module DBGeni
         @connection = connection
       end
 
-      def apply(migration)
+      def apply(migration, force=nil)
         filename = File.join(@config.migration_directory, migration.migration_file)
-        run_in_sqlplus(filename)
+        run_in_sqlplus(filename, force)
       end
 
-      def rollback(migration)
+      def rollback(migration, force=nil)
         filename = File.join(@config.migration_directory, migration.rollback_file)
-        run_in_sqlplus(filename)
+        run_in_sqlplus(filename, force)
       end
 
       def verify(migration)
@@ -24,7 +24,7 @@ module DBGeni
 
       private
 
-      def run_in_sqlplus(file)
+      def run_in_sqlplus(file, force)
         null_device = '/dev/null'
         if Kernel.is_windows?
           null_device = 'NUL:'
@@ -41,7 +41,9 @@ module DBGeni
           #            if sql_parameters == ''
           p.puts "set define off"
           #            end
-          p.puts "whenever sqlerror exit sql.sqlcode"
+          unless force
+            p.puts "whenever sqlerror exit sql.sqlcode"
+          end
           #            p.puts "START #{File.basename(file)} #{sql_parameters}"
           p.puts "spool #{@config.base_directory}/log/#{DBGeni::Migrator.logfile(file)}"
           p.puts "START #{file}"

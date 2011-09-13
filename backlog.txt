@@ -1,8 +1,7 @@
-Tests for CLI
-Milestones
-Force option for migrations and consider making rollback default force
-Documentation!
 Syntax errors in config file
+Tests for CLI
+Documentation!
+Milestones
 
 Think about the migration workflow and the dates etc that are being set
 

@@ -66,30 +66,30 @@ module DBGeni
       @migration_list.applied(@config, connection)
     end
 
-    def apply_all_migrations
+    def apply_all_migrations(force=nil)
       ensure_initialized
       migrations = outstanding_migrations
       if migrations.length == 0
         raise DBGeni::NoOutstandingMigrations
       end
       migrations.each do |m|
-        apply_migration(m)
+        apply_migration(m, force)
       end
     end
 
-    def apply_next_migration
+    def apply_next_migration(force=nil)
       ensure_initialized
       migrations = outstanding_migrations
       if migrations.length == 0
         raise DBGeni::NoOutstandingMigrations
       end
-      apply_migration(migrations.first)
+      apply_migration(migrations.first, force)
     end
 
-    def apply_migration(migration)
+    def apply_migration(migration, force=nil)
       ensure_initialized
       begin
-        migration.apply!(@config, connection)
+        migration.apply!(@config, connection, force)
         @logger.info "Applied #{migration.to_s}"
       rescue DBGeni::MigrationApplyFailed
         @logger.error "Failed #{migration.to_s}"
@@ -97,31 +97,31 @@ module DBGeni
       end
     end
 
-    def rollback_all_migrations
+    def rollback_all_migrations(force=nil)
       ensure_initialized
       migrations = applied_migrations.reverse
       if migrations.length == 0
         raise DBGeni::NoAppliedMigrations
       end
       migrations.each do |m|
-        rollback_migration(m)
+        rollback_migration(m, force)
       end
     end
 
-    def rollback_last_migration
+    def rollback_last_migration(force=nil)
       ensure_initialized
       migrations = applied_migrations
       if migrations.length == 0
         raise DBGeni::NoAppliedMigrations
       end
       # the most recent one is at the end of the array!!
-      rollback_migration(migrations.last)
+      rollback_migration(migrations.last, force)
     end
 
-    def rollback_migration(migration)
+    def rollback_migration(migration, force=nil)
       ensure_initialized
       begin
-        migration.rollback!(@config, connect)
+        migration.rollback!(@config, connection, force)
         @logger.info  "Rolledback #{migration.to_s}"
       rescue DBGeni::MigrationApplyFailed
         @logger.error "Failed #{migration.to_s}"

@@ -137,6 +137,14 @@ class TestMigration < Test::Unit::TestCase
     assert_equal('Completed', m.status(@config, @connection))
   end
 
+  def test_apply_good_migration_force_off
+    m = helper_good_sqlite_migration
+    assert_nothing_raised do
+      m.apply!(@config, @connection, false)
+    end
+    assert_equal('Completed', m.status(@config, @connection))
+  end
+
   def test_apply_already_applied_migration_errors
     m = helper_good_sqlite_migration
     assert_nothing_raised do
@@ -154,6 +162,15 @@ class TestMigration < Test::Unit::TestCase
     end
     assert_equal(false, m.applied?(@config, @connection))
     assert_equal('Failed', m.status(@config, @connection))
+  end
+
+  def test_apply_migration_with_errors_force_on
+    m = helper_bad_sqlite_migration
+    assert_nothing_raised do
+      m.apply!(@config, @connection, true)
+    end
+    assert_equal(true, m.applied?(@config, @connection))
+    assert_equal('Completed', m.status(@config, @connection))
   end
 
 
@@ -199,6 +216,20 @@ class TestMigration < Test::Unit::TestCase
       m.rollback!(@config, @connection)
     end
   end
+
+  def test_apply_rollback_with_errors_and_force_on_raises_no_exception
+    m2 = helper_good_sqlite_migration
+    assert_nothing_raised do
+      m2.apply!(@config, @connection)
+    end
+    m  = helper_bad_sqlite_migration
+    assert_nothing_raised do
+      m.rollback!(@config, @connection, true)
+    end
+    assert_equal(false, m.applied?(@config, @connection))
+    assert_equal('Rolledback', m.status(@config, @connection))
+  end
+
 
   private
 

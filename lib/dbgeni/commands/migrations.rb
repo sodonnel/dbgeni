@@ -1,6 +1,6 @@
 if %w(-h --help).include? ARGV[0]
   puts <<-EOF
-Usage: dbgeni migrations command <--environment-name env_name> <--config-file path/to/config>
+Usage: dbgeni migrations command <--environment-name env_name> <--config-file path/to/config> <--force>
 
 If config-file is not specified, then a file called .dbgeni in the current directory will be
 used if it exists, otherwise an error will occurr
@@ -8,8 +8,13 @@ used if it exists, otherwise an error will occurr
 If there is more than one environment defined in the config file, then environment-name must
 be specified.
 
+If --force is specified, the migration will run to completion and be marked as Completed even
+if errors occur.
+
 -e can be used as an abbreviation for --environment-name
 -c can be used as an abbreviation for --config-file
+-f can be used as an abbreviation for --force
+
 
 Avaliable commands are:
 
@@ -35,9 +40,9 @@ apply       Apply migrations to the given environment. Can specify:
               next    Apply only the next migration and stop
               specific migrations to apply
 
-            dbgeni migrations apply all  --environment-name test --config-file /home/myapp/.dbgeni
-            dbgeni migrations apply next --environment-name test --config-file /home/myapp/.dbgeni
-            dbgeni migrations apply YYYYMMDDHHMM::Name1 YYYYMMDDHHMM::Name2 YYYYMMDDHHMM::Name3 --environment-name test --config-file /home/myapp/.dbgeni
+            dbgeni migrations apply all  --environment-name test --config-file /home/myapp/.dbgeni <--force>
+            dbgeni migrations apply next --environment-name test --config-file /home/myapp/.dbgeni <--force>
+            dbgeni migrations apply YYYYMMDDHHMM::Name1 YYYYMMDDHHMM::Name2 YYYYMMDDHHMM::Name3 --environment-name test --config-file /home/myapp/.dbgeni <--force>
 
 rollback    Run the rollback script for a given migration. Can specify:
 
@@ -45,9 +50,9 @@ rollback    Run the rollback script for a given migration. Can specify:
             last      Rollback the last migration applied
             specific migrations to rollback
 
-            dbgeni migrations rollback all  --environment-name test --config-file /home/myapp/.dbgeni
-            dbgeni migrations rollback last --environment-name test --config-file /home/myapp/.dbgeni
-            dbgeni migrations rollback YYYYMMDDHHMM::Name1 YYYYMMDDHHMM::Name2 YYYYMMDDHHMM::Name3 --environment-name test --config-file /home/myapp/.dbgeni
+            dbgeni migrations rollback all  --environment-name test --config-file /home/myapp/.dbgeni <--force>
+            dbgeni migrations rollback last --environment-name test --config-file /home/myapp/.dbgeni <--force>
+            dbgeni migrations rollback YYYYMMDDHHMM::Name1 YYYYMMDDHHMM::Name2 YYYYMMDDHHMM::Name3 --environment-name test --config-file /home/myapp/.dbgeni <--force>
 
 EOF
   exit
@@ -91,9 +96,9 @@ when 'apply'
   begin
     case sub_command
     when 'all'
-      installer.apply_all_migrations
+      installer.apply_all_migrations($force)
     when 'next'
-      installer.apply_next_migration
+      installer.apply_next_migration($force)
     when /^(\d{12})::/
       # The param list are specific migration files, but in the internal format. One is
       # stored in sub_command and the rest are in ARGV. Grab all params that match the
@@ -103,7 +108,7 @@ when 'apply'
       migrations = files.map {|f| DBGeni::Migration.initialize_from_internal_name(installer.config.migration_directory, f)}
       # Now attempt to run each migration ... forwards for apply
       migrations.sort{|x,y| x.migration_file <=> y.migration_file}.each do |m|
-        installer.apply_migration(m)
+        installer.apply_migration(m, $force)
       end
     else
       logger.error "#{sub_command} is not a valid command"
@@ -121,9 +126,9 @@ when 'rollback'
   begin
     case sub_command
     when 'all'
-      installer.rollback_all_migrations
+      installer.rollback_all_migrations($force)
     when 'last'
-      installer.rollback_last_migration
+      installer.rollback_last_migration($force)
     when /^(\d{12})::/
       # The param list are specific migration files, but in the internal format. One is
       # stored in sub_command and the rest are in ARGV. Grab all params that match the
@@ -133,7 +138,7 @@ when 'rollback'
       migrations = files.map {|f| DBGeni::Migration.initialize_from_internal_name(installer.config.migration_directory, f)}
       # Now attempt to run each migration ... backwards for rollback
       migrations.sort{|x,y| y.migration_file <=> x.migration_file}.each do |m|
-        installer.rollback_migration(m)
+        installer.rollback_migration(m, $force)
       end
     else
       logger.error "#{sub_command} is not a valid command"
