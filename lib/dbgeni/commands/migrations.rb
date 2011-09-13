@@ -77,7 +77,11 @@ rescue DBGeni::ConfigFileNotSpecified => e
 rescue DBGeni::ConfigAmbiguousEnvironment => e
   puts "No environment specified and config file defines more than one environment"
   exit(1)
+rescue DBGeni::EnvironmentNotExist => e
+  puts "The environment #{$environment_name} does not exist"
+  exit(1)
 end
+
 logger    = DBGeni::Logger.instance
 
 case command
@@ -130,10 +134,13 @@ when 'apply'
     end
   rescue DBGeni::NoOutstandingMigrations => e
     logger.error "There are no outstanding migrations to apply"
+    exit(1)
   rescue DBGeni::MigrationApplyFailed => e
     logger.error "There was a problem applying #{e.to_s}"
+    exit(1)
   rescue DBGeni::MigrationAlreadyApplied => e
     logger.error "The migration is already applied #{e.to_s}"
+    exit(1)
   end
 
 when 'rollback'
@@ -160,10 +167,13 @@ when 'rollback'
     end
   rescue DBGeni::NoAppliedMigrations => e
     logger.error "There are no applied migrations to rollback"
+    exit(1)
   rescue DBGeni::MigrationApplyFailed => e
     logger.error "There was a problem rolling back #{e.to_s}"
+    exit(1)
   rescue DBGeni::MigrationNotApplied
     logger.error "#{e.to_s} has not been applied so cannot be rolledback"
+    exit(1)
   end
 else
   logger.error "#{command} is not a valid command"

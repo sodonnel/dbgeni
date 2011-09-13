@@ -2,6 +2,7 @@ module TestHelper
 
   require 'dbgeni/connectors/sqlite'
   require 'dbgeni/connectors/oracle'
+  require 'fileutils'
 
   TEMP_DIR = File.expand_path(File.join(File.dirname(__FILE__), "temp"))
   SQLITE_DB_NAME  = 'sqlite.db'
@@ -9,6 +10,8 @@ module TestHelper
   ORA_USER     = 'sodonnel'
   ORA_PASSWORD = 'sodonnel'
   ORA_DB       = 'local11g'
+
+  CLI = 'ruby C:\Users\sodonnell\Documents\dbinst\lib\dbgeni\cli.rb'
 
   def helper_clean_temp
     FileUtils.rm_rf("#{TEMP_DIR}")
@@ -59,6 +62,20 @@ module TestHelper
     end
     filename
   end
+
+  def helper_sqlite_single_environment_file_with_errors
+    filename = "#{TEMP_DIR}/sqlite.conf"
+    File.open(filename, 'w') do |f|
+      f.puts "database_typee 'sqlite'
+                                      environment('development') {
+                                         user     ''
+                                         password ''
+                                         database '#{TEMP_DIR}/#{SQLITE_DB_NAME}'
+                                     }"
+    end
+    filename
+  end
+
 
   def helper_sqlite_multiple_environment_file
     filename = "#{TEMP_DIR}/sqlite.conf"

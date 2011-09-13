@@ -17,7 +17,7 @@ end
 
 require 'dbgeni'
 
-installer = nil
+#installer = nil
 begin
   installer = DBGeni::Base.installer_for_environment($config_file, $environment_name)
 rescue DBGeni::ConfigSyntaxError => e
@@ -32,6 +32,9 @@ rescue DBGeni::ConfigFileNotSpecified => e
 rescue DBGeni::ConfigAmbiguousEnvironment => e
   puts "No environment specified and config file defines more than one environment"
   exit(1)
+rescue DBGeni::EnvironmentNotExist => e
+  puts "The environment #{$environment_name} does not exist"
+  exit(1)
 end
 
 begin
@@ -39,7 +42,7 @@ begin
   installer.initialize_database
   logger.info "Database initialized successfully"
 rescue DBGeni::DatabaseAlreadyInitialized
-  logger.error "The Database has already been Initialized"
+  logger.error "The Database has already been initialized"
   exit(1)
 rescue DBGeni::NoInitializerForDBType
   logger.error "There is no initializer for the db_type setting"
