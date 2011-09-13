@@ -17,8 +17,24 @@ end
 
 require 'dbgeni'
 
+installer = nil
 begin
   installer = DBGeni::Base.installer_for_environment($config_file, $environment_name)
+rescue DBGeni::ConfigSyntaxError => e
+  puts "There is an error in the config file: #{e.to_s}"
+  exit(1)
+rescue DBGeni::ConfigFileNotExist => e
+  puts "The config file #{$config_file} does not exist: #{e.to_s}"
+  exit(1)
+rescue DBGeni::ConfigFileNotSpecified => e
+  puts "No config file was specified"
+  exit(1)
+rescue DBGeni::ConfigAmbiguousEnvironment => e
+  puts "No environment specified and config file defines more than one environment"
+  exit(1)
+end
+
+begin
   logger = DBGeni::Logger.instance
   installer.initialize_database
   logger.info "Database initialized successfully"
@@ -34,4 +50,6 @@ rescue DBGeni::NoConnectorForDBType
 end
 
 exit(0)
+
+
 

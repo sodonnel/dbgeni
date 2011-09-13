@@ -123,7 +123,11 @@ module DBGeni
 
 
     def load(raw_config)
-      self.instance_eval(raw_config)
+      begin
+        self.instance_eval(raw_config)
+      rescue Exception => e
+        raise DBGeni::ConfigSyntaxError, e.to_s
+      end
       self
     end
 

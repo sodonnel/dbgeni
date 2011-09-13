@@ -16,7 +16,7 @@ directory = ARGV.shift
 
 if File.directory?(directory)
   puts "Error: The directory already exists"
-  exit
+  exit(1)
 end
 
 # create the base directory
@@ -25,7 +25,7 @@ begin
   FileUtils.mkdir_p(directory)
 rescue Exception => e
   puts "error: failed to create #{directory} - #{e.to_s}"
-  raise
+  exit(1)
 end
 
 # create the directory to hold migrations
@@ -34,7 +34,7 @@ begin
   FileUtils.mkdir_p(directory+'/migrations')
 rescue Exception => e
   puts "error: failed to create #{directory}/migrations - #{e.to_s}"
-  raise
+  exit(1)
 end
 
 # Create the initial version of the configuration file
@@ -97,7 +97,7 @@ migrations_directory "./migrations"
 EOF
 rescue Exception => e
   puts "error: failed to create #{directory}/.dbgeni - #{e.to_s}"
-  raise
+  exit(1)
 end
 
 exit(0)

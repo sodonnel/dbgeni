@@ -1,4 +1,3 @@
-Syntax errors in config file
 Tests for CLI
 Documentation!
 Milestones

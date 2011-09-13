@@ -13,6 +13,7 @@ module DBGeni
   class ConfigFileNotExist         < Exception; end
   class ConfigAmbiguousEnvironment < Exception; end
   class ConfigFileNotSpecified     < Exception; end
+  class ConfigSyntaxError          < Exception; end
 
   class NoEnvironmentSelected      < Exception; end
 
