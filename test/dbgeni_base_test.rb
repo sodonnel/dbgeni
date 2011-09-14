@@ -239,7 +239,7 @@ class TestDBGeniBase < Test::Unit::TestCase
     @installer = DBGeni::Base.installer_for_environment(helper_sqlite_single_environment_file, 'development')
     @installer.initialize_database
     migration = DBGeni::Migration.new('/dirnotexit', '201108190000_up_tst_migration.sql')
-    assert_raises DBGeni::MigrationApplyFailed do
+    assert_raises DBGeni::MigrationFileNotExist do
       @installer.apply_migration(migration)
     end
     assert_equal(0, @installer.applied_migrations.length)

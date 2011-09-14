@@ -48,9 +48,10 @@ module DBGeni
 
     def apply!(config, connection, force=nil)
       set_env(config, connection)
-      if applied?(config, connection)
+      if applied?(config, connection) and force != true
         raise DBGeni::MigrationAlreadyApplied, self.to_s
       end
+      ensure_file_exists
       migrator = DBGeni::Migrator.initialize(config, connection)
       set_pending!
       begin
@@ -64,9 +65,10 @@ module DBGeni
 
     def rollback!(config, connection, force=nil)
       set_env(config, connection)
-      if [NEW, ROLLEDBACK].include? status(config, connection)
+      if [NEW, ROLLEDBACK].include? status(config, connection) and force != true
         raise DBGeni::MigrationNotApplied, self.to_s
       end
+      ensure_file_exists
       migrator = DBGeni::Migrator.initialize(config, connection)
       set_pending!
       begin
@@ -200,6 +202,12 @@ module DBGeni
       end
       @sequence = $1
       @name     = $2
+    end
+
+    def ensure_file_exists
+      unless File.exists? File.join(@directory, @migration_file)
+        raise DBGeni::MigrationFileNotExist, File.join(@directory, @migration_file)
+      end
     end
 
   end

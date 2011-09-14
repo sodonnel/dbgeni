@@ -1,9 +1,7 @@
-Tests for CLI - generate and some migrations ones missing
-Specific migration that doesn't exist - needs a specific error scenario
 Documentation!
 Milestones
-Warnings about no username etc
-Prompt for password if missing
+Prompt for password if missing and needed!
+Tests for Generator CLI
 
 Think about the migration workflow and the dates etc that are being set
 
