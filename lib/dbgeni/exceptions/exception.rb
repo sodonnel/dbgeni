@@ -35,6 +35,7 @@ module DBGeni
 
   class DatabaseAlreadyInitialized  < Exception; end
   class DatabaseNotInitialized      < Exception; end
+  class DBGeni::DatabaseNotSpecified < Exception; end
   class NoOutstandingMigrations     < Exception; end
   class NoAppliedMigrations         < Exception; end
 

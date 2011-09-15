@@ -144,6 +144,9 @@ when 'apply'
   rescue DBGeni::MigrationFileNotExist => e
     logger.error "The migration file, #{e.to_s} does not exist"
     exit(1)
+  rescue DBGeni:: DatabaseNotInitialized => e
+    logger.error "The database needs to be initialized with the command dbgeni initialize"
+    exit(1)
   end
 
 when 'rollback'

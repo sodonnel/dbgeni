@@ -21,6 +21,7 @@ module DBGeni
       end
 
       def self.connect(user, password, database)
+        raise DBGeni::DatabaseNotSpecified unless database
         self.new(database)
       end
 

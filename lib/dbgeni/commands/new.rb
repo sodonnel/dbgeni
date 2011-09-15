@@ -50,11 +50,11 @@ migrations_directory "./migrations"
 # Valid values are oracle, mysql, sqlite however this is not validated
 # to enable different database plugins to easily be added.
 # Default is oracle
-# database_type "oracle"
+database_type "sqlite"
 
 # This is the table the installer logs applied migrations in the database
 # The default is dbgeni_migrations
-# database_table "dbgeni_migrations"
+database_table "dbgeni_migrations"
 
 
 # Environment Section
@@ -65,14 +65,15 @@ migrations_directory "./migrations"
 # Typically there will be more than one enviroment block detailling development,
 # test and production but any number of environments are valid provided there is at least one.
 
-# environment('development') {
-#   username 'user'        # this must be here, or it will error
-#   database 'DEV.WORLD'   # this must be here, or it will error. For Oracle, this is the TNS Name
-#   password ''            # If this value is missing, it will be promoted for if the env is used.
+environment('development') {
+#   username ''              # this must be here, or it will error
+#   database 'testdb.sqlite' # this must be here, or it will error. For Oracle, this is the TNS Name
+#   password ''              # If this value is missing, it will be promoted for if the env is used.
 #
 #   Other parameters can be defined here and will override global_parameters
 #   param_name 'value'
-# }
+}
+
 #
 # environment('test') {
 #   username 'user'        # this must be here, or it will error
