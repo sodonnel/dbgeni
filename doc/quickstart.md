@@ -4,7 +4,7 @@ Download [dbgeni-0.1.0.gem](/dbgeni-0.1.0.gem)
 
 # Install
 
-DBGeni requires [Ruby](http://rubylang.org) and [Rubygems]().
+DBGeni requires [Ruby](http://rubylang.org) and [Rubygems](http://rubygems.org).
 
     $ gem install /path/to/downloads/dbgeni-0.1.0.gem
 
