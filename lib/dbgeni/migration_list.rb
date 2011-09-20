@@ -20,6 +20,17 @@ module DBGeni
       migrations.reject {|m| m.applied?(config, connection) }.sort {|x,y| x.migration_file <=> y.migration_file }
     end
 
+    def broken(config, connection)
+      @migrations.select {|m| [DBGeni::Migration::FAILED, DBGeni::Migration::PENDING].include? m.status(config, connection) }.sort {|x,y| x.migration_file <=> y.migration_file }
+    end
+
+    def applied_and_broken(config, connection)
+      a = applied(config, connection)
+      b = broken(config, connection)
+      a.concat b
+      a.uniq{|m| m.migration_file }.sort {|x,y| x.migration_file <=> y.migration_file }
+    end
+
     private
 
     def file_list

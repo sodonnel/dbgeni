@@ -66,6 +66,12 @@ module DBGeni
       @migration_list.applied(@config, connection)
     end
 
+    def applied_and_broken_migrations
+      ensure_initialized
+      migrations
+      @migration_list.applied_and_broken(@config, connection)
+    end
+
     def apply_all_migrations(force=nil)
       ensure_initialized
       migrations = outstanding_migrations
@@ -99,7 +105,7 @@ module DBGeni
 
     def rollback_all_migrations(force=nil)
       ensure_initialized
-      migrations = applied_migrations.reverse
+      migrations = applied_and_broken_migrations.reverse
       if migrations.length == 0
         raise DBGeni::NoAppliedMigrations
       end
@@ -110,7 +116,7 @@ module DBGeni
 
     def rollback_last_migration(force=nil)
       ensure_initialized
-      migrations = applied_migrations
+      migrations = applied_and_broken_migrations
       if migrations.length == 0
         raise DBGeni::NoAppliedMigrations
       end
