@@ -31,7 +31,7 @@ module DBGeni
         end
 
         logfile = DBGeni::Migrator.logfile(file)
-        IO.popen("sqlite3 #{@connection.database} > #{null_device} 2>> #{logfile}", "w") do |p|
+        IO.popen("sqlite3 #{@connection.database} > #{@config.base_directory}/log/#{logfile} 2>> #{@config.base_directory}/log/#{logfile}", "w") do |p|
           unless force
             p.puts ".bail on"
           end
