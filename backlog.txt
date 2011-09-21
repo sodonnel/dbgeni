@@ -1,17 +1,21 @@
 Documentation!
+Find out if sqlite fails on OSX / LINUX as exit status is wrong and work around it.
 Milestones
 Migrate and rollback until
-Prompt for password if missing and needed!
 Tests for Generator CLI
+----------------------------------------------
+Prompt for password if missing and needed
+Stored Procs
+Better Logging
+----------------------------------------------
+Parameters in SQL scripts
 Global Parameters
+----------------------------------------------
+Refactor Migrators to have a parent class to inherit methods from
+MYSQL support
+----------------------------------------------
 
 Think about the migration workflow and the dates etc that are being set
-
-Logger (basic logger implemeneted. May need expanded as requirements develop)
-
-Migrators should really have a parent class to inherit shared methods from.
-
-SQLite doesn't seem to log the command or error to the logfile when it encounters an error. Just writes an empty log file
 
 Migration that fails to rollback makes it look like the migration failed has not been applied. Perhaps correct as the code is in limbo land, but not sure what the best thing to do with it is.
 

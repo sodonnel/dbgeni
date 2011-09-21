@@ -43,6 +43,7 @@ module DBGeni
         # When the system call ends, ruby sets $? with the exit status.  A
         # good exit status is 0 (zero) anything else means it went wrong
         # If $? is anything but zero, raise an exception.
+      #  puts "the exit status is #{$?}"
         if $? != 0
           # if there were errors in the migration, SQLITE seems to set a non-zero
           # exit status, depite running the migration to completion. So if the exit
