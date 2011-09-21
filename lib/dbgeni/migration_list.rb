@@ -13,22 +13,30 @@ module DBGeni
     # Returns an array of MIGRATIONS that have been applied
     # ordered by oldest first
     def applied(config, connection)
-      @migrations.select {|m| m.applied?(config, connection) }.sort {|x,y| x.migration_file <=> y.migration_file }
+      migrations_with_status(config, connection, DBGeni::Migration::COMPLETED)
     end
 
     def outstanding(config, connection)
-      migrations.reject {|m| m.applied?(config, connection) }.sort {|x,y| x.migration_file <=> y.migration_file }
-    end
-
-    def broken(config, connection)
-      @migrations.select {|m| [DBGeni::Migration::FAILED, DBGeni::Migration::PENDING].include? m.status(config, connection) }.sort {|x,y| x.migration_file <=> y.migration_file }
+      migrations_with_status(config, connection,
+                             DBGeni::Migration::NEW,
+                             DBGeni::Migration::ROLLEDBACK,
+                             DBGeni::Migration::FAILED,
+                             DBGeni::Migration::PENDING)
     end
 
     def applied_and_broken(config, connection)
-      a = applied(config, connection)
-      b = broken(config, connection)
-      a.concat b
-      a.uniq{|m| m.migration_file }.sort {|x,y| x.migration_file <=> y.migration_file }
+      migrations_with_status(config, connection,
+                             DBGeni::Migration::COMPLETED,
+                             DBGeni::Migration::FAILED,
+                             DBGeni::Migration::PENDING)
+    end
+
+    def migrations_with_status(config, connection, *args)
+      migrations = @migrations.select{|m|
+        args.include? m.status(config, connection)
+      }.sort {|x,y|
+        x.migration_file <=> y.migration_file
+      }
     end
 
     private

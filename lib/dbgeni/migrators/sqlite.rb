@@ -31,12 +31,12 @@ module DBGeni
         end
 
         logfile = DBGeni::Migrator.logfile(file)
-        IO.popen("sqlite3 #{@connection.database} > #{@config.base_directory}/log/#{logfile} 2>> #{@config.base_directory}/log/#{logfile}", "w") do |p|
+        IO.popen("sqlite3 #{@connection.database} > #{@config.base_directory}/log/#{logfile} 2>&1", "w") do |p|
           unless force
             p.puts ".bail on"
           end
           p.puts ".echo on"
-          p.puts ".output #{@config.base_directory}/log/#{logfile}"
+        #  p.puts ".output #{@config.base_directory}/log/#{logfile}"
           p.puts ".read #{file}"
           p.puts ".quit"
         end

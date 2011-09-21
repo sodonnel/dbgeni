@@ -123,6 +123,7 @@ module TestHelper
 
   def create_migration_files(content)
     FileUtils.rm_rf(File.join(TEMP_DIR, 'migrations', "*.sql"))
+    FileUtils.mkdir_p(File.join(TEMP_DIR, 'migrations'))
     filenames = %w(201108190000_up_test_migration.sql 201108190000_down_test_migration.sql)
     filenames.each do |fn|
       File.open(File.join(TEMP_DIR, 'migrations', fn), 'w') do |f|
