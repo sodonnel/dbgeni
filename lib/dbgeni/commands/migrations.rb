@@ -84,35 +84,35 @@ end
 
 logger    = DBGeni::Logger.instance
 
-case command
-when 'list'
-  migrations = installer.migrations
-  if migrations.length == 0
-    logger.info "There are no migrations in #{installer.config.migration_directory}"
-  end
-  migrations.each do |m|
-    puts m.to_s
-  end
-when 'applied'
-  applied = installer.applied_migrations
-  if applied.length == 0
-    logger.info "There are no applied migrations in #{installer.config.migration_directory}"
-  end
-  applied.each do |m|
-    puts m.to_s
-  end
-when 'outstanding'
-  outstanding = installer.outstanding_migrations
-  if outstanding.length == 0
-    logger.info "There are no applied migrations in #{installer.config.migration_directory}"
-  end
-  outstanding.each do |m|
-    puts m.to_s
-  end
+begin
+  case command
+  when 'list'
+    migrations = installer.migrations
+    if migrations.length == 0
+      logger.info "There are no migrations in #{installer.config.migration_directory}"
+    end
+    migrations.each do |m|
+      puts m.to_s
+    end
+  when 'applied'
+    applied = installer.applied_migrations
+    if applied.length == 0
+      logger.info "There are no applied migrations in #{installer.config.migration_directory}"
+    end
+    applied.each do |m|
+      puts m.to_s
+    end
+  when 'outstanding'
+    outstanding = installer.outstanding_migrations
+    if outstanding.length == 0
+      logger.info "There are no applied migrations in #{installer.config.migration_directory}"
+    end
+    outstanding.each do |m|
+      puts m.to_s
+    end
 
-when 'apply'
-  sub_command = ARGV.shift
-  begin
+  when 'apply'
+    sub_command = ARGV.shift
     case sub_command
     when 'all'
       installer.apply_all_migrations($force)
@@ -132,26 +132,9 @@ when 'apply'
     else
       logger.error "#{sub_command} is not a valid command"
     end
-  rescue DBGeni::NoOutstandingMigrations => e
-    logger.error "There are no outstanding migrations to apply"
-    exit(1)
-  rescue DBGeni::MigrationApplyFailed => e
-    logger.error "There was a problem applying #{e.to_s}"
-    exit(1)
-  rescue DBGeni::MigrationAlreadyApplied => e
-    logger.error "The migration is already applied #{e.to_s}"
-    exit(1)
-  rescue DBGeni::MigrationFileNotExist => e
-    logger.error "The migration file, #{e.to_s} does not exist"
-    exit(1)
-  rescue DBGeni:: DatabaseNotInitialized => e
-    logger.error "The database needs to be initialized with the command dbgeni initialize"
-    exit(1)
-  end
 
-when 'rollback'
-  sub_command = ARGV.shift
-  begin
+  when 'rollback'
+    sub_command = ARGV.shift
     case sub_command
     when 'all'
       installer.rollback_all_migrations($force)
@@ -171,18 +154,31 @@ when 'rollback'
     else
       logger.error "#{sub_command} is not a valid command"
     end
-  rescue DBGeni::NoAppliedMigrations => e
-    logger.error "There are no applied migrations to rollback"
-    exit(1)
-  rescue DBGeni::MigrationApplyFailed => e
-    logger.error "There was a problem rolling back #{e.to_s}"
-    exit(1)
-  rescue DBGeni::MigrationNotApplied
-    logger.error "#{e.to_s} has not been applied so cannot be rolledback"
-    exit(1)
+  else
+    logger.error "#{command} is not a valid command"
   end
-else
-  logger.error "#{command} is not a valid command"
+rescue DBGeni::NoOutstandingMigrations => e
+  logger.error "There are no outstanding migrations to apply"
+  exit(1)
+rescue DBGeni::MigrationApplyFailed => e
+  logger.error "There was a problem #{command == 'rollback' ? 'rolling back' : 'applying' } #{e.to_s}"
+  exit(1)
+rescue DBGeni::MigrationAlreadyApplied => e
+  logger.error "The migration is already applied #{e.to_s}"
+  exit(1)
+rescue DBGeni::MigrationFileNotExist => e
+  logger.error "The migration file, #{e.to_s} does not exist"
+  exit(1)
+rescue DBGeni:: DatabaseNotInitialized => e
+  logger.error "The database needs to be initialized with the command dbgeni initialize"
+  exit(1)
+rescue DBGeni::NoAppliedMigrations => e
+  logger.error "There are no applied migrations to rollback"
+  exit(1)
+rescue DBGeni::MigrationNotApplied
+  logger.error "#{e.to_s} has not been applied so cannot be rolledback"
+  exit(1)
 end
+
 
 exit(0)

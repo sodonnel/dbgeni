@@ -1,9 +1,9 @@
 Documentation!
 Find out if sqlite fails on OSX / LINUX as exit status is wrong and work around it.
-Milestones
 Migrate and rollback until
 Tests for Generator CLI
 ----------------------------------------------
+Milestones
 Prompt for password if missing and needed
 Stored Procs
 Better Logging

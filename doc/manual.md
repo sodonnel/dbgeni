@@ -1,33 +1,90 @@
-# Requirements
+# Contents
+
+ * [The dbgeni Concept](#concept)
+   * [10 Second Tour](#10tour)
+   * [Migration Script?](#migration_script)
+ * [Requirements](#requirements)
+   * [Sqlite](#requirements_sqlite)
+   * [Oracle](#requirements_oracle)
+ * [Install](#install)
+ * [Default Setup](#default_setup)
+ * [The Config File](#config_file)
+   * [Parameter Section](#config_parameter)
+   * [Environment Section](#config_environment)
+   * [Default Config Filename](#config_default_config)
+ * [Initialize The Database](#initialize)
+ * [Migrations](#migrations)
+   * [Generating Migrations](#migrations_generating)
+ * [Logging](#logging)
+ * [Setup Commands](#setup_commands)
+    * [new](#setup_commands_new)
+    * [new-config](#setup_commands_new-config)
+    * [initialize](#setup_commands_initialize)
+ * [Generator Commands](#generator_commands)
+    * [migration](#generator_commands_migration)
+ * [Migration Commands](#migration_commands)
+   * [list](#migrations_list)
+   * [applied](#migrations_applied)
+   * [outstanding](#migrations_outstanding)
+   * [apply all](#migrations_apply_all)
+   * [apply next](#migrations_apply_next)
+   * [apply specific](#migrations_apply_specific)
+   * [rollback all](#migrations_rollback_all)
+   * [rollback last](#migrations_rollback_last)
+   * [rollback specific](#migrations_rollback_specific)
+ * [Option Switches](#option_switches)
+   * [environment-name](#option_switches_environment_name)
+   * [config-file](#option_switches_config)
+   * [force](#option_switches_force)
+   * [help](#option_switches_help)
+
+
+
+# The dbgeni Concept<a id="concept"></a>
+
+You should read the [Overview](/overview.html) section before reading this manual so you understand the problem dbgeni solves and gain a high level overview of how it operates.
+
+## 10 Second Tour<a id="10tour"></a>
+
+DBGeni is a command line utility that is implemented using Ruby and installed as a Ruby gem.
+
+It requires a config file which defines the location of database migration scripts named in a special format.
+
+The config file also contains database connection details for various environments, and the name of a table in the database that tracks which migration scripts have been applied to the database.
+
+Given the config file, database and a set of migration scripts, dbgeni provides a set of commands to apply, rollback and query those migrations to make database changes as painless as possible.
+
+## Migration Script?<a id="migration_script"></a>
+
+A migration script is a plain old SQL file that contains commands to add, alter or drop tables, change data, add indexes etc. Basically any command that your database considers valid is allowed in the migration file - no special syntax is required, so it is possible to run the migrations with or without dbgeni.
+
+# Requirements<a id="requirements"></a>
 
 All DBGeni needs to run is the [Ruby](http://ruby-lang.org) programming language and the [RubyGems](http://rubygems.org/) package manager. No knowledge of Ruby is required to use it, but you need to install it.
 
-Depending on what database you want to use, you will also need the drivers for that database.
+Depending on the database you want to use, you will also need the drivers for that database.
 
-## SQLite
+## SQLite<a id="requirements_sqlite"></a>
 
- * Install the sqlite3 Gem.
- * The sqlite3 shell is required and must be on your path. Get it from [the sqlite website](http://www.sqlite.org/download.html)
+ * Install the sqlite3 gem.
+ * The sqlite3 shell is required and must be on your path. Get it from [the sqlite website](http://www.sqlite.org/download.html).
 
-## Oracle
+## Oracle<a id="requirements_oracle"></a>
 
- * Install the Oracle Client and ensure sqlplus works and is on your path 
+ * Install the Oracle Client and ensure sqlplus works and is on your path. 
  * Install [ruby-oci8](http://ruby-oci8.rubyforge.org/en/)
 
 
-# Download
-
-Download the [DBGeni GEM](/foobar)
-
-# Install
+# Install<a id="install"></a>
 
     $ gem install dbgeni-0.1.0.gem
 
-If Ruby is on your path, then the dbgeni command should display the usage instructions:
+If Ruby is on your path, then after installation the dbgeni command should also be on your path. Running the following command will display the usage instructions:
 
     $ dbgeni --help
 
-# Default Setup
+
+# Default Setup<a id="default_setup"></a>
 
 DBGeni requires a config file containing database connection details and the location in which all the migration scripts are stored.
 
@@ -43,11 +100,11 @@ This will create a directory structure as follows:
 
 By default a new SQLite database will be used, so it is safe to play around.
 
-If you just want to create a skeleton config file in the an existing project, use the new-config command:
+If you just want to create a skeleton config file in an existing project, use the new-config command:
 
     $ dbgeni new-config /path/to/config/.dbgeni
 
-# The Config File
+# The Config File<a id="config_file"></a>
 
 The skeleton config file generated by the new or new-config commands is given below:
 
@@ -91,13 +148,39 @@ The skeleton config file generated by the new or new-config commands is given be
     #   password ''             # If this value is missing, it will be promoted for if the env is used.
     # }
 
-There are two sections.
+An important note about the config file is that it is Ruby code, therefore the syntax is important or it will not complile.The file contains two sections which are detailed below.
 
-## Parameter Section
+## Parameter Section<a id="config_parameter"></a>
 
-This contains parameters which tell dbgeni where to find migrations, which database table to use and what sort of database it should connect to.
+This contains parameters which tell dbgeni where to find migrations, which database table to use to track migrations and what type (sqlite, Oracle etc) of database it will connect to. Details of the config options allowed are in the following sections.
 
-## Environment Section
+### migrations_directory
+
+The migrations_directory option defines where dbgeni will find migration files. It can be an absolute path, or normally a path relative to the location of the config file, eg:
+
+    migrations_directory "./migrations"
+    migrations_directory "/home/sodonnel/dbscripts"
+
+If it is not specified the default is "./migrations".
+
+### database_type
+
+The database_type option is used to tell dbgeni what sort of database is the target for migrations scripts. The current set of allowed values is "sqlite" or "oracle", eg:
+
+    database_type "oracle"
+    database_type "sqlite"
+
+If it is not specified the default is "sqlite".
+
+### database_table
+
+The database_table option is used to tell dbgeni which database table should be used to track applied, failed and rolled back migrations, eg:
+
+    database_table "dbgeni_migrations"
+
+If it is not specified the default is "dbgeni_migrations".
+
+## Environment Section<a id="config_environment"></a>
 
 This contains details about each environment dbgeni can connect to. In this release, the only useful parameters are database, username and password. In future releases other parameters can be defined here and used as parameters in SQL scripts.
 
@@ -113,9 +196,9 @@ If there is only 1 environment, then dbgeni will use it as the default. If there
 
     $ dbgeni migrations applied --environment-name test
 
-## Default Filename
+## Default Config Filename<a id="config_default_config"></a>
 
-By default, the config file is called .dbgeni If you run the dbgeni command it looks for a file called .dbgeni in the current directory, and if it does not find it, it will error:
+By default, the config file is called .dbgeni if you run the dbgeni command it looks for a file called .dbgeni in the current directory, and if it does not find it, it will error:
 
     $ dbgeni migrations list
     The config file ./.dbgeni does not exist:  (expanded from ./.dbgeni) does not exist
@@ -123,7 +206,7 @@ By default, the config file is called .dbgeni If you run the dbgeni command it l
 If the config file is located elsewhere or does not have the default name, it must be specified with the --config-file switch (-c for short).
 
 
-# Initialize the Database
+# Initialize the Database<a id="initialize"></a>
 
 Before most of the dbgeni commands can be used, the target database must be initialized. This simply creates a table in the database, with the default name of dbgeni_migrations having the following structure:
 
@@ -137,11 +220,11 @@ Before most of the dbgeni commands can be used, the target database must be init
       completed_dtm    date
     )
 
-If the database\_table parameter has been change in the config file, it will override the default name.
+If the database\_table parameter has been changed in the config file, it will override the default name.
 
 If you attempt to run a command against an uninitialized database, dbgeni will error:
 
-    TODO - not initialized error.
+    ERROR - The database needs to be initialized with the command dbgeni initialize
 
 The best way to initialize the database is using the initialize command:
 
@@ -152,7 +235,13 @@ The best way to initialize the database is using the initialize command:
 Alternatively create the table structure given above manually.
 
 
-# Generating Migrations
+# Migrations<a id="migrations"></a>
+
+As far as dbgeni is concerned, a migration is a pair of files. One of the files contains SQL commands to make a change to the database, while the other file contains commands to reverse the operation. If one file contains a command to add a new table, then the other file should contain the equivalent drop table command. 
+
+Sometimes it is not possible to reverse a database change if, for example, data was deleted, so it is possible to have an empty migration file that contains no commands.
+
+The file that moves the database forward a version is known as the UP migration, while the one that performs the rollback is known as the DOWN migration.
 
 For dbgeni to recognise migrations, they must be stored in the "migrations_directory" and named in a specific way:
 
@@ -167,44 +256,128 @@ Migrations should always be created in pairs, with both an UP and a DOWN script,
     201108101531_up_create_users.sql
     201108101531_down_create_users.sql
 
-A dbgeni command can be used to create the pair of empty migration files with the current timestamp:
+## Generating Migrations<a id="migrations_generating"></a>
+
+A dbgeni command can be used to create a pair of empty migration files with the current timestamp:
 
     $ dbgeni generate migration create_users_table
 
-Before the migrations can be applied to the database, the empty files should be edited to contain some definition or data changes. If migration is applied when the files are empty, dbgeni will not error.
+Before the migrations can be applied to the database, the empty files should be edited to contain some SQL statements. 
 
 There is no special syntax for the code in the migration files - any SQL that is valid to run against the target database can be included.
 
-Edit the 'up' file and add some DDL code, eg:
+For example, generate a migration and edit the UP file to add a create table statement, eg:
 
     create table users (
       id integer,
       username varchar2(255)
     );
 
-Edit the down file and add the equivalent drop statement, eg:
+Next edit the DOWN file and add the equivalent drop statement, eg:
 
     drop table users;
 
-This migration is now in a state that it can be applied to the target database.
+This migration is now in a state that it can be applied to the target database and rolled back easily using the dbgeni [migration_commands](#migration_commands), but can still be run manually if necessary.
 
-# Migration Commands
+# Logging<a id="logging"></a>
+
+Each time dbgeni runs, it writes to a logfile called log.txt stored in the log directory. The log directory is created in the same directory as the .dbgeni config file and will be created automatically if it does not exist.
+
+Each time a migration is applied or rolled back, an additional log file is created for each migration file executed. This file contains all the input and output produced by the database when running the SQL statements. If dbgeni reports problems applying a migration, these log files are the place to look for errors. They are named with a timestamp followed by the migration filename, eg:
+
+    20110922153123_201108101531_up_create_users.sql
+
+
+# Setup Commands<a id="setup_commands"></a>
+
+The setup commands are used to help configure a new or existing project to use dbgeni.
+
+## new<a id="setup_commands_new"></a>
+
+The new command will create a directory structure for a new project and a skeleton config file.
+
+    $ dbgeni new <path to directory>
+
+For example:
+
+    $ dbgeni new cool_project
+    
+    creating directory: cool_project
+    creating directory: cool_project/migrations
+    creating file: cool_project/.dbgeni
+
+The directory can be relative or absolute and will result in the directory being created, and it will contain a migrations directory and the skeleton .dbgeni config file.
+
+
+## new-config<a id="setup_commands_new-config"></a>
+
+The new-config command will add the .dbgeni skeleton config file to the given directory.
+
+    $ dbgeni new-config <path to directory>
+
+For example:
+
+    $ dbgeni new-config cool_project
+
+    creating file: cool_project/.dbgeni
+
+
+## initialize<a id="setup_commands_initialize"></a>
+
+The initialize command is used to initialize the database so dbgeni can track applied migrations. 
+
+    $ dbgeni initialize
+
+This creates a single table in the target database, which by default is called dbgeni_migrations. The table has the following structure and can be created manually if necessary:
+
+    create table dbgeni_migrations
+    (
+      sequence_or_hash varchar2(1000) not null,
+      migration_name   varchar2(4000) not null,
+      migration_type   varchar2(20)   not null,
+      migration_state  varchar2(20)   not null,
+      start_dtm        date,
+      completed_dtm    date
+    )
+
+
+# Generator Commands<a id="generator_commands"></a>
+
+Generator commands are helpers to make it easier to create files named in the format dbgeni requires.
+
+## migration<a id="generator_commands_migration"></a>
+
+The migration generator takes a single parameter, which is the name of a migration, and generates a pair of empty UP and DOWN migration files with the correct filenames:
+
+    $ dbgeni generate migration <name_of_migration>
+
+For example:
+
+    $ dbgeni generate migration create_users_table
+
+    creating: /home/sodonnell/cool_project/./migrations/201109221657_up_create_users_table.sql
+    creating: /home/sodonnell/cool_project/./migrations/201109221657_down_create_users_table.sql
+
+The generated files will have a TIMESTAMP set to the current date and time.
+
+
+# Migration Commands<a id="migration_commands"></a>
 
 The migration command has several sub-commands to list, apply and rollback migrations. For all migration commands the --environment-name (-e) and --config-file (-c) switches can be used if necessary.
 
-## List Migrations
+## list<a id="migrations_list"></a>
 
 To list all migrations stored in the migration directory, use the list sub-command:
 
     $ dbgeni migrations list
 
-## Applied Migrations
+## applied<a id="migrations_applied"></a>
 
 To see all the migrations that have been applied to the target database, use the applied sub-command:
 
     $ dbgeni migrations applied
 
-## Outstanding Migrations
+## outstanding<a id="migrations_outstanding"></a>
 
 To see all the migrations that have not been applied to the target database and are outstanding, use the outstanding sub-command:
 
@@ -217,7 +390,7 @@ One of several apply sub-commands can be used to run the migration script agains
 
 Normally migrations are applied in increasing TIMESTAMP order. Sometimes two different developers will add migrations that are out of sequence. The best way to correct this problem is to rename the files so the TIMESTAMPS put the files in the correct order.
 
-### apply all
+### apply all<a id="migrations_apply_all"></a>
 
 To apply all migrations that are outstanding, use the all command, eg:
 
@@ -225,7 +398,7 @@ To apply all migrations that are outstanding, use the all command, eg:
 
 If there are no outstanding migrations or a problem is encountered applying a migration an error will be displayed and dbgeni will not continue.
 
-### apply next
+### apply next<a id="migrations_apply_next"></a>
 
 To apply only the next migration that is outstanding, use the next command, eg:
 
@@ -233,7 +406,7 @@ To apply only the next migration that is outstanding, use the next command, eg:
 
 If there are no outstanding migrations or a problem is encountered applying the migration an error will be displayed.
 
-### apply specific
+### apply specific<a id="migrations_apply_specific"></a>
 
 To apply a single or several migrations out of their normal sequence, you can specify specific migrations to apply on the command line, eg:
 
@@ -241,17 +414,17 @@ To apply a single or several migrations out of their normal sequence, you can sp
 
 If there are no outstanding migrations or a problem is encountered applying a migration an error will be displayed and dbgeni will not continue.
 
-### Force Migrations Through
+### Forcing Migrations
 
-Normally when applying migrations, if any problem occurs applying a migration dbgeni stops processing it immediately, even if it is in the middle of a migration. Sometimes you just want to force a migration though, knowing some of the errors are not important. For all the migration commands, the --force (-f for short) switch can be specified with prevents dbgeni stopping when it encounters most errors, eg:
+Normally when applying migrations, if an error is raised by any SQL statement in the file, dbgeni stops processing immediately - it does not complete the current migration or move onto any subsequent ones. Sometimes you want to force a migration to complete, knowing some of the errors are not important. For all the migration commands, the --force (-f for short) switch can be specified with prevents dbgeni stopping when it encounters most errors, eg:
 
     $ dbgeni migrations apply all --force
 
 ## Rollback Migrations
 
-When a migration is rolled back the contents of the DOWN script are applied to the target database. For rollbacks, the DOWN scripts are applied in *decending* timestamp order. There is a set of rollback commands that mirrors the migration apply commands.
+When a migration is rolled back the contents of the DOWN script are applied to the target database. For rollbacks, the DOWN scripts are applied in *decending* TIMESTAMP order. There is a set of rollback commands that mirror the migration apply commands.
 
-### rollback all
+### rollback all<a id="migrations_rollback_all"></a>
 
 To rollback everything, use the all sub-command. If things work correctly, this will remove the entire application from the database:
 
@@ -259,8 +432,7 @@ To rollback everything, use the all sub-command. If things work correctly, this 
 
 If there are no applied migrations or a problem is encountered rolling back a migration an error will be displayed and dbgeni will not continue.
 
-
-### rollback last
+### rollback last<a id="migrations_rollback_last"></a>
 
 To rollback just the last applied migration, use the last sub-command, eg:
 
@@ -268,26 +440,63 @@ To rollback just the last applied migration, use the last sub-command, eg:
 
 If there are no applied migrations or a problem is encountered rolling back a migration an error will be displayed.
 
-### rollback specific
+### rollback specific<a id="migrations_rollback_specific"></a>
 
 To rollback a single or several migrations out of their normal sequence, you can specify specific migrations to rollback on the command line, eg:
 
     $ dbgeni migrations rollback 201108101531::create_users 201108110825::create_user_details 
 
-If any of the migrations are not applied or a problem is encountered applying a migration an error will be displayed and dbgeni will not continue.
+If any of the migrations are not applied or a problem is encountered rolling back a migration an error will be displayed and dbgeni will not continue.
 
 ### Forcing Rollbacks
 
-As with applying migrations, rollbacks can be forced through with the --force (-f for short) switch. This is particularly useful if an apply failed part way through and you want to clean up any changes it made.
+As with applying migrations, rollbacks can be forced through with the --force (-f for short) switch. This is particularly useful if an apply failed part way through and you want to clean up any changes it made without worrying about where the original migration failed.
+
+    $ dbgeni migrations rollback all --force
+
+# Option Switches<a id="option_switches"></a>
+
+Command line options allow the runtime behavour of dbgeni to be controlled.
+
+## --environment-name<a id="option_switches_environment_name"></a>
+
+Specifying --environment-name (-e for short) is required if more than one environment is defined in the config file. 
+
+For example:
+
+    $ dbgeni migrations applied --environment-name uat1
+    $ dbgeni migrations applied -e uat1
+
+An error will be raised if the environment name specified does not exist.
+
+## --config-file<a id="option_switches_config"></a>
+
+Specifying --config-file (-c for short) allows dbgeni to run with a config file that is not in the current directory or has not got the default name.
+
+For example:
+
+    $ dbgeni migrations applied --config-file /home/sodonnel/configs/.dbgeni_config_one
+    $ dbgeni migrations applied -c /home/sodonnel/configs/.dbgeni_config_one
+
+If the config file does not exist an error will be raised.
+
+## --force<a id="option_switches_force"></a>
+
+Specifying --force (-f for short) allows dbgeni to continue processing migrations when it encounters errors. This can be useful when developing new migrations, rolling back failed migrations and in some production scenarios.
+
+For example:
+
+    $ dbgeni migrations apply all --force
+    $ dbgeni migrations apply all -f
+
+## --help<a id="option_switches_help"></a>
+
+Specifying --help (-h for short) makes dbgeni display usage instructions for the command.
+
+For example:
+
+    $ dbgeni --help
+    $ dbgeni migrations --help
+    $ dbgeni migrations -h
 
 
-
-## Installing Ruby
-
-Version 1.9.2 is the best version of Ruby right now, but 1.8.7 will work fine too. 
-
-Get the download for your platform and install it. For Windows, grab the [Ruby Installer](http://rubyinstaller.org/downloads/) and for other platforms have a look [here](http://rubygems.org/pages/download).
-
-Next you need to install the Ruby Package manager, [RubyGems](http://rubygems.org/). 
-
-[Download it]() and installed 

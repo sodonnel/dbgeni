@@ -33,3 +33,4 @@ if index = ARGV.index('--force') or index = ARGV.index('-f')
 end
 
 require 'dbgeni/commands/commands'
+
