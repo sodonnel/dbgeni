@@ -30,6 +30,18 @@ class TestCLINew < Test::Unit::TestCase
     assert_equal(false, response)
   end
 
+  def test_config_file_only_created_directory_exists
+    FileUtils.mkdir_p("#{TEMP_DIR}/test_structure")
+    response = Kernel.system("#{CLI} new-config #{TEMP_DIR}/test_structure")
+    assert_equal(true, response)
+    assert_equal(true, File.exists?("#{TEMP_DIR}/test_structure/.dbgeni"))
+  end
+
+  def test_config_file_fails_to_create_when_directory_does_not_exist
+    response = Kernel.system("#{CLI} new-config #{TEMP_DIR}/test_structure")
+    assert_equal(false, response)
+  end
+
   def test_help_switch_works
     response = Kernel.system("#{CLI} new --help")
     assert_equal(true, response)

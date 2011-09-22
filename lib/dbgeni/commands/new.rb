@@ -10,32 +10,45 @@ EOF
   exit
 end
 
+
 require 'fileutils'
+
 
 directory = ARGV.shift
 
-if File.directory?(directory)
-  puts "Error: The directory already exists"
-  exit(1)
+# There can be two commands here - first is to create the directory
+# structure, the second is new-conf to just create the file, but only if
+# the directory exists.
+if %w(n new).include? $initial_command
+  if File.directory?(directory)
+    puts "Error: The directory already exists"
+    exit(1)
+  end
+
+  # create the base directory
+  begin
+    puts "creating directory: #{directory}"
+    FileUtils.mkdir_p(directory)
+  rescue Exception => e
+    puts "error: failed to create #{directory} - #{e.to_s}"
+    exit(1)
+  end
+
+  # create the directory to hold migrations
+  begin
+    puts "creating directory: #{directory}/migrations"
+    FileUtils.mkdir_p(directory+'/migrations')
+  rescue Exception => e
+    puts "error: failed to create #{directory}/migrations - #{e.to_s}"
+    exit(1)
+  end
+else
+  unless File.directory?(directory)
+    puts "Error: The directory #{directory} does not exist"
+    exit(1)
+  end
 end
 
-# create the base directory
-begin
-  puts "creating directory: #{directory}"
-  FileUtils.mkdir_p(directory)
-rescue Exception => e
-  puts "error: failed to create #{directory} - #{e.to_s}"
-  exit(1)
-end
-
-# create the directory to hold migrations
-begin
-  puts "creating directory: #{directory}/migrations"
-  FileUtils.mkdir_p(directory+'/migrations')
-rescue Exception => e
-  puts "error: failed to create #{directory}/migrations - #{e.to_s}"
-  exit(1)
-end
 
 # Create the initial version of the configuration file
 begin

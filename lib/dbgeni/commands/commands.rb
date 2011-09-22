@@ -1,20 +1,20 @@
 ARGV << '--help' if ARGV.empty?
 
-command = ARGV.shift
+$initial_command = ARGV.shift
 
-case command
-  when 'new'
+case $initial_command
+  when 'new', 'new-config'             ,'n'
   require 'dbgeni/commands/new'
-  when 'initialize'
+  when 'initialize'                    ,'i'
   require 'dbgeni/commands/initialize'
   when 'config'
   require 'dbgeni/commands/config'
-  when 'generate'
+  when 'generate'                      ,'g'
   require 'dbgeni/commands/generate'
-  when 'migrations'
+  when 'migrations'                    ,'m'
   require 'dbgeni/commands/migrations'
   else
-  puts "Error: Command not recognized" unless %w(-h --help).include?(command)
+  puts "Error: Command not recognized" unless %w(-h --help).include?($initial_command)
   puts <<-EOT
 Usage: dbgeni COMMAND [ARGS]
 
