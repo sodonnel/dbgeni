@@ -14,6 +14,8 @@ class TestMigration < Test::Unit::TestCase
 
     @connection = helper_sqlite_connection
     @config     = helper_sqlite_config
+
+    FileUtils.mkdir_p(File.join(TEMP_DIR, 'log'))
     begin
       DBGeni::Initializer.initialize(@connection, @config)
     rescue DBGeni::DatabaseAlreadyInitialized

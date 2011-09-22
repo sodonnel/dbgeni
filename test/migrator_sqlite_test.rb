@@ -14,6 +14,7 @@ class TestMigratorSqlite < Test::Unit::TestCase
   def setup
     @connection = helper_sqlite_connection
     @config     = helper_sqlite_config
+    FileUtils.mkdir_p(File.join(TEMP_DIR, 'log'))
     unless DBGeni::Initializer::Sqlite.initialized?(@connection, @config)
       DBGeni::Initializer::Sqlite.initialize(@connection, @config)
     end
@@ -74,7 +75,7 @@ class TestMigratorSqlite < Test::Unit::TestCase
     assert_nothing_raised do
       @migrator.apply(migration, true)
     end
-    # also ensure that the command after the bad command does not get run
+    # also ensure that the command after the bad command does get run
     results = @connection.execute("SELECT name FROM sqlite_master WHERE name = :t", 'foo')
     assert_equal(1, results.length)
     assert_nothing_raised do

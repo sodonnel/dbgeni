@@ -183,7 +183,9 @@ class TestConfig < Test::Unit::TestCase
     cfg = DBGeni::Config.new
     cfg.base_directory = "c:\\somedir\\"
     cfg.load("migrations_directory 'other_dir'\nenvironment('foo') { }\n environment('bar') { }")
-    assert_equal("c:\\somedir\\other_dir", cfg.migration_directory)
+    if Kernel.is_windows?
+      assert_equal("c:\\somedir\\other_dir", cfg.migration_directory)
+    end
   end
 
   def test_relative_migrations_dir_added_to_base_unix

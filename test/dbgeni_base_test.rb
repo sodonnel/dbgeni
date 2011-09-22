@@ -11,6 +11,7 @@ class TestDBGeniBase < Test::Unit::TestCase
 
   def setup
     helper_clean_temp
+    FileUtils.mkdir_p(File.join(TEMP_DIR, 'log'))
   end
 
   def teardown
