@@ -39,8 +39,7 @@ command = ARGV.shift
 name    = ARGV.shift
 
 unless name
-  puts "error: all migrations must have a name\n"
-  usage
+  puts "error: You must specify a name for the migration"
   exit(1)
 end
 
@@ -52,7 +51,7 @@ config = DBGeni::Config.load_from_file($config_file)
 case command
 when 'migration'
   datestamp = Time.now.strftime('%Y%m%d%H%M')
-  %w(up down verify).each do |f|
+  %w(up down).each do |f|
     filename = File.join(config.migration_directory, "#{datestamp}_#{f}_#{name}.sql")
     puts "creating: #{filename}"
     FileUtils.touch(filename)

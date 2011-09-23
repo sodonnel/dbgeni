@@ -1,7 +1,5 @@
 Documentation!
-Find out if sqlite fails on OSX / LINUX as exit status is wrong and work around it.
 Migrate and rollback until
-Tests for Generator CLI
 ----------------------------------------------
 Milestones
 Prompt for password if missing and needed
@@ -14,6 +12,10 @@ Global Parameters
 Refactor Migrators to have a parent class to inherit methods from
 MYSQL support
 ----------------------------------------------
+DAT files
+Validation hooks
+Validation scripts
+
 
 Think about the migration workflow and the dates etc that are being set
 

@@ -63,7 +63,7 @@ module DBGeni
 
     def __get_parameter(name, *args)
       unless @params.has_key?(name)
-        warn "Parameter #{name} is not defined for #{@environment_name}"
+      #  warn "Parameter #{name} is not defined for #{@environment_name}"
         nil
       else
         @params[name]

@@ -23,14 +23,14 @@ module DBGeni
     attr_reader   :environments
     attr_reader   :current_environment
     attr_reader   :migration_directory
-    attr_reader   :db_type  # oracle, mysql, sqlite etc
+    attr_reader   :db_type  # oracle, mysql, sqlite etc, default sqlite
     attr_reader   :db_table # defaults to dbgeni_migrations
     attr_reader   :config_file
     attr_reader   :base_directory
 
     def initialize
       @migration_directory  = 'migrations'
-      @db_type              = 'oracle'
+      @db_type              = 'sqlite'
       @db_table             = 'dbgeni_migrations'
       @environments         = Hash.new
     end

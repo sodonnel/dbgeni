@@ -216,7 +216,7 @@ class TestConfig < Test::Unit::TestCase
   def test_database_type_defaults_to_correct_value
     cfg = DBGeni::Config.new
     cfg.load("environment('foo') { }\n environment('bar') { }")
-    assert_equal('oracle', cfg.db_type)
+    assert_equal('sqlite', cfg.db_type)
   end
 
   def test_database_type_settable_in_config
