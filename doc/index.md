@@ -1,18 +1,24 @@
-# Download
+# Requirements
 
-Download [dbgeni-0.1.0.gem](/dbgeni-0.1.0.gem)
+DBGeni requires [Ruby](http://rubylang.org) and [Rubygems](http://rubygems.org). 
+
+At runtime, database drivers are required too:
+
+ * For Oracle ensure you have a working sqplus and install [oci8](http://ruby-oci8.rubyforge.org/)
+ * For Sqlite, ensure the sqlite3 command line shell works and install the sqlite3 gem
 
 # Install
 
-DBGeni requires [Ruby](http://rubylang.org) and [Rubygems](http://rubygems.org).
+Download [dbgeni-0.1.0.gem](/downloads/dbgeni-0.1.0.gem) and install it locally: 
 
-    $ gem install /path/to/downloads/dbgeni-0.1.0.gem
+    $ wget http://dbgeni.com/downloads/dbgeni-0.1.0.gem
+    $ gem install dbgeni-0.1.0.gem
 
-# Experiment
-
-By default, dbgeni uses a new SQLite database, so it is easy to experiment.
+At the moment dbgeni is not on Rubyforge.
 
 # Create a new project
+
+By default, dbgeni uses a new SQLite database, so it is easy to experiment.
 
     $ dbgeni new /path/to/project
 

@@ -2,7 +2,7 @@
 
 A database and an application that uses it are both very similar and very different. Both are created from code - for the database, the code is applied to it, creating tables and indexes. In contrast the application code is compiled into a binary image or executable.
 
-When a new version of an application is required, the old binary image is thrown away, but this is not what happens to a database - it is migrated from one version to the next by *Migration Code*.
+When a new version of an application is required, the old binary image is thrown away, but this is not what happens to a database - it is migrated from one version to the next by *Migration Scripts*.
 
 DBGeni is a tool to help manage these migrations, applying and rolling them back to move your database from version to version easily.
 
@@ -58,9 +58,9 @@ DBGeni is an installer.
 
 If you name your database migration scripts as described here, and allow DBGeni to create a table in your database to track applied migrations, it can be used to apply, track and rollback all your database migrations easily.
 
-DBGeni is distributed as a Ruby Gem, and it should work anywhere Ruby runs. It has been tested on Windows 7, OS X and Linux.
+DBGeni is distributed as a Ruby Gem, and it should work anywhere Ruby runs. It has been tested on Windows 7, OS X and Linux on Ruby version 1.8.7 and 1.9.2.
 
-DBGeni is normally used via it's command line interface which will be available after installing the GEM, but more complex install scripts can be created if necessary.
+DBGeni is normally used via it's command line interface which will be available after installing the gem, but more complex install scripts can be created if necessary.
 
 ## Why use DBGeni?
 

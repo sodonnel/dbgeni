@@ -1,4 +1,4 @@
-# Contents
+# Manual Contents
 
  * [The dbgeni Concept](#concept)
    * [10 Second Tour](#10tour)
@@ -77,6 +77,9 @@ Depending on the database you want to use, you will also need the drivers for th
 
 # Install<a id="install"></a>
 
+For now, dbgeni is not available in the Ruby gem libraries, so [download it](/downloads/dbgeni-0.1.0.gem) and install it locally:
+
+    $ wget http://dbgeni.com/downloads/dbgeni-0.1.0.gem
     $ gem install dbgeni-0.1.0.gem
 
 If Ruby is on your path, then after installation the dbgeni command should also be on your path. Running the following command will display the usage instructions:
