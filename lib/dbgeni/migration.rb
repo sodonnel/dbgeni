@@ -32,6 +32,14 @@ module DBGeni
       @rollback_file  = "#{sequence}_down_#{name}.sql"
     end
 
+    def ==(other)
+      if other.migration_file == @migration_file and other.directory == @directory
+        true
+      else
+        false
+      end
+    end
+
     def applied?(config, connection)
       result = status(config, connection)
       result == COMPLETED ? true : false

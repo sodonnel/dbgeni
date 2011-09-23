@@ -1,4 +1,5 @@
-Migrate and rollback until
+Test for CLI rollback until
+Maybe more tests for base apply and rollback until
 ----------------------------------------------
 Milestones
 Prompt for password if missing and needed

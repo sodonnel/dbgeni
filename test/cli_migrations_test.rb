@@ -225,6 +225,78 @@ class TestCLIMigrations < Test::Unit::TestCase
     assert_equal(true, response)
   end
 
+  ##########
+  # until  #
+  ##########
+
+  def test_apply_until_good_migration
+    response = Kernel.system("#{CLI} initialize -c #{TEMP_DIR}/sqlite.conf")
+    assert_equal(true, response)
+    helper_good_sqlite_migration
+    response = Kernel.system("#{CLI} migrations apply until 201108190000::test_migration -c #{TEMP_DIR}/sqlite.conf")
+    assert_equal(true, response)
+  end
+
+  def test_apply_until_bad_migration
+    response = Kernel.system("#{CLI} initialize -c #{TEMP_DIR}/sqlite.conf")
+    assert_equal(true, response)
+    helper_bad_sqlite_migration
+    response = Kernel.system("#{CLI} migrations apply until 201108190000::test_migration -c #{TEMP_DIR}/sqlite.conf")
+    assert_equal(false, response)
+  end
+
+  def test_apply_until_bad_migration_force_on
+    response = Kernel.system("#{CLI} initialize -c #{TEMP_DIR}/sqlite.conf")
+    assert_equal(true, response)
+    helper_bad_sqlite_migration
+    response = Kernel.system("#{CLI} migrations apply until 201108190000::test_migration -c #{TEMP_DIR}/sqlite.conf -f")
+    assert_equal(true, response)
+  end
+
+  def test_apply_until_migration_that_does_not_exist
+    response = Kernel.system("#{CLI} initialize -c #{TEMP_DIR}/sqlite.conf")
+    assert_equal(true, response)
+    response = `#{CLI} migrations apply until 201108200000::test_migration -c #{TEMP_DIR}/sqlite.conf`
+    assert_match(/does not exist or is not outstanding/, response)
+  end
+
+  def test_apply_until_migration_with_invalid_name
+    response = Kernel.system("#{CLI} initialize -c #{TEMP_DIR}/sqlite.conf")
+    assert_equal(true, response)
+    response = `#{CLI} migrations apply until 2011000000::test_migration -c #{TEMP_DIR}/sqlite.conf`
+    assert_match(/is not a valid migration name/, response)
+  end
+
+  def test_apply_until_migration_missing_name
+    response = Kernel.system("#{CLI} initialize -c #{TEMP_DIR}/sqlite.conf")
+    assert_equal(true, response)
+    response = `#{CLI} migrations apply until -c #{TEMP_DIR}/sqlite.conf`
+    assert_match(/A migration name must be specified/, response)
+  end
+
+  def test_apply_until_migration_many_migrations
+    response = Kernel.system("#{CLI} initialize -c #{TEMP_DIR}/sqlite.conf")
+    assert_equal(true, response)
+    helper_many_good_sqlite_migrations(4)
+    response = Kernel.system("#{CLI} migrations apply until 201108190002::test_migration -c #{TEMP_DIR}/sqlite.conf")
+    assert_equal(true, response)
+  end
+
+  def test_apply_until_migration_many_bad_migrations
+    response = Kernel.system("#{CLI} initialize -c #{TEMP_DIR}/sqlite.conf")
+    assert_equal(true, response)
+    helper_many_bad_sqlite_migrations(4)
+    response = Kernel.system("#{CLI} migrations apply until 201108190002::test_migration -c #{TEMP_DIR}/sqlite.conf")
+    assert_equal(false, response)
+  end
+
+  def test_apply_until_migration_many_bad_migrations_force_on
+    response = Kernel.system("#{CLI} initialize -c #{TEMP_DIR}/sqlite.conf")
+    assert_equal(true, response)
+    helper_many_bad_sqlite_migrations(4)
+    response = Kernel.system("#{CLI} migrations apply until 201108190002::test_migration -c #{TEMP_DIR}/sqlite.conf -f")
+    assert_equal(true, response)
+  end
 
   def test_invalid_apply_command
     response = Kernel.system("#{CLI} initialize -c #{TEMP_DIR}/sqlite.conf")

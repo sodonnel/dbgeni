@@ -104,6 +104,23 @@ module TestHelper
     create_migration_files("select * from sqlite_master;")
   end
 
+  def helper_many_good_sqlite_migrations(number)
+    datestamp = 201108190000 - 1
+    1.upto(number) do
+      datestamp += 1
+      create_migration_files("select * from sqlite_master;", datestamp.to_s)
+    end
+  end
+
+  def helper_many_bad_sqlite_migrations(number)
+    datestamp = 201108190000 - 1
+    1.upto(number) do
+      datestamp += 1
+      create_migration_files("select * from tab_not_exist;\ncreate table foo (c1 integer);", datestamp.to_s)
+    end
+  end
+
+
   def helper_bad_oracle_migration
     create_migration_files("select * from dua;\ncreate table foo (c1 integer);")
   end
@@ -122,10 +139,10 @@ module TestHelper
 
   private
 
-  def create_migration_files(content)
+  def create_migration_files(content, datestamp='201108190000')
     FileUtils.rm_rf(File.join(TEMP_DIR, 'migrations', "*.sql"))
     FileUtils.mkdir_p(File.join(TEMP_DIR, 'migrations'))
-    filenames = %w(201108190000_up_test_migration.sql 201108190000_down_test_migration.sql)
+    filenames = ["#{datestamp}_up_test_migration.sql", "#{datestamp}_down_test_migration.sql"]
     filenames.each do |fn|
       File.open(File.join(TEMP_DIR, 'migrations', fn), 'w') do |f|
         f.puts content

@@ -92,6 +92,20 @@ module DBGeni
       apply_migration(migrations.first, force)
     end
 
+    def apply_until_migration(migration_name, force=nil)
+      ensure_initialized
+      milestone = Migration.initialize_from_internal_name(@config.migration_directory, migration_name)
+      outstanding = outstanding_migrations
+      index = outstanding.index milestone
+      unless index
+        # milestone migration doesn't exist or is already applied.
+        raise MigrationNotOutstanding, milestone.to_s
+      end
+      0.upto(index) do |i|
+        apply_migration(outstanding[i], force)
+      end
+    end
+
     def apply_migration(migration, force=nil)
       ensure_initialized
       begin
@@ -122,6 +136,20 @@ module DBGeni
       end
       # the most recent one is at the end of the array!!
       rollback_migration(migrations.last, force)
+    end
+
+    def rollback_until_migration(migration_name, force=nil)
+      ensure_initialized
+      milestone = Migration.initialize_from_internal_name(@config.migration_directory, migration_name)
+      applied = applied_and_broken_migrations.reverse
+      index = applied.index milestone
+      unless index
+        # milestone migration doesn't exist or is already applied.
+        raise DBGeni::MigrationNotApplied, milestone.to_s
+      end
+      0.upto(index) do |i|
+        rollback_migration(applied[i], force)
+      end
     end
 
     def rollback_migration(migration, force=nil)

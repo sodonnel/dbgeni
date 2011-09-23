@@ -317,6 +317,38 @@ class TestDBGeniBase < Test::Unit::TestCase
     assert_equal(0, @installer.applied_migrations.length)
   end
 
+  def test_apply_until_migration_when_migration_not_outstanding
+    @installer = DBGeni::Base.installer_for_environment(helper_sqlite_single_environment_file, 'development')
+    @installer.initialize_database
+    assert_raises DBGeni::MigrationNotOutstanding do
+      @installer.apply_until_migration('201201010000::test')
+    end
+  end
+
+  def test_apply_until_migration_when_one_migration
+    @installer = DBGeni::Base.installer_for_environment(helper_sqlite_single_environment_file, 'development')
+    @installer.initialize_database
+    migration = helper_good_sqlite_migration
+    assert_nothing_raised do
+      @installer.apply_until_migration(migration.to_s)
+    end
+    assert_equal('Completed', migration.status(@installer.config, @installer.connection))
+  end
+
+  def test_apply_until_migration_when_many_migrations
+    @installer = DBGeni::Base.installer_for_environment(helper_sqlite_single_environment_file, 'development')
+    @installer.initialize_database
+    # will create 4 migrations called 201108190000::test_migration upto 201108190003::test_migration
+    migrations = helper_many_good_sqlite_migrations(4)
+    assert_nothing_raised do
+      @installer.apply_until_migration('201108190002::test_migration')
+    end
+    assert_equal(3, @installer.applied_migrations.length)
+    assert_equal(1, @installer.outstanding_migrations.length)
+    assert_equal('201108190003::test_migration', @installer.outstanding_migrations[0].to_s)
+  end
+
+
   ##########################
   # Applying Rollbacks etc #
   ##########################
@@ -411,6 +443,40 @@ class TestDBGeniBase < Test::Unit::TestCase
     end
     assert_equal(0, @installer.applied_migrations.length)
   end
+
+  def test_rollback_until_migration_when_migration_not_applied
+    @installer = DBGeni::Base.installer_for_environment(helper_sqlite_single_environment_file, 'development')
+    @installer.initialize_database
+    assert_raises DBGeni::MigrationNotApplied do
+      @installer.rollback_until_migration('201201010000::test')
+    end
+  end
+
+  def test_rollback_until_migration_when_one_migration
+    @installer = DBGeni::Base.installer_for_environment(helper_sqlite_single_environment_file, 'development')
+    @installer.initialize_database
+    migration = helper_good_sqlite_migration
+    @installer.apply_all_migrations
+    assert_nothing_raised do
+      @installer.rollback_until_migration(migration.to_s)
+    end
+    assert_equal('Rolledback', migration.status(@installer.config, @installer.connection))
+  end
+
+  def test_rollback_until_migration_when_many_migrations
+    @installer = DBGeni::Base.installer_for_environment(helper_sqlite_single_environment_file, 'development')
+    @installer.initialize_database
+    # will create 4 migrations called 201108190000::test_migration upto 201108190003::test_migration
+    migrations = helper_many_good_sqlite_migrations(4)
+    @installer.apply_all_migrations
+    assert_nothing_raised do
+      @installer.rollback_until_migration('201108190001::test_migration')
+    end
+    assert_equal(1, @installer.applied_migrations.length)
+    assert_equal(3, @installer.outstanding_migrations.length)
+    assert_equal('201108190000::test_migration', @installer.applied_migrations[0].to_s)
+  end
+
 
 
   #######################

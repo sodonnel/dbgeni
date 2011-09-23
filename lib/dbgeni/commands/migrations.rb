@@ -38,20 +38,24 @@ apply       Apply migrations to the given environment. Can specify:
 
               all     Apply all outstanding migrations
               next    Apply only the next migration and stop
+              until   Apply upto and including the specified migration
               specific migrations to apply
 
             dbgeni migrations apply all  --environment-name test --config-file /home/myapp/.dbgeni <--force>
             dbgeni migrations apply next --environment-name test --config-file /home/myapp/.dbgeni <--force>
+            dbgeni migrations apply until YYYYMMDDHHMM::Name1 --environment-name test --config-file /home/myapp/.dbgeni <--force>
             dbgeni migrations apply YYYYMMDDHHMM::Name1 YYYYMMDDHHMM::Name2 YYYYMMDDHHMM::Name3 --environment-name test --config-file /home/myapp/.dbgeni <--force>
 
 rollback    Run the rollback script for a given migration. Can specify:
 
             all       Rollback everything that has even been applied
             last      Rollback the last migration applied
+            until     Rollback from the last applied migration until and including the specified migration
             specific migrations to rollback
 
             dbgeni migrations rollback all  --environment-name test --config-file /home/myapp/.dbgeni <--force>
             dbgeni migrations rollback last --environment-name test --config-file /home/myapp/.dbgeni <--force>
+            dbgeni migrations rollback until YYYYMMDDHHMM::Name1 --environment-name test --config-file /home/myapp/.dbgeni <--force>
             dbgeni migrations rollback YYYYMMDDHHMM::Name1 YYYYMMDDHHMM::Name2 YYYYMMDDHHMM::Name3 --environment-name test --config-file /home/myapp/.dbgeni <--force>
 
 EOF
@@ -118,6 +122,19 @@ begin
       installer.apply_all_migrations($force)
     when 'next'
       installer.apply_next_migration($force)
+    when 'until'
+      # a migration name needs to be the next parameter
+      migration_name = ARGV[0]
+      unless migration_name
+        logger.error "A migration name must be specified"
+        exit(1)
+      end
+      # and the migration needs to be in the correct format
+      unless migration_name =~ /^(\d{12})::/
+        logger.error "#{migration_name} is not a valid migration name"
+        exit(1)
+      end
+      installer.apply_until_migration(migration_name, $force)
     when /^(\d{12})::/
       # The param list are specific migration files, but in the internal format. One is
       # stored in sub_command and the rest are in ARGV. Grab all params that match the
@@ -140,6 +157,18 @@ begin
       installer.rollback_all_migrations($force)
     when 'last'
       installer.rollback_last_migration($force)
+    when 'until'
+      # a migration name needs to be the next parameter
+      migration_name = ARGV[0]
+      unless migration_name
+        logger.error "A migration name must be specified"
+        exit(1)
+      end
+      # and the migration needs to be in the correct format
+      unless migration_name =~ /^(\d{12})::/
+        logger.error "#{migration_name} is not a valid migration name"
+      end
+      installer.rollback_until_migration(migration_name, $force)
     when /^(\d{12})::/
       # The param list are specific migration files, but in the internal format. One is
       # stored in sub_command and the rest are in ARGV. Grab all params that match the
@@ -177,6 +206,9 @@ rescue DBGeni::NoAppliedMigrations => e
   exit(1)
 rescue DBGeni::MigrationNotApplied
   logger.error "#{e.to_s} has not been applied so cannot be rolledback"
+  exit(1)
+rescue DBGeni::MigrationNotOutstanding
+  logger.error "#{e.to_s} does not exist or is not outstanding"
   exit(1)
 end
 

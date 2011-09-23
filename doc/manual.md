@@ -28,9 +28,11 @@
    * [outstanding](#migrations_outstanding)
    * [apply all](#migrations_apply_all)
    * [apply next](#migrations_apply_next)
+   * [apply until](#migrations_apply_until)
    * [apply specific](#migrations_apply_specific)
    * [rollback all](#migrations_rollback_all)
    * [rollback last](#migrations_rollback_last)
+   * [rollback until](#migrations_rollback_until)
    * [rollback specific](#migrations_rollback_specific)
  * [Option Switches](#option_switches)
    * [environment-name](#option_switches_environment_name)
@@ -409,6 +411,19 @@ To apply only the next migration that is outstanding, use the next command, eg:
 
 If there are no outstanding migrations or a problem is encountered applying the migration an error will be displayed.
 
+### apply until<a id="migrations_apply_until"></a>
+
+To apply from the first outstanding migration up to and including a specific migration, use the until command, eg:
+
+    $ dbgeni migrations apply until 201108101531::create_users
+
+This is useful if there are a large number of outstanding migrations, and you know you want stop applying before the final one.
+
+If the specified migration is already applied, does not exist or there are no outstanding migrations the command will error. 
+
+If a problem is encountered applying a migration an error will be displayed and dbgeni will not continue.
+
+
 ### apply specific<a id="migrations_apply_specific"></a>
 
 To apply a single or several migrations out of their normal sequence, you can specify specific migrations to apply on the command line, eg:
@@ -416,6 +431,7 @@ To apply a single or several migrations out of their normal sequence, you can sp
     $ dbgeni migrations apply 201108101531::create_users 201108110825::create_user_details 
 
 If there are no outstanding migrations or a problem is encountered applying a migration an error will be displayed and dbgeni will not continue.
+
 
 ### Forcing Migrations
 
@@ -442,6 +458,19 @@ To rollback just the last applied migration, use the last sub-command, eg:
     $ dbgeni migrations rollback last
 
 If there are no applied migrations or a problem is encountered rolling back a migration an error will be displayed.
+
+### rollback until<a id="migrations_rollback_until"></a>
+
+To rollback from the last applied migration down to and including a specific migration, use the until command, eg:
+
+    $ dbgeni migrations rollback until 201108101531::create_users
+
+This is useful if there are a large number of applied migrations, and you know you want stop rolling back before the first one.
+
+If the specified migration has not been applied, does not exist or there are no outstanding migrations the command will error. 
+
+If a problem is encountered rolling back a migration an error will be displayed and dbgeni will not continue.
+
 
 ### rollback specific<a id="migrations_rollback_specific"></a>
 

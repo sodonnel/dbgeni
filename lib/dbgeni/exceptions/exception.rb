@@ -8,6 +8,7 @@ module DBGeni
   class MigrationNotApplied        < Exception; end
   class MigrationApplyFailed       < Exception; end
   class MigrationContainsErrors    < Exception; end
+  class MigrationNotOutstanding    < Exception; end
 
   class EnvironmentNotExist        < Exception; end
 

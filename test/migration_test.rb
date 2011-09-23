@@ -57,6 +57,30 @@ class TestMigration < Test::Unit::TestCase
   end
 
 
+  ##########
+  # ==     #
+  ##########
+
+  def test_same_migration_file_is_equal
+    m1 = DBGeni::Migration.new('anydir', @valid_migration)
+    m2 = DBGeni::Migration.new('anydir', @valid_migration)
+    assert_equal(m1, m2)
+  end
+
+  def test_different_migration_file_is_not_equal
+    m1 = DBGeni::Migration.new('anydir', @valid_migration)
+    m2 = DBGeni::Migration.new('anydir', "201201010000_up_migration.sql")
+    assert_not_equal(m1, m2)
+  end
+
+  def test_same_migration_different_directory_is_not_equal
+    m1 = DBGeni::Migration.new('anydir',  @valid_migration)
+    m2 = DBGeni::Migration.new('anydir2', @valid_migration)
+    assert_not_equal(m1, m2)
+  end
+
+
+
   #####################################################
   # set_* (pending, failed, rolledback, completed etc #
   #####################################################
