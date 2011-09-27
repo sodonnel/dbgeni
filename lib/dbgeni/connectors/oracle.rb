@@ -55,7 +55,7 @@ module DBGeni
       end
 
       def date_placeholder(bind_var)
-        "to_date('YYYYMMDDHH24MISS', :#{bind_var})"
+        "to_date(:#{bind_var}, 'YYYYMMDDHH24MISS')"
       end
 
       def date_as_string(dtm)

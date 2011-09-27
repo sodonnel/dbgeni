@@ -64,13 +64,12 @@ DBGeni is normally used via it's command line interface which will be available 
 
 ## Why use DBGeni?
 
-If your current Database release process requires a lot of manual work, or is error prone, or you have lots of environments to apply changes to, DBGeni might help you.
+Most shops already have a strategy for managing database changes and some do it better than others.
+
+If you already version control all your schema change scripts you are on the right track. If you can checkout that code, and with only a single command apply all outstanding changes to any of your database environments, then just keep on doing what you are doing.
+
+However, if you need to hand craft a custom install script for each release, or find your team spending time at the end of a development cycle 'generating' DDL scripts or packaging the install, DBGeni can help by enabling painless one step database installs.
+
+Changing deployment processes in any organisation can be difficult. The great thing about DBGeni is that it uses the same SQL scripts as if you don't use it, just named differently. It is possible to use DBGeni in development and test proving it within your team, while using the old process to deploy the migration scripts onto production.
 
 It only takes 2 minutes to try it out, so download DBGeni and play around.
-
-
-
-
-
-
-
