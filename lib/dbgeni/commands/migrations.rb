@@ -167,6 +167,7 @@ begin
       # and the migration needs to be in the correct format
       unless migration_name =~ /^(\d{12})::/
         logger.error "#{migration_name} is not a valid migration name"
+        exit(1)
       end
       installer.rollback_until_migration(migration_name, $force)
     when /^(\d{12})::/

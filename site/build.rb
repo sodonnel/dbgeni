@@ -25,7 +25,7 @@ source_files.each do |f|
   filename = $1
   header_source = header.dup
   header_source.gsub!(/_-_selected_#{filename}/, 'style="background-color:#FF9933;"')
-  header_source.gsub!(/_-_selected_[^>]+>/, '')
+  header_source.gsub!(/_-_selected_[^>]+>/, '>')
   source = IO.read(File.join(source_dir, f))
 
   # if there is a file called 'filename.md' in ../doc, get it,
