@@ -1,6 +1,6 @@
 require 'fileutils'
 require 'rubygems'
-require 'Bluecloth'
+require 'bluecloth'
 
 # For each file in the given directory, create a markdown image of the file in <dir>/temp
 # Consider adding an index page in future.
