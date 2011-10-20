@@ -1,0 +1,187 @@
+body {
+  background-color: #eeeeee;
+
+}
+
+#bevel {
+  background-color: white;
+  width: 950px;
+  margin-left: auto;
+  margin-right: auto;
+  border: 2px solid #cccccc;
+  border-top: none;
+  border-bottom: bottom: none;
+}
+
+#main {
+  background-color: white;
+  min-height: 600px;
+}
+
+.header {
+    width: 100%;
+    background-color: black;
+    height: 30px;
+    background-image: -moz-linear-gradient(19% 85% 90deg,#000000, #262626);
+    background-image: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#262626), to(#000000));
+    color: #cccccc;
+    font: bold 13px "Helvetica Neue",Arial,Sans-serif;
+}
+
+body {
+    line-height: 1;
+}
+
+p {
+    line-height: 1.5;
+}
+
+li {
+    line-height: 1.5;
+}
+
+h1 {
+    font-size: 22px;
+    font-weight: bold;
+    color: #FF9933;
+}
+
+h2 {
+    color: #FF9933;
+}
+
+h3 {
+    color: #FF9933;
+}
+
+
+h1 a {
+    text-decoration: none;
+    color: #111111;
+}
+
+h2 a {
+    text-decoration: none;
+    color: #111111;
+}
+
+h3 a {
+    text-decoration: none;
+    color: #111111;
+}
+
+#banner {
+  margin-top: 30px;
+}
+
+#banner h1 {
+  margin-bottom: 5px;
+  color: black;
+}
+
+#banner p {
+  color: #666666;
+  margin-bottom: 5px;
+}
+
+#banner ul {
+    list-style: none; margin: 0; padding: 0; display: block;
+    padding-bottom: 10px;
+}
+
+#banner li {
+  list-style: none; margin: 0; padding: 0; display: inline;
+  margin-left: 0px;
+  background-color: #999999;
+  margin-right: 10px;
+  color: white;
+  padding-left: 1px;
+  padding-right: 1px;
+  padding-top: 8px;
+  padding-bottom: 8px;
+
+}
+
+#banner a {
+  color: white;
+  text-decoration: none;
+  underline: none;
+  padding-left: 15px;
+  padding-right: 15px;
+  padding-bottom: 8px;
+  padding-top:    8px;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+
+#banner li:hover {
+  background-color: #FF9933;
+}
+
+.selectedtab {
+  background-color: #FF9933;
+}
+
+.wmd-preview {
+ /*   padding-top: 15px; */
+}
+.wmd-preview h1 {
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.wmd-preview h2 {
+  font-size: 15px;
+  font-weight: bold;
+}
+
+
+.wmd-preview h3 {
+  font-size: 13px;
+  font-weight: bold;
+}
+
+.wmd-preview ul {
+  margin-top: 0px;
+  margin-left: 15px;
+}
+
+
+.wmd-preview li {
+  padding-bottom: 0px;
+  line-height: 1.5;
+}
+
+.wmd-preview pre {
+  font-size: 12px;
+  line-height: 1;
+  margin-left: 0px;
+  overflow: auto;
+  background: #eeeeee;
+  padding: 10px;
+  border: 1px solid #cccccc;
+}
+
+.plist {
+  margin-bottom: 5px;
+}
+
+.plist a {
+
+}
+
+#siteheading a {
+    color: #111111;
+    font-size: 22px;
+    font-weight: bold;
+    text-decoration: none;
+    margin: 0px;
+    padding: 0px;
+}
+
+textarea {
+  font-family:"Helvetica Neue", Arial, Helvetica, sans-serif;
+  font-size: 11px;;
+  line-height: 1.5;
+}
