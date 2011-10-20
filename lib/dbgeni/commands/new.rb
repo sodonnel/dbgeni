@@ -79,9 +79,10 @@ database_table "dbgeni_migrations"
 # test and production but any number of environments are valid provided there is at least one.
 
 environment('development') {
-#   username ''              # this must be here, or it will error
-#   database 'testdb.sqlite' # this must be here, or it will error. For Oracle, this is the TNS Name
-#   password ''              # If this value is missing, it will be promoted for if the env is used.
+
+   database 'testdb.sqlite' # this must be here, or it will error. For Oracle, this is the TNS Name
+#   username ''             # this must be here, or it will error (unless using sqlite)
+#   password ''             # If this value is missing, it will be promoted for at run time
 #
 #   Other parameters can be defined here and will override global_parameters
 #   param_name 'value'
