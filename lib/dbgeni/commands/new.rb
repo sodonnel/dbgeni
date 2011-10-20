@@ -59,6 +59,9 @@ begin
 # This directory specifies the location of the migrations directory
 migrations_directory "./migrations"
 
+# This directory specifies the location of any code modules
+code_directory "./code"
+
 # This specifies the type of database this installer is applied against
 # Valid values are oracle, mysql, sqlite however this is not validated
 # to enable different database plugins to easily be added.

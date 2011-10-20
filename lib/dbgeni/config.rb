@@ -23,6 +23,12 @@ module DBGeni
     attr_reader   :environments
     attr_reader   :current_environment
     attr_reader   :migration_directory
+    # ideally wnat code_dir to be code_directory, but then it clashes with the
+    # setter used in the config file, so need to change it. Probably more sensible
+    # like this than the migrations_directory vs migration_directory
+    #                            _-_
+    #
+    attr_reader   :code_dir
     attr_reader   :db_type  # oracle, mysql, sqlite etc, default sqlite
     attr_reader   :db_table # defaults to dbgeni_migrations
     attr_reader   :config_file
@@ -30,6 +36,7 @@ module DBGeni
 
     def initialize
       @migration_directory  = 'migrations'
+      @code_dir             = 'code'
       @db_type              = 'sqlite'
       @db_table             = 'dbgeni_migrations'
       @environments         = Hash.new
@@ -70,6 +77,7 @@ module DBGeni
         # TODO - need to take off the actual migration directory and join to new base_dir
       else
         @migration_directory = File.join(@base_directory, @migration_directory)
+        @code_dir = File.join(@base_directory, @code_dir)
       end
     end
 
@@ -166,6 +174,24 @@ module DBGeni
             @migration_directory = File.join(@base_directory, p[0])
           else
             @migration_directory = p[0]
+          end
+        end
+      end
+    end
+
+    def code_directory(*p)
+      if p.length == 0
+        @code_dir
+      else
+        if is_absolute_path?(p[0])
+          # it looks like an absolute path
+          @code_dir = p[0]
+        else
+          # it looks like a relative path
+          if @base_directory
+            @code_dir = File.join(@base_directory, p[0])
+          else
+            @code_dir = p[0]
           end
         end
       end

@@ -95,4 +95,19 @@ class TestMigratorOracle < Test::Unit::TestCase
 
   end
 
+  def test_good_procedure_loads_without_error
+    code = helper_good_procedure_file
+    assert_nothing_raised do
+      @migrator.compile(code)
+    end
+  end
+
+  def test_bad_procedure_loads_without_error
+    code = helper_bad_procedure_file
+    assert_nothing_raised do
+      @migrator.compile(code)
+    end
+  end
+
+
 end

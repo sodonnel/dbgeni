@@ -40,5 +40,8 @@ module DBGeni
   class NoOutstandingMigrations     < Exception; end
   class NoAppliedMigrations         < Exception; end
 
+  ## code
+  class UnknownCodeType             < Exception; end
+
 
 end

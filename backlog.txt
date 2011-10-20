@@ -1,9 +1,8 @@
-Missing migration for rollback, what happens and what about force?
 Maybe more tests for base apply and rollback until
 ----------------------------------------------
+Stored Procs  **** About to implement the apply and remove parts ...
 Milestones
 Prompt for password if missing and needed
-Stored Procs
 Better Logging
 ----------------------------------------------
 Parameters in SQL scripts
@@ -24,6 +23,10 @@ Migration that fails to rollback makes it look like the migration failed has not
 
 set ORACLE_HOME=C:\app\sodonnell\product\11.2.0\dbhome_1
 
+
+Missing migration for rollback, what happens and what about force?
+  If a migration file is missing, it will error when rollback is applied.
+  If force is used, it will still push on with the next rollback.
 
 
 

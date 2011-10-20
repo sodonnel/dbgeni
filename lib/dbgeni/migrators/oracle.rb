@@ -22,9 +22,13 @@ module DBGeni
       def verify(migration)
       end
 
+      def compile(code)
+        run_in_sqlplus(File.join(@config.code_directory, code.filename), false, true)
+      end
+
       private
 
-      def run_in_sqlplus(file, force)
+      def run_in_sqlplus(file, force, is_proc=false)
         null_device = '/dev/null'
         if Kernel.is_windows?
           null_device = 'NUL:'
@@ -47,6 +51,10 @@ module DBGeni
           #            p.puts "START #{File.basename(file)} #{sql_parameters}"
           p.puts "spool #{@config.base_directory}/log/#{DBGeni::Migrator.logfile(file)}"
           p.puts "START #{file}"
+          if is_proc
+            p.puts "/"
+            p.puts "show err"
+          end
           p.puts "spool off"
           p.puts "exit"
         end

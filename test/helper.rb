@@ -137,7 +137,33 @@ module TestHelper
     helper_empty_oracle_migration
   end
 
+  def helper_good_procedure_file
+    create_procedure_file("create or replace procedure proc1
+      as
+      begin
+         null;
+      end;", 'proc1.prc')
+  end
+
+  def helper_bad_procedure_file
+    create_procedure_file("create or replace procedure proc1
+      as
+      begin
+         null -- compile error here
+      end;", 'proc1.prc')
+  end
+
+
   private
+
+  def create_procedure_file(content, filename)
+    FileUtils.rm_rf(File.join(TEMP_DIR, 'code', "*.prc"))
+    FileUtils.mkdir_p(File.join(TEMP_DIR, 'code'))
+    File.open(File.join(TEMP_DIR, 'code', 'proc1.prc'), 'w') do |f|
+      f.puts content
+    end
+    DBGeni::Code.new(File.join(TEMP_DIR, 'code'), filename)
+  end
 
   def create_migration_files(content, datestamp='201108190000')
     FileUtils.rm_rf(File.join(TEMP_DIR, 'migrations', "*.sql"))

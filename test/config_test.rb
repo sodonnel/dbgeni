@@ -152,6 +152,10 @@ class TestConfig < Test::Unit::TestCase
   end
 
 
+  ########################
+  # MIGRATIONS_DIRECTORY #
+  ########################
+
   def test_migrations_directory_defaults
     cfg = DBGeni::Config.new
     cfg.load("environment('foo') { }\n environment('bar') { }")
@@ -200,6 +204,63 @@ class TestConfig < Test::Unit::TestCase
     cfg.base_directory = '/somedir'
     assert_equal('/somedir/migrations', cfg.migration_directory)
   end
+
+  ######################
+  # CODE_DIR parameter #
+  ######################
+
+  def test_code_directory_defaults
+    cfg = DBGeni::Config.new
+    cfg.load("environment('foo') { }\n environment('bar') { }")
+    assert_equal('code', cfg.code_dir)
+  end
+
+  def test_code_dir_settable_via_config
+    cfg = DBGeni::Config.new
+    cfg.load("code_directory 'other_dir'\nenvironment('foo') { }\n environment('bar') { }")
+    assert_equal('other_dir', cfg.code_dir)
+  end
+
+  def test_absolution_code_dir_not_modified_windows
+    cfg = DBGeni::Config.new
+    cfg.base_directory = "c:\\somedir\\"
+    # !! need to escape backslashes as they are escape character!
+    cfg.load("code_directory 'c:\\other_dir'\nenvironment('foo') { }\n environment('bar') { }")
+    assert_equal('c:\other_dir', cfg.code_dir)
+  end
+
+  def test_absolution_code_dir_not_modified_unix
+    cfg = DBGeni::Config.new
+    cfg.base_directory = "/somedir"
+    cfg.load("code_directory '/other_dir'\nenvironment('foo') { }\n environment('bar') { }")
+    assert_equal('/other_dir', cfg.code_dir)
+  end
+
+  def test_relative_code_dir_added_to_base_windows
+    cfg = DBGeni::Config.new
+    cfg.base_directory = "c:\\somedir\\"
+    cfg.load("code_directory 'other_dir'\nenvironment('foo') { }\n environment('bar') { }")
+    if Kernel.is_windows?
+      assert_equal("c:\\somedir\\other_dir", cfg.code_dir)
+    end
+  end
+
+  def test_relative_code_dir_added_to_base_unix
+    cfg = DBGeni::Config.new
+    cfg.base_directory = '/somedir'
+    cfg.load("code_directory 'other_dir'\nenvironment('foo') { }\n environment('bar') { }")
+    assert_equal('/somedir/other_dir', cfg.code_dir)
+  end
+
+  def test_code_dir_changes_when_base_dir_changed
+    cfg = DBGeni::Config.new
+    cfg.base_directory = '/somedir'
+    assert_equal('/somedir/code', cfg.code_dir)
+  end
+
+
+
+#################
 
   def test_database_table_defaults_to_correct_value
     cfg = DBGeni::Config.new

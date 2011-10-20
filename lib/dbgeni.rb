@@ -1,4 +1,5 @@
 require 'rbconfig'
+require 'digest/sha1'
 
 module Kernel
 
