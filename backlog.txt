@@ -1,6 +1,7 @@
 Maybe more tests for base apply and rollback until
 ----------------------------------------------
 Stored Procs  **** About to implement the apply and remove parts ...
+Better error when sqlite or sqlplus is not on the path
 Milestones
 Prompt for password if missing and needed
 Better Logging
@@ -14,6 +15,8 @@ MYSQL support
 DAT files
 Validation hooks
 Validation scripts
+
+
 
 
 Think about the migration workflow and the dates etc that are being set
