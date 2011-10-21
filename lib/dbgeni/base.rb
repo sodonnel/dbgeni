@@ -4,6 +4,7 @@ require 'dbgeni/config'
 require 'dbgeni/environment'
 require 'dbgeni/migration_list'
 require 'dbgeni/migration'
+require 'dbgeni/code_list'
 require 'dbgeni/code'
 require 'dbgeni/exceptions/exception'
 require 'dbgeni/initializers/initializer'
@@ -50,6 +51,10 @@ module DBGeni
       end
     end
 
+    ######################
+    # Listing Migrations #
+    ######################
+
     def migrations
       @migration_list ||= DBGeni::MigrationList.new(@config.migration_directory) unless @migration_list
       @migration_list.migrations
@@ -72,6 +77,10 @@ module DBGeni
       migrations
       @migration_list.applied_and_broken(@config, connection)
     end
+
+    #######################
+    # Applying Migrations #
+    #######################
 
     def apply_all_migrations(force=nil)
       ensure_initialized
@@ -118,6 +127,10 @@ module DBGeni
       end
     end
 
+    ###########################
+    # Rolling back migrations #
+    ###########################
+
     def rollback_all_migrations(force=nil)
       ensure_initialized
       migrations = applied_and_broken_migrations.reverse
@@ -163,6 +176,68 @@ module DBGeni
         raise DBGeni::MigrationApplyFailed, migration.to_s
       end
     end
+
+    ########################
+    # Listing Code Modules #
+    ########################
+
+    def code
+      @code_list ||= DBGeni::CodeList.new(@config.code_dir)
+      @code_list.code
+    end
+
+    def current_code
+      ensure_initialized
+      code
+      @code_list.current(@config, connection)
+    end
+
+    def outstanding_code
+      ensure_initialized
+      code
+      @code_list.outstanding(@config, connection)
+    end
+
+    ######################################
+    # Applying and removing code modules #
+    ######################################
+
+    def apply_all_code
+      ensure_initialized
+      code_files = code
+      if code_files.length == 0
+        raise DBGeni::NoOutstandingCode
+      end
+      code_files.each do |c|
+        apply_code(c, true)
+      end
+    end
+
+    def apply_outstanding_code
+      ensure_initialized
+      code_files = outstanding_code
+      if code_files.length == 0
+        raise DBGeni::NoOutstandingCode
+      end
+      code_files.each do |c|
+        apply_code(c, true)
+      end
+    end
+
+    def apply_code(code_obj, force=nil)
+      ensure_initialized
+      begin
+        code_obj.apply!(@config, connection, force)
+        @logger.info "Applied #{code_obj.to_s}"
+      rescue DBGeni::CodeApplyFailed => e
+        @logger.error "Failed #{code_obj.to_s}"
+        raise DBGeni::CodeApplyFailed, e.to_s
+      end
+    end
+
+    ###########################
+    # Various utility methods #
+    ###########################
 
     def connect
       raise DBGeni::NoEnvironmentSelected unless selected_environment_name

@@ -128,6 +128,53 @@ class TestCode < Test::Unit::TestCase
   end
 
 
+  ##########
+  # apply! #
+  ##########
+
+  def test_apply_simple_procedure
+    helper_good_procedure_file
+    c = DBGeni::Code.new(File.join(TestHelper::TEMP_DIR, 'code'), 'proc1.prc')
+    assert_nothing_raised do
+      c.apply!(@config, @connection)
+    end
+    assert_equal(true, c.current?(@config,@connection))
+  end
+
+  def test_apply_when_current_raises_exception
+    helper_good_procedure_file
+    c = DBGeni::Code.new(File.join(TestHelper::TEMP_DIR, 'code'), 'proc1.prc')
+    assert_nothing_raised do
+      c.apply!(@config, @connection)
+    end
+    assert_raises DBGeni::CodeModuleCurrent do
+      c.apply!(@config, @connection)
+    end
+  end
+
+  def test_apply_when_current_and_force_does_not_raise_exception
+    helper_good_procedure_file
+    c = DBGeni::Code.new(File.join(TestHelper::TEMP_DIR, 'code'), 'proc1.prc')
+    assert_nothing_raised do
+      c.apply!(@config, @connection)
+    end
+    assert_nothing_raised do
+      c.apply!(@config, @connection, true)
+    end
+  end
+
+  def test_apply_when_file_not_exist_raises_exception
+    c = DBGeni::Code.new(File.join(TestHelper::TEMP_DIR, 'code'), 'proc2.prc')
+    assert_raises DBGeni::CodeFileNotExist do
+      c.apply!(@config, @connection)
+    end
+  end
+
+  ###########
+  # remove! #
+  ###########
+
+
 
   private
 

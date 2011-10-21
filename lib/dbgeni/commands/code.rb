@@ -84,14 +84,31 @@ logger    = DBGeni::Logger.instance
 
 begin
   case command
-  when 'list'
-  when 'applied'
-  when 'outstanding'
+  when 'list', 'current', 'outstanding'
+    method_mapper = {
+      'list'             => :code,
+      'current'          => :current_code,
+      'outstanding'      => :outstanding_code
+    }
+    code = installer.send(method_mapper[command])
+    if code.length == 0
+      if command == 'list'
+        logger.info "There are no code modules in #{installer.config.code_dir}"
+      else
+        logger.info "There are no code modules #{command}"
+      end
+      exit(0)
+    end
+    code.each do |c|
+      puts c.to_s
+    end
   when 'apply'
     sub_command = ARGV.shift
     case sub_command
     when 'all'
-    when 'changed'
+      installer.apply_all_code
+    when 'outstanding'
+      installer.apply_outstanding_code
     when /^(\d{12})::/
     else
       logger.error "#{sub_command} is not a valid command"
@@ -123,14 +140,8 @@ rescue DBGeni::MigrationFileNotExist => e
 rescue DBGeni:: DatabaseNotInitialized => e
   logger.error "The database needs to be initialized with the command dbgeni initialize"
   exit(1)
-rescue DBGeni::NoAppliedMigrations => e
-  logger.error "There are no applied migrations to rollback"
-  exit(1)
-rescue DBGeni::MigrationNotApplied
-  logger.error "#{e.to_s} has not been applied so cannot be rolledback"
-  exit(1)
-rescue DBGeni::MigrationNotOutstanding
-  logger.error "#{e.to_s} does not exist or is not outstanding"
+rescue DBGeni::CodeDirectoryNotExist
+  logger.error "The code directory does not exist"
   exit(1)
 end
 

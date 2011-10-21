@@ -42,6 +42,12 @@ module DBGeni
 
   ## code
   class UnknownCodeType             < Exception; end
+  class CodeModuleCurrent           < Exception; end
+  class CodeApplyFailed             < Exception; end
+  class CodeFileNotExist            < Exception; end
+  class CodeDirectoryNotExist       < Exception; end
+  class NoOutstandingCode           < Exception; end
+  class NoCodeFilesExist            < Exception; end
 
 
 end

@@ -17,6 +17,7 @@ module TestHelper
   def helper_clean_temp
     FileUtils.rm_rf("#{TEMP_DIR}")
     FileUtils.mkdir_p(File.join(TEMP_DIR, 'migrations'))
+    FileUtils.mkdir_p(File.join(TEMP_DIR, 'code'))
   end
 
   def helper_sqlite_connection
@@ -78,23 +79,38 @@ module TestHelper
   end
 
 
+
   def helper_sqlite_multiple_environment_file
     filename = "#{TEMP_DIR}/sqlite.conf"
     File.open(filename, 'w') do |f|
       f.puts "database_type 'sqlite'
                                       environment('development') {
-                                         user     ''
+                                         username ''
                                          password ''
                                          database '#{TEMP_DIR}/#{SQLITE_DB_NAME}'
                                      }"
       f.puts "                        environment('test') {
-                                         user     ''
+                                         username ''
                                          password ''
                                          database '#{TEMP_DIR}/#{SQLITE_DB_NAME}'
                                      }"
     end
     filename
   end
+
+  def helper_oracle_single_environment_file
+    filename = "#{TEMP_DIR}/oracle.conf"
+    File.open(filename, 'w') do |f|
+      f.puts "database_type 'oracle'
+                                      environment('development') {
+                                         username '#{ORA_USER}'
+                                         password '#{ORA_PASSWORD}'
+                                         database '#{ORA_DB}'
+                                     }"
+    end
+    filename
+  end
+
 
   def helper_good_oracle_migration
     create_migration_files("select * from dual;")

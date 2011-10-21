@@ -56,12 +56,62 @@ when 'migration'
     puts "creating: #{filename}"
     FileUtils.touch(filename)
   end
-when 'package'
-  puts "not implemented"
-when 'procedure'
-  puts "not implemented"
-when 'function'
-  puts "not implemented"
+when 'package', 'pkg'
+  filename = File.join(config.code_dir, "#{name}.pks")
+  if File.exists?(filename)
+    puts "exists: #{filename}"
+  else
+    puts "creating: #{filename}"
+    File.open(filename, 'w') do |f|
+      f.puts "create or replace package #{name}"
+      f.puts "as"
+      f.puts "begin"
+      f.puts ""
+      f.puts "end #{name};"
+    end
+  end
+  filename = File.join(config.code_dir, "#{name}.pkb")
+  if File.exists?(filename)
+    puts "exists: #{filename}"
+  else
+    puts "creating: #{filename}"
+    File.open(filename, 'w') do |f|
+      f.puts "create or replace package body #{name}"
+      f.puts "as"
+      f.puts "begin"
+      f.puts ""
+      f.puts "end #{name};"
+    end
+  end
+when 'procedure', 'prc', 'proc'
+  filename = File.join(config.code_dir, "#{name}.prc")
+  if File.exists?(filename)
+    puts "exists: #{filename}"
+  else
+    puts "creating: #{filename}"
+    File.open(filename, 'w') do |f|
+      f.puts "create or replace procedure #{name}"
+      f.puts "as"
+      f.puts "begin"
+      f.puts "  null;"
+      f.puts "end #{name};"
+    end
+  end
+when 'function', 'fnc', 'func'
+  filename = File.join(config.code_dir, "#{name}.prc")
+  if File.exists?(filename)
+    puts "exists: #{filename}"
+  else
+    puts "creating: #{filename}"
+    File.open(filename, 'w') do |f|
+      f.puts "create or replace function #{name}"
+      f.puts "  return varchar2"
+      f.puts "as"
+      f.puts "begin"
+      f.puts "  null;"
+      f.puts "end #{name};"
+    end
+  end
 end
 
 exit(0)

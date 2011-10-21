@@ -498,6 +498,43 @@ class TestDBGeniBase < Test::Unit::TestCase
     end
   end
 
+  #######################
+  # Code - listing etc  #
+  #######################
+
+  def test_can_list_code_modules_when_none_exist
+    @installer = DBGeni::Base.installer_for_environment(helper_sqlite_single_environment_file, 'development')
+    assert_equal(0, @installer.code.length)
+  end
+
+  def test_can_list_code_modules_when_some_exist
+    @installer = DBGeni::Base.installer_for_environment(helper_sqlite_single_environment_file, 'development')
+    helper_good_procedure_file
+    assert_equal(1, @installer.code.length)
+  end
+
+  def test_correct_error_raised_when_code_directory_not_exist
+    @installer = DBGeni::Base.installer_for_environment(helper_sqlite_single_environment_file, 'development')
+    @installer.config.code_directory 'not_there'
+    assert_raises DBGeni::CodeDirectoryNotExist do
+      @installer.code
+    end
+  end
+
+  ##### Current Procs
+  def test_current_code_modules_listed
+    @installer = DBGeni::Base.installer_for_environment(helper_oracle_single_environment_file, 'development')
+    helper_good_procedure_file
+    assert_equal(0, @installer.current_code.length)
+    # TODO - apply a procedure and ensure it comes up in the current list.
+  end
+
+  ##### Outstanding Procs
+  def test_outstanding_code_modules_listed
+    @installer = DBGeni::Base.installer_for_environment(helper_oracle_single_environment_file, 'development')
+    helper_good_procedure_file
+    assert_equal(1, @installer.outstanding_code.length)
+  end
 
 
 end

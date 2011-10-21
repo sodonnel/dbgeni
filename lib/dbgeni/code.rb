@@ -37,16 +37,15 @@ module DBGeni
       # TODO what if file is empty?
       @hash ||= begin
                   hasher = Digest::SHA1.new
-                  File.readlines(File.join(@directory, @filename), 'r') do |l|
-                    hasher.update(l)
+                  File.open(File.join(@directory, @filename), 'r') do |f|
+                    Digest::SHA1.hexdigest(f.read())
                   end
-                  hasher.hexdigest
                 end
     end
 
     # if the DB hash equals the file hash then it is current
     def current?(config, connection)
-      hash == db_hash(config, connection)
+      hash == nil_to_s(db_hash(config, connection))
     end
 
     # if a hash is found in the DB then it is applied.
@@ -69,7 +68,20 @@ module DBGeni
       remove_db_record
     end
 
-    def apply!(config, connection)
+    def apply!(config, connection, force=false)
+      env(config, connection)
+      ensure_file_exists
+      if current?(config, connection) and force != true
+        raise DBGeni::CodeModuleCurrent, self.to_s
+      end
+      migrator = DBGeni::Migrator.initialize(config, connection)
+      begin
+        migrator.compile(self) #, force)
+        set_applied(config,connection)
+      rescue Exception => e
+        puts e.to_s
+        raise DBGeni::CodeApplyFailed, "(#{self.to_s}) #{e.to_s}"
+      end
     end
 
     def remove!(config, connection)
@@ -79,6 +91,10 @@ module DBGeni
 #      env(config, connection)
 #      remove_db_record
 #    end
+
+    def to_s
+      "#{@name} - #{@type}"
+    end
 
 
     private
@@ -137,7 +153,6 @@ module DBGeni
                                     and   migration_name  = :name", @type, @name)
     end
 
-
     def set_type
       @filename =~ /\.(.+)$/
       if EXT_MAP.has_key?($1)
@@ -157,5 +172,14 @@ module DBGeni
       @connection = connection
     end
 
+    def ensure_file_exists
+      unless File.exists? File.join(@directory, @filename)
+        raise DBGeni::CodeFileNotExist, File.join(@directory, @filename)
+      end
+    end
+
+    def nil_to_s(obj)
+      obj ? obj : ''
+    end
   end
 end
