@@ -24,7 +24,7 @@ Readonly
 list        Prints out all available code modules
             dbgeni code list --config-file /home/myapp/.dbgeni
 
-applied     Prints all code modules that have been applied to an environment
+current     Prints all code modules that have been applied to an environment
             dbgeni code applied --environment-name test --config-file /home/myapp/.dbgeni
 
 outstanding Prints all code modules that have not been applied to an environment
@@ -109,7 +109,17 @@ begin
       installer.apply_all_code
     when 'outstanding'
       installer.apply_outstanding_code
-    when /^(\d{12})::/
+    when /\.(#{DBGeni::Code::EXT_MAP.keys.join('|')})$/
+      # The param list are specific code files. One is
+      # stored in sub_command and the rest are in ARGV. Grab all params that match the
+      # parameter name format
+      files = ARGV.select{ |f| f =~ /\.(#{DBGeni::Code::EXT_MAP.keys.join('|')})$/ }
+      files.unshift sub_command
+      code = files.map {|f| DBGeni::Code.new(installer.config.code_dir, f)}
+      # Now attempt to run each code file in
+      code.each do |c|
+        installer.apply_code(c, $force)
+      end
     else
       logger.error "#{sub_command} is not a valid command"
     end
@@ -125,17 +135,17 @@ begin
   else
     logger.error "#{command} is not a valid command"
   end
-rescue DBGeni::NoOutstandingMigrations => e
-  logger.error "There are no outstanding migrations to apply"
+rescue DBGeni::NoOutstandingCode => e
+  logger.error "There are no outstanding code modules to apply"
   exit(1)
-rescue DBGeni::MigrationApplyFailed => e
-  logger.error "There was a problem #{command == 'rollback' ? 'rolling back' : 'applying' } #{e.to_s}"
+rescue DBGeni::CodeApplyFailed => e
+  logger.error "There was a problem applying #{e.to_s}"
   exit(1)
-rescue DBGeni::MigrationAlreadyApplied => e
-  logger.error "The migration is already applied #{e.to_s}"
+rescue DBGeni::CodeModuleCurrent => e
+  logger.error "The code module is already current #{e.to_s}"
   exit(1)
-rescue DBGeni::MigrationFileNotExist => e
-  logger.error "The migration file, #{e.to_s} does not exist"
+rescue DBGeni::CodeFileNotExist => e
+  logger.error "The code file, #{e.to_s} does not exist"
   exit(1)
 rescue DBGeni:: DatabaseNotInitialized => e
   logger.error "The database needs to be initialized with the command dbgeni initialize"

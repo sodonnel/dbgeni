@@ -11,13 +11,25 @@ module TestHelper
   ORA_PASSWORD = 'sodonnel'
   ORA_DB       = 'local11gr2'
 
-  CLI = 'ruby C:\Users\sodonnel\code\dbgeni\lib\dbgeni\cli.rb'
-#  CLI = 'ruby /Users/sodonnel/rails/dbinst/lib/dbgeni/cli.rb'
+#  CLI = 'ruby C:\Users\sodonnel\code\dbgeni\lib\dbgeni\cli.rb'
+  CLI = 'ruby /home/sodonnel/code/dbgeni/lib/dbgeni/cli.rb'
 
   def helper_clean_temp
     FileUtils.rm_rf("#{TEMP_DIR}")
     FileUtils.mkdir_p(File.join(TEMP_DIR, 'migrations'))
     FileUtils.mkdir_p(File.join(TEMP_DIR, 'code'))
+  end
+
+  def helper_reinitialize_oracle
+    conn   = helper_oracle_connection
+    config = helper_oracle_config
+    begin
+      DBGeni::Initializer.initialize(conn, config)
+      conn.initialize_database
+    rescue DBGeni::DatabaseAlreadyInitialized
+    end
+    conn.execute("delete from dbgeni_migrations")
+    conn.disconnect
   end
 
   def helper_sqlite_connection

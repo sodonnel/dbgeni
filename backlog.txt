@@ -1,7 +1,7 @@
 Maybe more tests for base apply and rollback until
 ----------------------------------------------
-Stored Procs  **** APPLY ALL is working. Apply Outstanding needs setup.
-                   The BASE proceedures need testing as does the CLI changes.
+Stored Procs  **** apply and list is all tested and working
+                   The remove options need implemented and tested
 Better error when sqlite or sqlplus is not on the path
 Milestones
 Prompt for password if missing and needed
