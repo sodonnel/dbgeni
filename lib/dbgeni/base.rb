@@ -122,7 +122,7 @@ module DBGeni
         migration.apply!(@config, connection, force)
         @logger.info "Applied #{migration.to_s}"
       rescue DBGeni::MigrationApplyFailed
-        @logger.error "Failed #{migration.to_s}"
+        @logger.error "Failed #{migration.to_s}. Errors in #{migration.logfile}"
         raise DBGeni::MigrationApplyFailed, migration.to_s
       end
     end
@@ -172,7 +172,7 @@ module DBGeni
         migration.rollback!(@config, connection, force)
         @logger.info  "Rolledback #{migration.to_s}"
       rescue DBGeni::MigrationApplyFailed
-        @logger.error "Failed #{migration.to_s}"
+        @logger.error "Failed #{migration.to_s}. Errors in #{migration.logfile}"
         raise DBGeni::MigrationApplyFailed, migration.to_s
       end
     end
@@ -228,7 +228,11 @@ module DBGeni
       ensure_initialized
       begin
         code_obj.apply!(@config, connection, force)
-        @logger.info "Applied #{code_obj.to_s}"
+        if code_obj.error_messages
+          @logger.info "Applied #{code_obj.to_s} (with errors)\n\n#{code_obj.error_messages}\nFull errors in #{code_obj.logfile}\n\n"
+        else
+          @logger.info "Applied #{code_obj.to_s}"
+        end
       rescue DBGeni::CodeApplyFailed => e
         @logger.error "Failed #{code_obj.to_s}"
         raise DBGeni::CodeApplyFailed, e.to_s

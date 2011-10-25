@@ -3,10 +3,13 @@ module DBGeni
 
     class Sqlite
 
+      attr_reader :logfile
+
       def initialize(config, connection)
         @config = config
         # this is not actually used to run in the sql script
         @connection = connection
+        ensure_executable_exists
       end
 
       def apply(migration, force=nil)
@@ -22,6 +25,18 @@ module DBGeni
       def verify(migration)
       end
 
+      # Code no enabled
+      # def compile(code)
+      # end
+
+      def migration_errors
+        nil
+      end
+
+      # No code enabled
+      # def code_errors
+      # end
+
       private
 
       def run_in_sqlite(file, force=nil)
@@ -30,8 +45,8 @@ module DBGeni
           null_device = 'NUL:'
         end
 
-        logfile = "#{@config.base_directory}/log/" << DBGeni::Migrator.logfile(file)
-        IO.popen("sqlite3 #{@connection.database} > #{logfile} 2>&1", "w") do |p|
+        @logfile = "#{@config.base_directory}/log/" << DBGeni::Migrator.logfile(file)
+        IO.popen("sqlite3 #{@connection.database} > #{@logfile} 2>&1", "w") do |p|
           unless force
             p.puts ".bail on"
           end
@@ -48,8 +63,8 @@ module DBGeni
         has_errors = false
         unless force
           # For empty migrations, sometimes no logfile?
-          if File.exists? logfile
-            File.open(logfile, 'r').each do |l|
+          if File.exists? @logfile
+            File.open(@logfile, 'r').each do |l|
               if l =~ /^SQL error near line/
                 has_errors = true
                 break
@@ -67,6 +82,12 @@ module DBGeni
           unless force
             raise DBGeni::MigrationContainsErrors
           end
+        end
+      end
+
+      def ensure_executable_exists
+        unless Kernel.executable_exists?('sqlite3')
+          raise DBGeni::DBCLINotOnPath
         end
       end
 

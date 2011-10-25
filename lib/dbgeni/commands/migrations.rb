@@ -211,6 +211,9 @@ rescue DBGeni::MigrationNotApplied
 rescue DBGeni::MigrationNotOutstanding
   logger.error "#{e.to_s} does not exist or is not outstanding"
   exit(1)
+rescue DBGeni::DBCLINotOnPath
+  logger.error "The command line interface for the database is not on the path (sqlite3, sqlplus)"
+  exit(1)
 end
 
 

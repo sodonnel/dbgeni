@@ -3,10 +3,14 @@ module DBGeni
 
     class Oracle
 
+      attr_reader :logfile
+
       def initialize(config, connection)
         @config = config
         # this is not actually used to run in the sql script
         @connection = connection
+        @logfile    = nil
+        ensure_executable_exists
       end
 
       def apply(migration, force=nil)
@@ -26,6 +30,52 @@ module DBGeni
         run_in_sqlplus(File.join(@config.code_directory, code.filename), false, true)
       end
 
+      def migration_errors
+        nil
+      end
+
+      def code_errors
+        # The error part of the file file either looks like:
+
+        # SQL> show err
+        # No errors.
+        # SQL> spool off
+
+        # or
+
+        # SQL> show err
+        # Errors for PACKAGE BODY PKG1:
+
+        # LINE/COL ERROR
+        # -------- -----------------------------------------------------------------
+        # 5/1      PLS-00103: Encountered the symbol "END" when expecting one of the
+        # following:
+        # Error messages here
+        # SQL> spool off
+
+        # In the first case, return nil, but in the second case get everything after show err
+
+        error_msg = ''
+        start_search = false
+        File.open(@logfile, 'r').each_line do |l|
+          if !start_search && l =~ /^SQL> show err/
+            start_search = true
+            next
+          end
+          if start_search
+            if l =~ /^No errors\./
+              error_msg = nil
+              break
+            elsif l =~ /^SQL> spool off/
+              break
+            else
+              error_msg << l
+            end
+          end
+        end
+        error_msg
+      end
+
       private
 
       def run_in_sqlplus(file, force, is_proc=false)
@@ -33,6 +83,7 @@ module DBGeni
         if Kernel.is_windows?
           null_device = 'NUL:'
         end
+        @logfile = "#{@config.base_directory}/log/#{DBGeni::Migrator.logfile(file)}"
 
 #        sql_parameters = parameters
 #        unless parameters
@@ -49,7 +100,7 @@ module DBGeni
             p.puts "whenever sqlerror exit sql.sqlcode"
           end
           #            p.puts "START #{File.basename(file)} #{sql_parameters}"
-          p.puts "spool #{@config.base_directory}/log/#{DBGeni::Migrator.logfile(file)}"
+          p.puts "spool #{@logfile}"
           p.puts "START #{file}"
           if is_proc
             p.puts "/"
@@ -63,6 +114,12 @@ module DBGeni
           # If $? is anything but zero, raise an exception.
         if $? != 0
           raise DBGeni::MigrationContainsErrors
+        end
+      end
+
+      def ensure_executable_exists
+        unless Kernel.executable_exists?('sqlite3')
+          raise DBGeni::DBCLINotOnPath
         end
       end
 

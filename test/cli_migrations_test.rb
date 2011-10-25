@@ -305,6 +305,14 @@ class TestCLIMigrations < Test::Unit::TestCase
     assert_match(/is not a valid command/, response)
   end
 
+  def test_bad_migration_includes_logfile
+    response = Kernel.system("#{CLI} initialize -c #{TEMP_DIR}/sqlite.conf")
+    assert_equal(true, response)
+    helper_bad_sqlite_migration
+    response = `#{CLI} migrations apply all -c #{TEMP_DIR}/sqlite.conf`
+    assert_match(/Errors in/, response)
+  end
+
   ##################
   # Rollback Tests #
   ##################
@@ -544,6 +552,17 @@ class TestCLIMigrations < Test::Unit::TestCase
     response = Kernel.system("#{CLI} migrations rollback until 201108190002::test_migration -c #{TEMP_DIR}/sqlite.conf -f")
     assert_equal(true, response)
   end
+
+  def test_rollback_migration_that_error_includes_logfile
+    response = Kernel.system("#{CLI} initialize -c #{TEMP_DIR}/sqlite.conf")
+    assert_equal(true, response)
+    helper_good_sqlite_migration
+    response = Kernel.system("#{CLI} migrations apply all -c #{TEMP_DIR}/sqlite.conf")
+    helper_bad_sqlite_migration
+    response = `#{CLI} migrations rollback all -c #{TEMP_DIR}/sqlite.conf`
+    assert_match(/Errors in/, response)
+  end
+
 
 #  def test_rollback_until_migration_missing_migration_file
 #

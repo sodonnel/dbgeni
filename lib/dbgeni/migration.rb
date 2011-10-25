@@ -18,7 +18,7 @@ module DBGeni
     ROLLEDBACK  = 'Rolledback'
     # TODO - add verified state?
 
-    attr_reader :directory, :migration_file, :rollback_file, :name, :sequence
+    attr_reader :directory, :migration_file, :rollback_file, :name, :sequence, :logfile, :error_messages
 
     def self.initialize_from_internal_name(directory, name)
       name =~ /^(\d{12})::(.+)$/
@@ -68,6 +68,9 @@ module DBGeni
       rescue Exception => e
         set_failed!
         raise DBGeni::MigrationApplyFailed, self.to_s
+      ensure
+        @logfile        = migrator.logfile
+        @error_messages = migrator.migration_errors
       end
     end
 
@@ -85,6 +88,9 @@ module DBGeni
       rescue Exception => e
         set_failed!
         raise DBGeni::MigrationApplyFailed, self.to_s
+      ensure
+        @logfile        = migrator.logfile
+        @error_messages = migrator.migration_errors
       end
     end
 

@@ -1,7 +1,7 @@
 module DBGeni
   class Code
 
-    attr_reader :directory, :filename, :type, :name
+    attr_reader :directory, :filename, :type, :name, :logfile, :error_messages
     PACKAGE_SPEC = 'PACKAGE SPEC'
     PACKAGE_BODY = 'PACKAGE BODY'
     PROCEDURE    = 'PROCEDURE'
@@ -79,9 +79,10 @@ module DBGeni
         migrator.compile(self) #, force)
         set_applied(config,connection)
       rescue Exception => e
-        puts e.to_s
         raise DBGeni::CodeApplyFailed, "(#{self.to_s}) #{e.to_s}"
       end
+      @logfile = migrator.logfile
+      @error_messages = migrator.code_errors
     end
 
     def remove!(config, connection)

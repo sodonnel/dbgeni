@@ -153,6 +153,9 @@ rescue DBGeni:: DatabaseNotInitialized => e
 rescue DBGeni::CodeDirectoryNotExist
   logger.error "The code directory does not exist"
   exit(1)
+rescue DBGeni::DBCLINotOnPath
+  logger.error "The command line interface for the database is not on the path (sqlite3, sqlplus)"
+  exit(1)
 end
 
 

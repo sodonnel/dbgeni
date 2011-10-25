@@ -161,8 +161,13 @@ class TestCLICodeOracleTest < Test::Unit::TestCase
      assert_equal(true,response)
    end
 
-   
-   
+   def test_ensure_apply_procedure_with_error_lists_errors
+     helper_bad_procedure_file
+     response = `#{CLI} code apply outstanding -c #{TEMP_DIR}/oracle.conf`
+     assert_match(/with errors/, response)
+   end
+
+
 #   def test_apply_next_migration_with_errors
 #     response = Kernel.system("#{CLI} initialize -c #{TEMP_DIR}/sqlite.conf")
 #     assert_equal(true, response)

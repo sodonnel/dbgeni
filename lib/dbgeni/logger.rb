@@ -7,7 +7,7 @@ module DBGeni
     end
 
     def info(msg)
-      write_msg("info - #{msg}")
+      write_msg(msg)
     end
 
     def error(msg)

@@ -176,6 +176,33 @@ class TestCode < Test::Unit::TestCase
 
 
 
+  def test_logfile_is_available
+    helper_good_procedure_file
+    c = DBGeni::Code.new(File.join(TestHelper::TEMP_DIR, 'code'), 'proc1.prc')
+    assert_nothing_raised do
+      c.apply!(@config, @connection)
+    end
+    assert_not_nil(c.logfile)
+  end
+
+  def test_error_messages_are_nil_for_good_procedure
+    helper_good_procedure_file
+    c = DBGeni::Code.new(File.join(TestHelper::TEMP_DIR, 'code'), 'proc1.prc')
+    assert_nothing_raised do
+      c.apply!(@config, @connection)
+    end
+    assert_nil(c.error_messages)
+  end
+
+  def test_error_messages_available_for_bad_procedure
+    helper_bad_procedure_file
+    c = DBGeni::Code.new(File.join(TestHelper::TEMP_DIR, 'code'), 'proc1.prc')
+    assert_nothing_raised do
+      c.apply!(@config, @connection)
+    end
+    assert_not_nil(c.error_messages)
+  end
+
   private
 
   def get_state(m)

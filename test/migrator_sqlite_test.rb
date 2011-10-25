@@ -96,5 +96,13 @@ class TestMigratorSqlite < Test::Unit::TestCase
     end
   end
 
+  def test_logfile_accessible
+    migration = helper_good_sqlite_migration
+    assert_nothing_raised do
+      @migrator.apply(migration)
+    end
+    assert_not_nil(@migrator.logfile)
+  end
+
 end
 

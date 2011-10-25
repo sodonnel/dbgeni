@@ -256,6 +256,45 @@ class TestMigration < Test::Unit::TestCase
     assert_equal('Rolledback', m.status(@config, @connection))
   end
 
+  def test_logfile_available_on_apply
+    m = helper_good_sqlite_migration
+    assert_nothing_raised do
+      m.apply!(@config, @connection)
+    end
+    assert_not_nil(m.logfile)
+  end
+
+  def test_logfile_available_on_apply_bad_migration
+    m = helper_bad_sqlite_migration
+    assert_raises DBGeni::MigrationApplyFailed do
+      m.apply!(@config, @connection)
+    end
+    assert_not_nil(m.logfile)
+  end
+
+  def test_logfile_available_on_rollback
+    m = helper_good_sqlite_migration
+    assert_nothing_raised do
+      m.apply!(@config, @connection)
+    end
+    m = helper_good_sqlite_migration
+    assert_nothing_raised do
+      m.rollback!(@config, @connection)
+    end
+    assert_not_nil(m.logfile)
+  end
+
+  def test_logfile_available_on_rollback_bad_migration
+    m = helper_good_sqlite_migration
+    assert_nothing_raised do
+      m.apply!(@config, @connection)
+    end
+    m = helper_bad_sqlite_migration
+    assert_raises DBGeni::MigrationApplyFailed do
+      m.rollback!(@config, @connection)
+    end
+    assert_not_nil(m.logfile)
+  end
 
   private
 

@@ -109,5 +109,30 @@ class TestMigratorOracle < Test::Unit::TestCase
     end
   end
 
+  def test_logfile_accessible
+    code = helper_good_procedure_file
+    assert_nothing_raised do
+      @migrator.compile(code)
+    end
+    assert_match(/.+proc1\.prc/, @migrator.logfile)
+  end
+
+  def test_no_code_errors_reported_for_good_file
+    code = helper_good_procedure_file
+    assert_nothing_raised do
+      @migrator.compile(code)
+    end
+    assert_nil(@migrator.code_errors)
+  end
+
+  def test_code_errors_reported_for_bad_file
+    code = helper_bad_procedure_file
+    assert_nothing_raised do
+      @migrator.compile(code)
+    end
+    puts @migrator.code_errors
+    assert_not_nil(@migrator.code_errors)
+  end
+
 
 end
