@@ -22,6 +22,7 @@ class TestCode < Test::Unit::TestCase
   end
 
   def teardown
+    @connection.disconnect
   end
 
   def test_can_initialize_ok

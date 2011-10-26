@@ -43,13 +43,12 @@ unless name
   exit(1)
 end
 
-require 'dbgeni'
 require 'fileutils'
 
 config = DBGeni::Config.load_from_file($config_file)
 
 case command
-when 'migration'
+when 'migration', 'mig'
   datestamp = Time.now.strftime('%Y%m%d%H%M')
   %w(up down).each do |f|
     filename = File.join(config.migration_directory, "#{datestamp}_#{f}_#{name}.sql")
@@ -112,6 +111,9 @@ when 'function', 'fnc', 'func'
       f.puts "end #{name};"
     end
   end
+else
+  puts "Error: #{command} is not a invalid generator"
+  exit(1)
 end
 
 exit(0)

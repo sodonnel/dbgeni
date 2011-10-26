@@ -66,10 +66,13 @@ module DBGeni
 
       def initialize(user, password, database)
         @database = database
-        @connection = OCI8.new(user, password, database)
+        begin
+          @connection = OCI8.new(user, password, database)
+        rescue Exception => e
+          raise DBGeni::DBConnectionError, e.to_s
+        end
       end
 
     end
-
   end
 end

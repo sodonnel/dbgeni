@@ -39,6 +39,7 @@ class TestDBGeniBaseProcOracle < Test::Unit::TestCase
 
 
   def teardown
+    @connection.disconnect
   end
 
   #######################

@@ -18,8 +18,6 @@ if ! File.exists?($config_file)
   exit(1)
 end
 
-require 'dbgeni'
-
 begin
   cfg = DBGeni::Config.load_from_file($config_file)
 rescue DBGeni::ConfigSyntaxError => e

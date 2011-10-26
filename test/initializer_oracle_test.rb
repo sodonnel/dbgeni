@@ -22,6 +22,7 @@ class TestInitializerOracle < Test::Unit::TestCase
   end
 
   def teardown
+    @db_connection.disconnect
   end
 
   def test_not_initialized_returns_false_when_not_initialized

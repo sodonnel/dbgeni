@@ -32,5 +32,27 @@ if index = ARGV.index('--force') or index = ARGV.index('-f')
   ARGV.delete_at(index)
 end
 
-require 'dbgeni/commands/commands'
+require 'dbgeni'
+
+begin
+  require 'dbgeni/commands/commands'
+rescue DBGeni::ConfigSyntaxError => e
+  puts "There is an error in the config file: #{e.to_s}"
+  exit(1)
+rescue DBGeni::ConfigFileNotExist => e
+  puts "The config file #{$config_file} does not exist"
+  exit(1)
+rescue DBGeni::ConfigFileNotSpecified => e
+  puts "No config file was specified"
+  exit(1)
+rescue DBGeni::ConfigAmbiguousEnvironment => e
+  puts "No environment specified and config file defines more than one environment"
+  exit(1)
+rescue DBGeni::EnvironmentNotExist => e
+  puts "The environment #{$environment_name} does not exist"
+  exit(1)
+rescue DBGeni::DBConnectionError => e
+  puts "Failed to establish databse connection: #{e.to_s}"
+  exit(1)
+end
 

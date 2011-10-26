@@ -2,17 +2,19 @@ Maybe more tests for base apply and rollback until
 Better Logging
 ----------------------------------------------
 Milestones
-Prompt for password if missing and needed - look at environment.rb __get_param. Use this to prompt for password if it is needed. Also, make sure sqlite related things don't ask for it, as they don't need it.
-----------------------------------------------
-Parameters in SQL scripts
-Global Parameters
+Extract first error message for migrations and display (and aborted code errors due to insufficient privs)
 ----------------------------------------------
 Refactor Migrators to have a parent class to inherit methods from
 MYSQL support
 ----------------------------------------------
+Parameters in SQL scripts
+Global Parameters
+----------------------------------------------
 DAT files
 Validation hooks
 Validation scripts
+Make password be hidden when typing it in from a prompt
+Make sure something is typed in (ie not blank) or reprompt
 
 
 

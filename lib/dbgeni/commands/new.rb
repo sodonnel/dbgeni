@@ -10,9 +10,7 @@ EOF
   exit
 end
 
-
 require 'fileutils'
-
 
 directory = ARGV.shift
 

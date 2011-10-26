@@ -70,8 +70,12 @@ module DBGeni
       private
 
       def initialize(database)
-        @connection = SQLite3::Database.new(database)
         @database   = database
+        begin
+          @connection = SQLite3::Database.new(database)
+        rescue Exception => e
+          raise DBGeni::DBConnectionError, e.to_s
+        end
       end
 
     end

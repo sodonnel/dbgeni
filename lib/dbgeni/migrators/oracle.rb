@@ -124,6 +124,9 @@ module DBGeni
           # good exit status is 0 (zero) anything else means it went wrong
           # If $? is anything but zero, raise an exception.
         if $? != 0
+          # Code compile errors never get here as they don't make sqlplus abort.
+          # But if the user does not have privs to create the proc / trigger etc,
+          # the code will abort to here via a insufficient privs error.
           raise DBGeni::MigrationContainsErrors
         end
       end

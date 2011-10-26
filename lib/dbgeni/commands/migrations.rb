@@ -62,29 +62,10 @@ EOF
   exit
 end
 
-require 'dbgeni'
-
 command = ARGV.shift
 
 installer = nil
-begin
-  installer = DBGeni::Base.installer_for_environment($config_file, $environment_name)
-rescue DBGeni::ConfigSyntaxError => e
-  puts "There is an error in the config file: #{e.to_s}"
-  exit(1)
-rescue DBGeni::ConfigFileNotExist => e
-  puts "The config file #{$config_file} does not exist: #{e.to_s}"
-  exit(1)
-rescue DBGeni::ConfigFileNotSpecified => e
-  puts "No config file was specified"
-  exit(1)
-rescue DBGeni::ConfigAmbiguousEnvironment => e
-  puts "No environment specified and config file defines more than one environment"
-  exit(1)
-rescue DBGeni::EnvironmentNotExist => e
-  puts "The environment #{$environment_name} does not exist"
-  exit(1)
-end
+installer = DBGeni::Base.installer_for_environment($config_file, $environment_name)
 
 logger    = DBGeni::Logger.instance
 
@@ -205,13 +186,13 @@ rescue DBGeni:: DatabaseNotInitialized => e
 rescue DBGeni::NoAppliedMigrations => e
   logger.error "There are no applied migrations to rollback"
   exit(1)
-rescue DBGeni::MigrationNotApplied
+rescue DBGeni::MigrationNotApplied => e
   logger.error "#{e.to_s} has not been applied so cannot be rolledback"
   exit(1)
-rescue DBGeni::MigrationNotOutstanding
+rescue DBGeni::MigrationNotOutstanding => e
   logger.error "#{e.to_s} does not exist or is not outstanding"
   exit(1)
-rescue DBGeni::DBCLINotOnPath
+rescue DBGeni::DBCLINotOnPath => e
   logger.error "The command line interface for the database is not on the path (sqlite3, sqlplus)"
   exit(1)
 end

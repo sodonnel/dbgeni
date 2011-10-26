@@ -234,7 +234,11 @@ module DBGeni
           @logger.info "Applied #{code_obj.to_s}"
         end
       rescue DBGeni::CodeApplyFailed => e
-        @logger.error "Failed #{code_obj.to_s}"
+        # TODO - the only real way code can get here is if the user had insufficient privs
+        # to create the proc, or there was other bad stuff in the proc file.
+        # In this case, dbgeni should stop - but also treat the error like a migration error
+        # as the error message will be in the logfile in the format standard SQL errors are.
+        @logger.error "Failed to apply #{code_obj.to_s}. Errors in #{migration.logfile}"
         raise DBGeni::CodeApplyFailed, e.to_s
       end
     end
@@ -256,8 +260,12 @@ module DBGeni
         code_obj.remove!(@config, connection, force)
         @logger.info "Removed #{code_obj.to_s}"
       rescue DBGeni::CodeRemoveFailed => e
-        puts "Failed to remove #{code_obj.to_s}: #{e.to_s}"
-        @logger.error "Failed to remove #{code_obj.to_s}: #{e.to_s}"
+        # TODO - the only real way code can get here is if the user had insufficient privs
+        # to create the proc, or there was other bad stuff in the proc file.
+        # In this case, dbgeni should stop - but also treat the error like a migration error
+        # as the error message will be in the logfile in the format standard SQL errors are.
+
+        @logger.error "Failed to remove #{code_obj.to_s}. Errors in #{migration.logfile}"
         raise DBGeni::CodeRemoveFailed
       end
     end

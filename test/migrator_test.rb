@@ -16,6 +16,7 @@ class TestMigrator < Test::Unit::TestCase
   end
 
   def teardown
+    @connection_ora.disconnect
   end
 
   def test_sqlite_migrator_loads

@@ -30,6 +30,7 @@ class TestCodeList < Test::Unit::TestCase
 
   def teardown
     FileUtils.rmdir(@code_directory)
+    @connection.disconnect
   end
 
   def test_exception_raised_when_code_directory_does_not_exist

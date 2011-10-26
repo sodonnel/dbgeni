@@ -58,13 +58,19 @@ module DBGeni
       #if nil == args[0]
       #  raise ""
       #end
-      @params[name] = args[0]
+      @params[name] = args[0] unless args[0] == ''
     end
 
     def __get_parameter(name, *args)
       unless @params.has_key?(name)
-      #  warn "Parameter #{name} is not defined for #{@environment_name}"
-        nil
+        # Password is a special case - if it is not defined it should be prompted for
+        if name == 'password'
+          puts "Please enter the password for #{@params['database']} in the #{@environment_name} environment\n"
+          print "password: "
+          password = gets.chomp
+          @params[name] = password
+          password
+        end
       else
         @params[name]
       end

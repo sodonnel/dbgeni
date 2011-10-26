@@ -31,6 +31,7 @@ class TestMigratorOracle < Test::Unit::TestCase
   end
 
   def teardown
+    @connection.disconnect
   end
 
   def test_good_migration_runs_without_error
