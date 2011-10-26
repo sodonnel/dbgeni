@@ -128,7 +128,15 @@ begin
     sub_command = ARGV.shift
     case sub_command
     when 'all'
-    when /^(\d{12})::/
+      installer.remove_all_code
+    when /\.(#{DBGeni::Code::EXT_MAP.keys.join('|')})$/
+      files = ARGV.select{ |f| f =~ /\.(#{DBGeni::Code::EXT_MAP.keys.join('|')})$/ }
+      files.unshift sub_command
+      code = files.map {|f| DBGeni::Code.new(installer.config.code_dir, f)}
+      # Now attempt to remove each code file
+      code.each do |c|
+        installer.remove_code(c, $force)
+      end
     else
       logger.error "#{sub_command} is not a valid command"
     end
@@ -137,6 +145,9 @@ begin
   end
 rescue DBGeni::NoOutstandingCode => e
   logger.error "There are no outstanding code modules to apply"
+  exit(1)
+rescue DBGeni::NoCodeFilesExist => e
+  logger.error "There are no code files in the code_directory"
   exit(1)
 rescue DBGeni::CodeApplyFailed => e
   logger.error "There was a problem applying #{e.to_s}"

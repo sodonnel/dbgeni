@@ -9,7 +9,11 @@ module DBGeni
       rescue NameError
         raise DBGeni::InvalidConnectorForDBType, config.db_type
       end
-      required_method.call(config.env.username, config.env.password, config.env.database)
+      required_method.call(config.env.username,
+                           # SQLITE doesn't need a password, so prevent asking for it
+                           # or it may be promoted for
+                           config.env.database == 'sqlite' ? '' : config.env.password,
+                           config.env.database)
     end
 
     private

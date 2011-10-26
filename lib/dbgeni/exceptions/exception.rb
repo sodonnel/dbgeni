@@ -49,6 +49,8 @@ module DBGeni
   class NoOutstandingCode           < Exception; end
   class NoCodeFilesExist            < Exception; end
 
-  class DBGeni::DBCLINotOnPath      < Exception; end
+  class DBCLINotOnPath              < Exception; end
+  class CodeRemoveFailed            < Exception; end
+  class NotImplemented              < Exception; end
 
 end

@@ -29,6 +29,10 @@ module TestHelper
     rescue DBGeni::DatabaseAlreadyInitialized
     end
     conn.execute("delete from dbgeni_migrations")
+    begin
+      conn.execute("drop procedure proc1")
+    rescue
+    end
     conn.disconnect
   end
 
@@ -173,6 +177,49 @@ module TestHelper
       end;", 'proc1.prc')
   end
 
+  def helper_good_function_file
+    create_procedure_file("create or replace function func1
+      return varchar2
+      as
+      begin
+         null;
+      end;", 'func1.fnc')
+  end
+
+  def helper_good_trigger_file
+    create_procedure_file("create or replace trigger trg1
+                           before insert on dbgeni_migrations
+      begin
+         null;
+      end;", 'trg1.trg')
+  end
+
+  def helper_good_package_spec_file
+    create_procedure_file("create or replace package pkg1
+      as
+        procedure foobar;
+      end;", 'pkg1.pks')
+    create_procedure_file("create or replace package body pkg1
+      as
+        procedure foobar
+        is
+        begin
+          null;
+        end;
+      end;", 'pkg1.pkb')
+  end
+
+  def helper_good_package_body_file
+      create_procedure_file("create or replace package body pkg1
+      as
+        procedure foobar
+        is
+        begin
+          null;
+        end;
+      end;", 'pkg1.pkb')
+  end
+
   def helper_bad_procedure_file
     create_procedure_file("create or replace procedure proc1
       as
@@ -185,9 +232,9 @@ module TestHelper
   private
 
   def create_procedure_file(content, filename)
-    FileUtils.rm_rf(File.join(TEMP_DIR, 'code', "*.prc"))
+    FileUtils.rm_rf(File.join(TEMP_DIR, 'code', "*.*"))
     FileUtils.mkdir_p(File.join(TEMP_DIR, 'code'))
-    File.open(File.join(TEMP_DIR, 'code', 'proc1.prc'), 'w') do |f|
+    File.open(File.join(TEMP_DIR, 'code', filename), 'w') do |f|
       f.puts content
     end
     DBGeni::Code.new(File.join(TEMP_DIR, 'code'), filename)

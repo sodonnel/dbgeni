@@ -35,6 +35,10 @@ By default, dbgeni uses a new SQLite database, so it is easy to experiment.
 
     $ dbgeni migrations apply all
 
+# Apply Stored Procedures
+
+    $ dbgeni code apply all
+
 # More information
 
 Have a look at the [overview](/overview.html) and the [manual](/manual.html) to learn how DBGeni works and all the other features.

@@ -31,6 +31,10 @@ class TestDBGeniBaseProcOracle < Test::Unit::TestCase
     rescue DBGeni::DatabaseAlreadyInitialized
     end
     @connection.execute("delete from #{@config.db_table}")
+    begin
+      @connection.execute("drop procedure proc1")
+    rescue
+    end
   end
 
 
@@ -117,6 +121,50 @@ class TestDBGeniBaseProcOracle < Test::Unit::TestCase
       @installer.apply_outstanding_code
     end
   end
+
+  ###################
+  # Code - removing #
+  ###################
+
+  def test_remove_single_procedure_which_is_not_installed
+    code_obj = @installer.outstanding_code.first
+    assert_nothing_raised do
+      @installer.remove_code(code_obj)
+    end
+  end
+
+  def test_remove_single_procedure_which_is_installed
+    code_obj = @installer.outstanding_code.first
+    code_obj.apply!(@config, @connection)
+    assert_nothing_raised do
+      @installer.remove_code(code_obj)
+    end
+    assert_equal(5, @installer.outstanding_code.length)
+  end
+
+  def test_remove_single_procedure_which_does_not_exist_raises
+    code_obj = DBGeni::Code.new(@config.code_dir, 'someproc.prc')
+    assert_raises DBGeni::CodeFileNotExist do
+      @installer.remove_code(code_obj)
+    end
+  end
+
+  def test_remove_all_code_when_none_installed
+    assert_nothing_raised do
+      @installer.remove_all_code
+    end
+    assert_equal(5, @installer.outstanding_code.length)
+  end
+
+  def test_remove_all_code_when_installed
+    assert_nothing_raised do
+      @installer.apply_all_code
+      assert_equal(0, @installer.outstanding_code.length)
+      @installer.remove_all_code
+    end
+    assert_equal(5, @installer.outstanding_code.length)
+  end
+
 
   private
 

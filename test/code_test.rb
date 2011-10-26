@@ -174,7 +174,46 @@ class TestCode < Test::Unit::TestCase
   # remove! #
   ###########
 
+  def test_no_error_when_remove_procedure_that_doesnt_exist
+    code = helper_good_procedure_file
+    begin
+      @connection.execute("drop procedure proc1")
+    rescue Exception => e
+    end
+    assert_nothing_raised do
+      code.remove!(@config, @connection)
+    end
+  end
 
+  def test_procedure_removed_sucessfully
+    code = helper_good_procedure_file
+    begin
+      @connection.execute("drop procedure proc1")
+    rescue Exception => e
+    end
+    code.apply!(@config, @connection)
+    assert_equal(true,code.current?(@config, @connection))
+    assert_nothing_raised do
+      code.remove!(@config, @connection)
+    end
+    assert_equal(false,code.current?(@config, @connection))
+    # ensure procedure removed from database.
+    assert_equal(0, @connection.execute("select count(*) from all_objects where object_name = 'PROC1'")[0][0])
+    # ensure the migrations table entry is purged.
+    assert_equal(0, @connection.execute("select count(*) from #{@config.db_table} where migration_name = 'PROC1'")[0][0])
+  end
+
+  def test_remove_procedure_when_file_not_exist_raises_exception
+    c = DBGeni::Code.new(File.join(TestHelper::TEMP_DIR, 'code'), 'proc2.prc')
+    assert_raises DBGeni::CodeFileNotExist do
+      c.remove!(@config, @connection)
+    end
+  end
+
+
+  ###############
+  # Other tests #
+  ###############
 
   def test_logfile_is_available
     helper_good_procedure_file

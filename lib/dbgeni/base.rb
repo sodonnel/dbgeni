@@ -239,6 +239,29 @@ module DBGeni
       end
     end
 
+    def remove_all_code
+      ensure_initialized
+      code_files = code
+      if code_files.length == 0
+        raise DBGeni::NoCodeFilesExist
+      end
+      code_files.each do |c|
+        remove_code(c)
+      end
+    end
+
+    def remove_code(code_obj, force=nil)
+      ensure_initialized
+      begin
+        code_obj.remove!(@config, connection, force)
+        @logger.info "Removed #{code_obj.to_s}"
+      rescue DBGeni::CodeRemoveFailed => e
+        puts "Failed to remove #{code_obj.to_s}: #{e.to_s}"
+        @logger.error "Failed to remove #{code_obj.to_s}: #{e.to_s}"
+        raise DBGeni::CodeRemoveFailed
+      end
+    end
+
     ###########################
     # Various utility methods #
     ###########################

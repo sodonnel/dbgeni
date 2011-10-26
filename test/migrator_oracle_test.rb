@@ -20,6 +20,13 @@ class TestMigratorOracle < Test::Unit::TestCase
       @connection.execute("drop table foo")
     rescue Exception => e
     end
+    ["drop procedure proc1", "drop package body pkg1", "drop package pkg1",
+     "drop trigger trg1", "drop function func1"].each do |command|
+      begin
+        @connection.execute(command)
+      rescue Exception => e
+      end
+    end
     @migrator = DBGeni::Migrator.initialize(@config, @connection)
   end
 
@@ -130,9 +137,67 @@ class TestMigratorOracle < Test::Unit::TestCase
     assert_nothing_raised do
       @migrator.compile(code)
     end
-    puts @migrator.code_errors
     assert_not_nil(@migrator.code_errors)
   end
+
+  def test_no_error_dropping_code_object_that_is_not_on_database
+    code = helper_good_procedure_file
+    assert_nothing_raised do
+      @migrator.remove(code)
+    end
+  end
+
+  def test_procedure_is_dropped_successfully
+    code = helper_good_procedure_file
+    assert_nothing_raised do
+      @migrator.compile(code)
+      assert_equal(1, @connection.execute("select count(*) from all_objects where object_name = 'PROC1'")[0][0])
+      @migrator.remove(code)
+    end
+    assert_equal(0, @connection.execute("select count(*) from all_objects where object_name = 'PROC1'")[0][0])
+  end
+
+  def test_function_is_dropped_successfully
+    code = helper_good_function_file
+    assert_nothing_raised do
+      @migrator.compile(code)
+      assert_equal(1, @connection.execute("select count(*) from all_objects where object_name = 'FUNC1'")[0][0])
+      @migrator.remove(code)
+    end
+    assert_equal(0, @connection.execute("select count(*) from all_objects where object_name = 'FUNC1'")[0][0])
+  end
+
+  def test_package_body_is_dropped_successfully
+    code = helper_good_package_spec_file
+    assert_nothing_raised do
+      @migrator.compile(code)
+      assert_equal(1, @connection.execute("select count(*) from all_objects where object_name = 'PKG1' and object_type = 'PACKAGE'")[0][0])
+      @migrator.remove(code)
+    end
+    assert_equal(0, @connection.execute("select count(*) from all_objects where object_name = 'PKG1' and object_type = 'PACKAGE'")[0][0])
+  end
+
+  def test_package_body_is_dropped_successfully
+    code = helper_good_package_body_file
+    assert_nothing_raised do
+      @migrator.compile(code)
+          assert_equal(1, @connection.execute("select count(*) from all_objects where object_name = 'PKG1' and object_type = 'PACKAGE BODY'")[0][0])
+      @migrator.remove(code)
+    end
+    assert_equal(0, @connection.execute("select count(*) from all_objects where object_name = 'PKG1' and object_type = 'PACKAGE BODY'")[0][0])
+
+  end
+
+  def test_trigger_is_dropped_successfully
+    code = helper_good_trigger_file
+    assert_nothing_raised do
+      @migrator.compile(code)
+      assert_equal(1, @connection.execute("select count(*) from all_objects where object_name = 'TRG1'")[0][0])
+      @migrator.remove(code)
+    end
+    assert_equal(0, @connection.execute("select count(*) from all_objects where object_name = 'TRG1'")[0][0])
+  end
+
 
 
 end

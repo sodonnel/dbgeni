@@ -22,20 +22,25 @@ module DBGeni
         run_in_sqlite(filename, force)
       end
 
-      def verify(migration)
-      end
-
-      # Code no enabled
-      # def compile(code)
-      # end
-
       def migration_errors
         nil
       end
 
-      # No code enabled
-      # def code_errors
-      # end
+      def verify(migration)
+        raise DBGeni::NotImplemented
+      end
+
+      def compile(code)
+        raise DBGeni::NotImplemented
+      end
+
+      def remove(code)
+        raise DBGeni::NotImplemented
+      end
+
+      def code_errors
+        raise DBGeni::NotImplemented
+      end
 
       private
 

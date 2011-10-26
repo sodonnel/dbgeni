@@ -85,13 +85,17 @@ module DBGeni
       @error_messages = migrator.code_errors
     end
 
-    def remove!(config, connection)
+    def remove!(config, connection, force=false)
+      env(config, connection)
+      ensure_file_exists
+      migrator = DBGeni::Migrator.initialize(config, connection)
+      begin
+        migrator.remove(self)
+        remove_db_record
+      rescue Exception => e
+        raise DBGeni::CodeRemoveFailed, e.to_s
+      end
     end
-
-#    def set_updated(config, connection)
-#      env(config, connection)
-#      remove_db_record
-#    end
 
     def to_s
       "#{@name} - #{@type}"
@@ -99,13 +103,6 @@ module DBGeni
 
 
     private
-
-#    def existing_db_record
-#      results = @connection.execute("select sequence_or_hash, migration_name, migration_type, migration_state, start_dtm, completed_dtm
-#                                    from #{@config.db_table}
-#                                    where migration_name = :name
-#                                    and   migration_type = :type", @name, @type)
-#    end
 
     def insert_or_set_state(state)
       # no hash in the DB means there is no db record...

@@ -23,15 +23,26 @@ module DBGeni
         run_in_sqlplus(filename, force)
       end
 
+      def migration_errors
+        nil
+      end
+
       def verify(migration)
+        raise DBGeni::NotImplemented
       end
 
       def compile(code)
         run_in_sqlplus(File.join(@config.code_directory, code.filename), false, true)
       end
 
-      def migration_errors
-        nil
+      def remove(code)
+        begin
+          @connection.execute(drop_command(code))
+        rescue Exception => e
+          unless e.to_s =~ /(object|trigger) .+ does not exist/
+            raise DBGeni::CodeRemoveFailed, e.to_s
+          end
+        end
       end
 
       def code_errors
@@ -120,6 +131,21 @@ module DBGeni
       def ensure_executable_exists
         unless Kernel.executable_exists?('sqlite3')
           raise DBGeni::DBCLINotOnPath
+        end
+      end
+
+      def drop_command(code)
+        case code.type
+        when DBGeni::Code::PACKAGE_SPEC
+          "drop package #{code.name}"
+        when DBGeni::Code::PACKAGE_BODY
+          "drop package body #{code.name}"
+        when DBGeni::Code::TRIGGER
+          "drop trigger #{code.name}"
+        when DBGeni::Code::FUNCTION
+          "drop function #{code.name}"
+        when DBGeni::Code::PROCEDURE
+          "drop procedure #{code.name}"
         end
       end
 

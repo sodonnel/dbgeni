@@ -38,7 +38,14 @@
    * [rollback until](#migrations_rollback_until)
    * [rollback specific](#migrations_rollback_specific)
  * [Code Commands](#code_commands)
-
+   * [list](#code_commands_list)
+   * [current](#code_commands_current)
+   * [outstanding](#code_commands_outstanding)
+   * [apply all](#code_apply_all)
+   * [apply outstanding](#code_apply_outstanding)
+   * [apply specific](#code_apply_specific)
+   * [remove all](#code_remove_all)
+   * [remove specific](#code_remove_specific)
  * [Option Switches](#option_switches)
    * [environment-name](#option_switches_environment_name)
    * [config-file](#option_switches_config)
@@ -182,7 +189,7 @@ If it is not specified the default is "./migrations".
 
 ### code_directory
 
-The code_directory option defines where dbgeni will find code files. It can be an absolute path, or normally a path relative to the location of the config file, eg:
+The code\_directory option defines where dbgeni will find code files. It can be an absolute path, or normally a path relative to the location of the config file, eg:
 
     migrations_directory "./code"
     migrations_directory "/home/sodonnel/code"
@@ -308,7 +315,7 @@ This migration is now in a state that it can be applied to the target database a
 
 # Stored Procedures<a id="stored_procedures"></a>
 
-Many database applications make use of stored procedures and dbgeni can help with installing them too. 
+Many database applications make use of stored procedures and dbgeni can install them too. 
 
 All code should be stored in the "code_directory", and the naming of the files is important. The filename should be given the same name as the object name in the database. For example, if a code file creates a procedure called insert_customer, then the file should be called "insert_customer.prc". In this case, the name of the file identifies the database object, and the file extension identifies the type of object.
 
@@ -323,17 +330,32 @@ There are 5 allowed file extensions:
 The naming of the files is very important for removing stored procedures, as the appropriate drop command will be generated from the filename, eg:
 
     insert_customer.prc => drop procedure insert_customer;
+    insert_customer.fnc => drop function  insert_customer;
 
 Dbgeni considers stored procedure code to be in one of two states:
 
  * Outstanding - This is code which has never been applied to the database, or has been changed since it was last applied.
  * Current - This is code that has been applied to the database, and has not been changed since it was last applied.
 
-To determine if a code module is current, dbgeni generates a hash of the file on disk, and compares it to a hash that was stored in the dbgeni_migrations table on the database. If the two match, then the code is considered current. If the code module is changed on the database manually or using another tool, then dbgeni will not see the change, and will still consider the module current.
+To determine if a code module is current, dbgeni generates a hash of the relevant file in the code_directory, and compares it to a hash that was stored in the dbgeni_migrations table on the database. If the two match, then the code is considered current. 
+
+If the code module is changed on the database manually or using another tool, then dbgeni will not see the change, and will still consider the module current.
 
 When a code module is current, it does not necessarily mean it complied without error on the database. Unlike with migrations, dbgeni does not error if a code module compiles with errors.
 
 ## Generating Stored Procedure Files<a id="stored_procedures_generating"></a>
+
+A dbgeni command can be used to create empty code files named in the correct way:
+
+    $ dbgeni generate package   manage_customer
+    $ dbgeni generate procedure insert_customer
+    $ dbgeni generate function  select_customer
+    $ dbgeni generate trigger   biud_on_customer
+
+Each of these commands will create a file in the code_directory with the correct name and some boiler plate code. In the case of a package, it will generate a file for each of the package specification and body.
+
+Before the code can be applied to the database, the template file should be edited to contain valid code and then use the [code_commands](#code_commands) to apply it to the database.
+
 
 # Logging<a id="logging"></a>
 
@@ -536,6 +558,79 @@ If any of the migrations are not applied or a problem is encountered rolling bac
 As with applying migrations, rollbacks can be forced through with the --force (-f for short) switch. This is particularly useful if an apply failed part way through and you want to clean up any changes it made without worrying about where the original migration failed.
 
     $ dbgeni migrations rollback all --force
+
+# Code Commands<a id="code_commands"></a>
+
+The code command has several sub-commands to list, apply and remove code modules. For all code commands the --environment-name (-e) and --config-file (-c) switches can be used if necessary.
+
+## list<a id="code_commands_list"></a>
+
+To list all code modules stored in the code\_directory, use the list sub-command:
+
+    $ dbgeni code list 
+
+## current<a id="code_commands_current"></a>
+
+To list all code modules stored in the code\_directory that are considered current, use the current sub-command:
+
+    $ dbgeni code current
+
+A module is considered current if the hash of the file in the code\_directory is the same as the hash stored in the dbgeni\_migrations table in the database.
+
+## outstanding<a id="code_commands_outstanding"></a>
+
+To list all code modules stored in the code\_directory that are considered outstanding, use the outstanding sub-command:
+
+    $ dbgeni code outstanding
+
+A module is considered outstanding if the hash of the file in the code directory is not the same as the hash stored in the dbgeni_migrations table in the database or there is no entry in the database for the file.
+
+## Apply Code Modules
+
+One of several apply sub-commands can be used to install code modules onto the database. Code modules are applied to the database in increasing alphabetic order.
+
+### apply all<a id="code_apply_all"></a>
+
+To apply all the code modules in the code\_directory, whether they are current or outstanding, use the all command, eg:
+
+    $ dbgeni code apply all
+
+This command will result in a total refresh of all code on the database. It is best used for initial installs, or on test or development environments.
+
+### apply outstanding<a id="code_apply_outstanding"></a>
+
+To apply the code modules in the code\_directory that are outstanding, use the outstanding command, eg:
+
+    $ dbgeni code apply outstanding
+
+### apply specific<a id="code_apply_specific"></a>
+
+To apply a single or several code modules, you can specify the filenames on the command line, eg:
+
+    $ dbgeni code apply create_cust.prc get_cust.fnc
+
+If a code module is current, then an error will be displayed and dbgeni will stop processing. If you want to force a current module to be applied to the database, use the --force switch.
+
+## Remove Code Modules
+
+One of several sub-commands can be used to remove code modules from the database.
+
+### remove all<a id="code_remove_all"></a>
+
+To remove all code modules that are in the code\_directory, use the all command, eg:
+
+    $ dbgeni remove all
+
+Note this command will not remove code modules that were not installed by dbgeni.
+
+### remove specific<a id="code_remove_specific"></a>
+
+To remove one or several specific code modules, you can specify the filenames on the command line, eg:
+
+    $ dbgeni code remove create_cust.prc get_cust.fnc
+
+The remove command will not error if the code module is not installed.
+
 
 # Option Switches<a id="option_switches"></a>
 
