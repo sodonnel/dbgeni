@@ -18,6 +18,10 @@ migration  Generates a set of files for a new database migration. The only param
            is a name for the migration:
              dbgeni generate migration name_for_this_migration
 
+milestone  Generates a milestone, which is like a tag on a particular migration indicating
+           that a migration completes a release of the application
+             dbgenu generate milestone name_for_milestone existing_migration_for_milestone
+
 package    Generates a pair of files for a plsql package with the given package name
              dbgeni generate package my_package_name
 
@@ -39,7 +43,7 @@ command = ARGV.shift
 name    = ARGV.shift
 
 unless name
-  puts "error: You must specify a name for the migration"
+  puts "error: You must specify a name for the #{command}"
   exit(1)
 end
 
@@ -111,6 +115,29 @@ when 'function', 'fnc', 'func'
       f.puts "end #{name};"
     end
   end
+when 'milestone'
+  filename = File.join(config.migration_directory, "#{name}.milestone")
+  if File.exists?(filename)
+    puts "milestone already exists"
+    exit(1)
+  end
+  # The migration can be either the migration filename, or the internal :: name
+  migration = ARGV.shift
+  unless migration
+    puts "You must specify a migration for the milestone"
+    exit(1)
+  end
+  if migration =~ /::/ # internal name
+    migration = DBGeni::Migration.filename_from_internal_name(migration)
+  end
+  unless File.exists?(File.join(config.migration_directory, migration))
+    puts "The migration #{migration} does not exist"
+    exit(1)
+  end
+  File.open(filename, 'w') do |f|
+    f.puts migration
+  end
+  puts "creating: #{filename}"
 else
   puts "Error: #{command} is not a invalid generator"
   exit(1)

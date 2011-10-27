@@ -26,6 +26,21 @@ class TestMigration < Test::Unit::TestCase
   def teardown
   end
 
+  def test_internal_name_to_filename
+    assert_equal("201101010000_up_name_of_mig.sql",
+                 DBGeni::Migration.filename_from_internal_name("201101010000::name_of_mig"))
+  end
+
+  def test_filename_to_internal_name
+    assert_equal("201101010000::name_of_mig",
+                 DBGeni::Migration.internal_name_from_filename("201101010000_up_name_of_mig.sql"))
+    assert_equal("201101010000::name_of_mig",
+                 DBGeni::Migration.internal_name_from_filename("201101010000_down_name_of_mig.sql"))
+
+  end
+
+
+
   def test_valid_filename_ok
     m = DBGeni::Migration.new('anydir', @valid_migration)
     assert_equal('this_is_a_test_migration', m.name)

@@ -20,9 +20,18 @@ module DBGeni
 
     attr_reader :directory, :migration_file, :rollback_file, :name, :sequence, :logfile, :error_messages
 
+    def self.internal_name_from_filename(filename)
+      filename =~ /^(\d{12})_(up|down)_(.+)\.sql$/
+      "#{$1}::#{$3}"
+    end
+
+    def self.filename_from_internal_name(internal_name)
+      internal_name =~ /^(\d{12})::(.+)$/
+      "#{$1}_up_#{$2}.sql"
+    end
+
     def self.initialize_from_internal_name(directory, name)
-      name =~ /^(\d{12})::(.+)$/
-      self.new(directory, "#{$1}_up_#{$2}.sql")
+      self.new(directory, Migration.filename_from_internal_name(name))
     end
 
     def initialize(directory, migration)
