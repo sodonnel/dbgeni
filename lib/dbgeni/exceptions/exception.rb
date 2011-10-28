@@ -54,4 +54,6 @@ module DBGeni
   class CodeRemoveFailed            < Exception; end
   class NotImplemented              < Exception; end
 
+  class MilestoneHasNoMigration     < Exception; end
+
 end

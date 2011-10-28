@@ -16,6 +16,7 @@
  * [Initialize The Database](#initialize)
  * [Migrations](#migrations)
    * [Generating Migrations](#migrations_generating)
+   * [Milestones](#migrations_milestones)
  * [Stored Procedures](#stored_procedures)
    * [Generating Stored Procedure Files](#stored_procedures_generating)
  * [Logging](#logging)
@@ -25,6 +26,11 @@
     * [initialize](#setup_commands_initialize)
  * [Generator Commands](#generator_commands)
     * [migration](#generator_commands_migration)
+    * [procedure](#generator_commands_procedure)
+    * [function](#generator_commands_function)
+    * [package](#generator_commands_package)
+    * [trigger](#generator_commands_trigger)
+    * [milestone](#generator_commands_milestone)
  * [Migration Commands](#migration_commands)
    * [list](#migrations_list)
    * [applied](#migrations_applied)
@@ -33,10 +39,14 @@
    * [apply next](#migrations_apply_next)
    * [apply until](#migrations_apply_until)
    * [apply specific](#migrations_apply_specific)
+   * [apply milestone](#migrations_apply_milestone)
    * [rollback all](#migrations_rollback_all)
    * [rollback last](#migrations_rollback_last)
    * [rollback until](#migrations_rollback_until)
    * [rollback specific](#migrations_rollback_specific)
+   * [rollback milestone](#migrations_rollback_milestone)
+ * [Milestone Commands](#milestone_commands)
+   * [list](#milestone_commands_list)
  * [Code Commands](#code_commands)
    * [list](#code_commands_list)
    * [current](#code_commands_current)
@@ -313,6 +323,29 @@ Next edit the DOWN file and add the equivalent drop statement, eg:
 
 This migration is now in a state that it can be applied to the target database and rolled back easily using the dbgeni [migration_commands](#migration_commands), but can still be run manually if necessary.
 
+## Milestones<a id="migrations_milestones"></a>
+
+Over the lifetime of a database application, many migrations will be added and they will normally be pushed to production in batches. Each time new migrations are pushed to production, the database structure moves to a new version, determined by which migrations have been applied. As migrations are applied in increasing date stamp order, the version of the database is determined by the newest migration that is to be applied for the release. 
+
+The final migration to be applied during a release is known as a milestone migration, and a "milestone" can be created to mark it.
+
+A milestone is set by creating a file in the migrations_directory, that has the name of the milestone as the filename and an extension of ".milestone". The file should contain the filename of the milestone migration on the first line and nothing else. For example, to set a milestone called release_1.0, with the migration 201101011754_up_create_customer_table.sql as the milestone, first create a file in the migrations directory:
+
+    $ release_1.0.milestone
+
+And the contents of the file:
+
+    201101011754_up_create_customer_table.sql
+
+You can use the [milestone generator](#generator_commands_milestone) to easily create milestones, and the [milestones](#milestone_commands) command to list any that exist.
+
+    $ dbgeni milestones list
+
+To apply or rollback all migrations to a particular milestone, use the migrations apply or rollback back command, for example:
+
+    $ dbgeni migrations apply    milestone <name_of_milestone>
+    $ dbgeni migrations rollback milestone <name_of_milestone>
+
 # Stored Procedures<a id="stored_procedures"></a>
 
 Many database applications make use of stored procedures and dbgeni can install them too. 
@@ -438,6 +471,74 @@ For example:
 
 The generated files will have a TIMESTAMP set to the current date and time.
 
+## procedure<a id="generator_commands_procedure"></a>
+
+The procedure generator takes a single parameter, which is the name of the procedure on the database, and generates a template file with the correct filename:
+
+    $ dbgeni generate procedure <name_of_procedure>
+
+For example:
+
+    $ dbgeni generate procedure insert_customer
+
+    creating: /home/sodonnell/cool_project/./code/insert_customer.prc
+
+
+## function<a id="generator_commands_function"></a>
+
+The function generator takes a single parameter, which is the name of the function on the database, and generates a template file with the correct filename:
+
+    $ dbgeni generate function <name_of_function>
+
+For example:
+
+    $ dbgeni generate function get_customer
+
+    creating: /home/sodonnell/cool_project/./code/get_customer.fnc
+
+
+## package<a id="generator_commands_package"></a>
+
+The package generator takes a single parameter, which is the name of the package on the database, and generates two template files with the correct filename:
+
+    $ dbgeni generate package <name_of_package>
+
+For example:
+
+    $ dbgeni generate package manage_customer
+
+    creating: /home/sodonnell/cool_project/./code/manage_customer.pks
+    creating: /home/sodonnell/cool_project/./code/manage_customer.pkb
+
+
+## trigger<a id="generator_commands_trigger"></a>
+
+The trigger generator takes a single parameter, which is the name of the trigger on the database, and generates a template file with the correct filename:
+
+    $ dbgeni generate trigger <name_of_trigger>
+
+For example:
+
+    $ dbgeni generate trigger biud_customer
+
+    creating: /home/sodonnell/cool_project/./code/biud_customer.trg
+
+
+## milestone<a id="generator_commands_milestone"></a>
+
+The milestone generator takes two parameters. The first is the name of the milestone, and the second is the name of the migration to use for the milestone. The migration must exist and can be specified using the migration name or filename:
+
+    $ dbgeni generate milestone <name_of_milestone> <migration>
+
+For example:
+
+    $ dbgeni generate milestone release_1.0 201101011754::create_customer
+
+OR
+
+    $ dbgeni generate milestone release_1.0 201101011754_up_create_customer.sql
+
+    creating: /home/sodonnell/cool_project/./migrations/release_1.0.milestone
 
 # Migration Commands<a id="migration_commands"></a>
 
@@ -505,6 +606,10 @@ To apply a single or several migrations out of their normal sequence, you can sp
 
 If there are no outstanding migrations or a problem is encountered applying a migration an error will be displayed and dbgeni will not continue.
 
+### apply milestone<a id="migrations_apply_milestone"></a>
+
+TODO
+
 
 ### Forcing Migrations
 
@@ -534,7 +639,7 @@ If there are no applied migrations or a problem is encountered rolling back a mi
 
 ### rollback until<a id="migrations_rollback_until"></a>
 
-To rollback from the last applied migration down to and including a specific migration, use the until command, eg:
+To rollback from the last applied migration down to but NOT including a specific migration, use the until command, eg:
 
     $ dbgeni migrations rollback until 201108101531::create_users
 
@@ -553,11 +658,21 @@ To rollback a single or several migrations out of their normal sequence, you can
 
 If any of the migrations are not applied or a problem is encountered rolling back a migration an error will be displayed and dbgeni will not continue.
 
+### rollback milestone<a id="migrations_rollback_milestone"></a>
+
+TODO
+
 ### Forcing Rollbacks
 
 As with applying migrations, rollbacks can be forced through with the --force (-f for short) switch. This is particularly useful if an apply failed part way through and you want to clean up any changes it made without worrying about where the original migration failed.
 
     $ dbgeni migrations rollback all --force
+
+# Milestone Commands<a id="milestone_commands"></a>
+
+## list<a id="milestone_commands_list"></a>
+
+TODO
 
 # Code Commands<a id="code_commands"></a>
 

@@ -39,7 +39,31 @@ class TestMigration < Test::Unit::TestCase
 
   end
 
+  def test_migration_extracted_from_milestone
+    migration_name = "201101011754_up_my_migration.sql"
+    File.open(File.join(TEMP_DIR, 'something.milestone'), 'w') do |f|
+      f.puts migration_name
+    end
+    assert_equal(migration_name, DBGeni::Migration.get_milestone_migration(TEMP_DIR, 'something.milestone'))
+  end
 
+  def test_exception_raised_when_milestone_contains_junk
+    migration_name = "rubbish"
+    File.open(File.join(TEMP_DIR, 'something.milestone'), 'w') do |f|
+      f.puts migration_name
+    end
+    assert_raises DBGeni::MilestoneHasNoMigration do
+      DBGeni::Migration.get_milestone_migration(TEMP_DIR, 'something.milestone')
+    end
+  end
+
+  def test_exception_raised_when_milestone_contains_no_migration
+    File.open(File.join(TEMP_DIR, 'something.milestone'), 'w') do |f|
+    end
+    assert_raises DBGeni::MilestoneHasNoMigration do
+      DBGeni::Migration.get_milestone_migration(TEMP_DIR, 'something.milestone')
+    end
+  end
 
   def test_valid_filename_ok
     m = DBGeni::Migration.new('anydir', @valid_migration)

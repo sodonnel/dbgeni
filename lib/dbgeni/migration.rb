@@ -34,11 +34,30 @@ module DBGeni
       self.new(directory, Migration.filename_from_internal_name(name))
     end
 
+    def self.get_milestone_migration(directory, name)
+      migration = ''
+      begin
+        f = File.open(File.join(directory,name), 'r')
+        migration = f.readline.chomp
+      rescue EOFError
+      ensure
+        f.close if f
+      end
+      unless migration =~ /^(\d{12})_(up|down)_(.+)\.sql$/
+        raise DBGeni::MilestoneHasNoMigration, name
+      end
+      migration
+    end
+
     def initialize(directory, migration)
       @directory      = directory
       @migration_file = migration
       parse_file
       @rollback_file  = "#{sequence}_down_#{name}.sql"
+    end
+
+    def migration_file(dir='up')
+      "#{@sequence}_#{dir}_#{name}.sql"
     end
 
     def ==(other)
@@ -88,7 +107,7 @@ module DBGeni
       if [NEW, ROLLEDBACK].include? status(config, connection) and force != true
         raise DBGeni::MigrationNotApplied, self.to_s
       end
-      ensure_file_exists
+      ensure_file_exists('down')
       migrator = DBGeni::Migrator.initialize(config, connection)
       set_pending!
       begin
@@ -227,9 +246,9 @@ module DBGeni
       @name     = $2
     end
 
-    def ensure_file_exists
-      unless File.exists? File.join(@directory, @migration_file)
-        raise DBGeni::MigrationFileNotExist, File.join(@directory, @migration_file)
+    def ensure_file_exists(dir='up')
+      unless File.exists? File.join(@directory, self.migration_file(dir))
+        raise DBGeni::MigrationFileNotExist, File.join(@directory, migration_file(dir))
       end
     end
 

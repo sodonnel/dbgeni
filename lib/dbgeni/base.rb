@@ -161,7 +161,8 @@ module DBGeni
         # milestone migration doesn't exist or is already applied.
         raise DBGeni::MigrationNotApplied, milestone.to_s
       end
-      0.upto(index) do |i|
+      # The minus 1 is taken off index as we don't want to rollback the specified migration
+      0.upto(index-1) do |i|
         rollback_migration(applied[i], force)
       end
     end

@@ -1,7 +1,7 @@
 Maybe more tests for base apply and rollback until
 Better Logging
 ----------------------------------------------
-Milestones
+Milestones - add CLI tests for the migrations apply/rollback milestone. Add Milestone CLI and tests.
 Extract first error message for migrations and display (and aborted code errors due to insufficient privs)
 ----------------------------------------------
 Refactor Migrators to have a parent class to inherit methods from

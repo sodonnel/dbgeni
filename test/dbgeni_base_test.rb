@@ -453,6 +453,7 @@ class TestDBGeniBase < Test::Unit::TestCase
   end
 
   def test_rollback_until_migration_when_one_migration
+    # Will not actually roll anything back, so it only goes UNTIL but not including
     @installer = DBGeni::Base.installer_for_environment(helper_sqlite_single_environment_file, 'development')
     @installer.initialize_database
     migration = helper_good_sqlite_migration
@@ -460,7 +461,7 @@ class TestDBGeniBase < Test::Unit::TestCase
     assert_nothing_raised do
       @installer.rollback_until_migration(migration.to_s)
     end
-    assert_equal('Rolledback', migration.status(@installer.config, @installer.connection))
+    assert_equal('Completed', migration.status(@installer.config, @installer.connection))
   end
 
   def test_rollback_until_migration_when_many_migrations
@@ -472,8 +473,8 @@ class TestDBGeniBase < Test::Unit::TestCase
     assert_nothing_raised do
       @installer.rollback_until_migration('201108190001::test_migration')
     end
-    assert_equal(1, @installer.applied_migrations.length)
-    assert_equal(3, @installer.outstanding_migrations.length)
+    assert_equal(2, @installer.applied_migrations.length)
+    assert_equal(2, @installer.outstanding_migrations.length)
     assert_equal('201108190000::test_migration', @installer.applied_migrations[0].to_s)
   end
 

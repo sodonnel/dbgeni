@@ -36,15 +36,17 @@ Destructive
 
 apply       Apply migrations to the given environment. Can specify:
 
-              all     Apply all outstanding migrations
-              next    Apply only the next migration and stop
-              until   Apply upto and including the specified migration
+              all       Apply all outstanding migrations
+              next      Apply only the next migration and stop
+              until     Apply upto and including the specified migration
               specific migrations to apply
+              milestone Apply upto a specified milestone
 
             dbgeni migrations apply all  --environment-name test --config-file /home/myapp/.dbgeni <--force>
             dbgeni migrations apply next --environment-name test --config-file /home/myapp/.dbgeni <--force>
             dbgeni migrations apply until YYYYMMDDHHMM::Name1 --environment-name test --config-file /home/myapp/.dbgeni <--force>
             dbgeni migrations apply YYYYMMDDHHMM::Name1 YYYYMMDDHHMM::Name2 YYYYMMDDHHMM::Name3 --environment-name test --config-file /home/myapp/.dbgeni <--force>
+            dbgeni migrations apply milestone release_1.0 --environment-name test --config-file /home/myapp/.dbgeni <--force>
 
 rollback    Run the rollback script for a given migration. Can specify:
 
@@ -57,6 +59,7 @@ rollback    Run the rollback script for a given migration. Can specify:
             dbgeni migrations rollback last --environment-name test --config-file /home/myapp/.dbgeni <--force>
             dbgeni migrations rollback until YYYYMMDDHHMM::Name1 --environment-name test --config-file /home/myapp/.dbgeni <--force>
             dbgeni migrations rollback YYYYMMDDHHMM::Name1 YYYYMMDDHHMM::Name2 YYYYMMDDHHMM::Name3 --environment-name test --config-file /home/myapp/.dbgeni <--force>
+            dbgeni migrations rollback milestone release_1.0 --environment-name test --config-file /home/myapp/.dbgeni <--force>
 
 EOF
   exit
@@ -103,9 +106,25 @@ begin
       installer.apply_all_migrations($force)
     when 'next'
       installer.apply_next_migration($force)
-    when 'until'
-      # a migration name needs to be the next parameter
-      migration_name = ARGV[0]
+    when 'until', 'milestone'
+      migration_name = nil
+      if sub_command == 'milestone'
+        unless ARGV[0]
+          puts "You must specify a milestone"
+          exit(1)
+        end
+        unless File.exists? File.join(installer.config.migration_directory, "#{ARGV[0]}.milestone")
+          puts "The milestone #{ARGV[0]} does not exist"
+          exit(1)
+        end
+        migration_name = DBGeni::Migration.internal_name_from_filename(
+                            DBGeni::Migration.get_milestone_migration(
+                              installer.config.migration_directory, "#{ARGV[0]}.milestone"))
+      else
+        # a migration name needs to be the next parameter
+        migration_name = ARGV[0]
+      end
+
       unless migration_name
         logger.error "A migration name must be specified"
         exit(1)
@@ -138,9 +157,21 @@ begin
       installer.rollback_all_migrations($force)
     when 'last'
       installer.rollback_last_migration($force)
-    when 'until'
-      # a migration name needs to be the next parameter
-      migration_name = ARGV[0]
+    when 'until', 'milestone'
+      migration_name = nil
+      if sub_command == 'milestone'
+        unless File.exists? File.join(installer.config.migration_directory, "#{ARGV[0]}.milestone")
+          puts "The milestone #{ARGV[0]} does not exist"
+          exit(1)
+        end
+        migration_name = DBGeni::Migration.internal_name_from_filename(
+                            DBGeni::Migration.get_milestone_migration(
+                              installer.config.migration_directory, "#{ARGV[0]}.milestone"))
+      else
+        # a migration name needs to be the next parameter
+        migration_name = ARGV[0]
+      end
+
       unless migration_name
         logger.error "A migration name must be specified"
         exit(1)
@@ -178,7 +209,7 @@ rescue DBGeni::MigrationAlreadyApplied => e
   logger.error "The migration is already applied #{e.to_s}"
   exit(1)
 rescue DBGeni::MigrationFileNotExist => e
-  logger.error "The migration file, #{e.to_s} does not exist"
+  logger.error "The migration file #{e.to_s} does not exist"
   exit(1)
 rescue DBGeni:: DatabaseNotInitialized => e
   logger.error "The database needs to be initialized with the command dbgeni initialize"
@@ -194,6 +225,9 @@ rescue DBGeni::MigrationNotOutstanding => e
   exit(1)
 rescue DBGeni::DBCLINotOnPath => e
   logger.error "The command line interface for the database is not on the path (sqlite3, sqlplus)"
+  exit(1)
+rescue DBGeni::MilestoneHasNoMigration => e
+  logger.error "The milestone does not contain a valid migration"
   exit(1)
 end
 

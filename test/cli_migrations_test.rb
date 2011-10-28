@@ -192,7 +192,7 @@ class TestCLIMigrations < Test::Unit::TestCase
     response = Kernel.system("#{CLI} initialize -c #{TEMP_DIR}/sqlite.conf")
     assert_equal(true, response)
     response = `#{CLI} migrations apply 201108190000::not_there -c #{TEMP_DIR}/sqlite.conf`
-    assert_match(/The migration file, .* does not exist/, response)
+    assert_match(/The migration file .* does not exist/, response)
   end
 
   def test_apply_specific_migration_that_has_already_been_applied
@@ -552,6 +552,36 @@ class TestCLIMigrations < Test::Unit::TestCase
     response = Kernel.system("#{CLI} migrations rollback until 201108190002::test_migration -c #{TEMP_DIR}/sqlite.conf -f")
     assert_equal(true, response)
   end
+
+  # Rollback until milestone is basically the same as rollback until, so test it
+  # all gets started correctly.
+
+  def test_rollback_until_milestone_when_no_milestone_specified
+    response = Kernel.system("#{CLI} initialize -c #{TEMP_DIR}/sqlite.conf")
+    assert_equal(true, response)
+    response = `#{CLI} migrations rollback milestone -c #{TEMP_DIR}/sqlite.conf`
+    assert_match(/You must specify a milestone/, response)
+  end
+
+  def test_rollback_until_milestone_when_milestone_not_exist
+    response = Kernel.system("#{CLI} initialize -c #{TEMP_DIR}/sqlite.conf")
+    assert_equal(true, response)
+    response = `#{CLI} migrations rollback milestone not_here -c #{TEMP_DIR}/sqlite.conf`
+    assert_match(/The milestone .+ does not exist/, response)
+  end
+
+  def test_rollback_until_milestone
+    response = Kernel.system("#{CLI} initialize -c #{TEMP_DIR}/sqlite.conf")
+    assert_equal(true, response)
+    helper_many_good_sqlite_migrations(4)
+    response = Kernel.system("#{CLI} generate milestone rel1 201108190002::test_migration -c #{TEMP_DIR}/sqlite.conf")
+    assert_equal(true, response)
+    response = Kernel.system("#{CLI} migrations apply all 201108190002::test_migration -c #{TEMP_DIR}/sqlite.conf")
+    assert_equal(true, response)
+    response = Kernel.system("#{CLI} migrations rollback milestone rel1 -c #{TEMP_DIR}/sqlite.conf")
+    assert_equal(true, response)
+  end
+
 
   def test_rollback_migration_that_error_includes_logfile
     response = Kernel.system("#{CLI} initialize -c #{TEMP_DIR}/sqlite.conf")
