@@ -3,6 +3,7 @@ Better Logging
 ----------------------------------------------
 Milestones - add CLI tests for the migrations apply/rollback milestone. Add Milestone CLI and tests.
 Extract first error message for migrations and display (and aborted code errors due to insufficient privs)
+Something strange happens when a code apply aborts - the correct error etc is not presented.
 ----------------------------------------------
 Refactor Migrators to have a parent class to inherit methods from
 MYSQL support
@@ -15,6 +16,8 @@ Validation hooks
 Validation scripts
 Make password be hidden when typing it in from a prompt
 Make sure something is typed in (ie not blank) or reprompt
+Grants for procedures - how to do them without two commands
+Bad NLS_LANG setting causes a very strange error.
 
 
 

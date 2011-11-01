@@ -239,7 +239,7 @@ module DBGeni
         # to create the proc, or there was other bad stuff in the proc file.
         # In this case, dbgeni should stop - but also treat the error like a migration error
         # as the error message will be in the logfile in the format standard SQL errors are.
-        @logger.error "Failed to apply #{code_obj.to_s}. Errors in #{migration.logfile}"
+        @logger.error "Failed to apply #{code_obj.to_s}. Errors in #{code_obj.logfile}"
         raise DBGeni::CodeApplyFailed, e.to_s
       end
     end

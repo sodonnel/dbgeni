@@ -18,5 +18,3 @@ Gem::Specification.new do |s|
 #  s.extra_rdoc_files = ["README"]
 #  s.add_dependency("dependency", ">= 0.x.x")
 end
-
-puts (Dir.glob("{bin,lib}/**/*") + Dir.glob("[A-Z]*")).reject{ |fn| fn.include? "temp" }

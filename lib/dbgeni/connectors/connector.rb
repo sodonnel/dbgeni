@@ -21,7 +21,7 @@ module DBGeni
     def self.setup(db_type)
       begin
         require "dbgeni/connectors/#{db_type}"
-      rescue
+      rescue Exception => e
         raise DBGeni::NoConnectorForDBType, db_type
       end
 
