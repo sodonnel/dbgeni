@@ -93,7 +93,7 @@ begin
   when 'outstanding'
     outstanding = installer.outstanding_migrations
     if outstanding.length == 0
-      logger.info "There are no applied migrations in #{installer.config.migration_directory}"
+      logger.info "There are no outstanding migrations in #{installer.config.migration_directory}"
     end
     outstanding.each do |m|
       puts m.to_s
