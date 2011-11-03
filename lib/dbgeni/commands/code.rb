@@ -129,7 +129,7 @@ rescue DBGeni::NoCodeFilesExist => e
   logger.error "There are no code files in the code_directory"
   exit(1)
 rescue DBGeni::CodeApplyFailed => e
-  logger.error "There was a problem applying #{e.to_s}"
+#  logger.error "There was a problem applying #{e.to_s}"
   exit(1)
 rescue DBGeni::CodeModuleCurrent => e
   logger.error "The code module is already current #{e.to_s}"

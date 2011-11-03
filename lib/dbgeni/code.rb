@@ -78,11 +78,14 @@ module DBGeni
       begin
         migrator.compile(self) #, force)
         set_applied(config,connection)
-      rescue Exception => e
-        raise DBGeni::CodeApplyFailed, "(#{self.to_s}) #{e.to_s}"
+      rescue DBGeni::MigrationContainsErrors
+        @error_messages = migrator.migration_errors
+        raise DBGeni::CodeApplyFailed #, "(#{self.to_s}) #{e.to_s}"
+      ensure
+        @logfile = migrator.logfile
+        # Only set this if it has not been set in the exception handler
+        @error_messages ||= migrator.code_errors
       end
-      @logfile = migrator.logfile
-      @error_messages = migrator.code_errors
     end
 
     def remove!(config, connection, force=false)

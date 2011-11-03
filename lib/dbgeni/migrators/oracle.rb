@@ -24,7 +24,27 @@ module DBGeni
       end
 
       def migration_errors
-        nil
+        has_errors = false
+        buffer = []
+
+        File.open(@logfile, 'r').each_line do |l|
+          buffer.push l
+          if buffer.length > 10
+            buffer.shift
+          end
+          if !has_errors && l =~ /^ERROR at line/
+            has_errors = true
+            next
+          end
+          # After we find the ERROR at line, the next line contains the error
+          # message, so we just want to consume it and then exit.
+          # The line we care about will be in the buffer, so just break and join
+          # the buffer.
+          if has_errors
+            break
+          end
+        end
+        buffer.join("")
       end
 
       def verify(migration)
@@ -126,7 +146,8 @@ module DBGeni
         if $? != 0
           # Code compile errors never get here as they don't make sqlplus abort.
           # But if the user does not have privs to create the proc / trigger etc,
-          # the code will abort to here via a insufficient privs error.
+          # the code will abort to here via a insufficient privs error. Or if the code
+          # file doesn't contain 'create or replace .... ' and just garbage it can get here.
           raise DBGeni::MigrationContainsErrors
         end
       end

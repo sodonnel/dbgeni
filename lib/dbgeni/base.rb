@@ -122,7 +122,7 @@ module DBGeni
         migration.apply!(@config, connection, force)
         @logger.info "Applied #{migration.to_s}"
       rescue DBGeni::MigrationApplyFailed
-        @logger.error "Failed #{migration.to_s}. Errors in #{migration.logfile}"
+        @logger.error "Failed #{migration.to_s}. Errors in #{migration.logfile}\n\n#{migration.error_messages}\n\n"
         raise DBGeni::MigrationApplyFailed, migration.to_s
       end
     end
@@ -173,7 +173,7 @@ module DBGeni
         migration.rollback!(@config, connection, force)
         @logger.info  "Rolledback #{migration.to_s}"
       rescue DBGeni::MigrationApplyFailed
-        @logger.error "Failed #{migration.to_s}. Errors in #{migration.logfile}"
+        @logger.error "Failed #{migration.to_s}. Errors in #{migration.logfile}\n\n#{migration.error_messages}\n\n"
         raise DBGeni::MigrationApplyFailed, migration.to_s
       end
     end
@@ -235,11 +235,11 @@ module DBGeni
           @logger.info "Applied #{code_obj.to_s}"
         end
       rescue DBGeni::CodeApplyFailed => e
-        # TODO - the only real way code can get here is if the user had insufficient privs
+        # The only real way code can get here is if the user had insufficient privs
         # to create the proc, or there was other bad stuff in the proc file.
         # In this case, dbgeni should stop - but also treat the error like a migration error
         # as the error message will be in the logfile in the format standard SQL errors are.
-        @logger.error "Failed to apply #{code_obj.to_s}. Errors in #{code_obj.logfile}"
+        @logger.error "Failed to apply #{code_obj.filename}. Errors in #{code_obj.logfile}\n\n#{code_obj.error_messages}\n\n"
         raise DBGeni::CodeApplyFailed, e.to_s
       end
     end
@@ -261,12 +261,12 @@ module DBGeni
         code_obj.remove!(@config, connection, force)
         @logger.info "Removed #{code_obj.to_s}"
       rescue DBGeni::CodeRemoveFailed => e
-        # TODO - the only real way code can get here is if the user had insufficient privs
+        # The only real way code can get here is if the user had insufficient privs
         # to create the proc, or there was other bad stuff in the proc file.
         # In this case, dbgeni should stop - but also treat the error like a migration error
         # as the error message will be in the logfile in the format standard SQL errors are.
 
-        @logger.error "Failed to remove #{code_obj.to_s}. Errors in #{migration.logfile}"
+        @logger.error "Failed to remove #{code_obj.filename}. Errors in #{code_obj.logfile}"
         raise DBGeni::CodeRemoveFailed
       end
     end

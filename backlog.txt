@@ -1,9 +1,8 @@
 Maybe more tests for base apply and rollback until
-Better Logging
 ----------------------------------------------
 Milestones - add CLI tests for the migrations apply/rollback milestone. Add Milestone CLI and tests.
-Extract first error message for migrations and display (and aborted code errors due to insufficient privs)
-Something strange happens when a code apply aborts - the correct error etc is not presented.
+Tests to ensure error message is extract for (1) migration error (2) rollback error (3) code compile (4) code blow up
+Better Logging
 ----------------------------------------------
 Refactor Migrators to have a parent class to inherit methods from
 MYSQL support
