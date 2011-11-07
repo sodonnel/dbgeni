@@ -110,11 +110,11 @@ begin
       migration_name = nil
       if sub_command == 'milestone'
         unless ARGV[0]
-          puts "You must specify a milestone"
+          logger.error "You must specify a milestone"
           exit(1)
         end
         unless File.exists? File.join(installer.config.migration_directory, "#{ARGV[0]}.milestone")
-          puts "The milestone #{ARGV[0]} does not exist"
+          logger.error "The milestone #{ARGV[0]} does not exist"
           exit(1)
         end
         migration_name = DBGeni::Migration.internal_name_from_filename(
@@ -160,8 +160,12 @@ begin
     when 'until', 'milestone'
       migration_name = nil
       if sub_command == 'milestone'
+        unless ARGV[0]
+          logger.error "You must specify a milestone"
+          exit(1)
+        end
         unless File.exists? File.join(installer.config.migration_directory, "#{ARGV[0]}.milestone")
-          puts "The milestone #{ARGV[0]} does not exist"
+          logger.error "The milestone #{ARGV[0]} does not exist"
           exit(1)
         end
         migration_name = DBGeni::Migration.internal_name_from_filename(

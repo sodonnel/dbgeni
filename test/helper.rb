@@ -11,8 +11,8 @@ module TestHelper
   ORA_PASSWORD = 'sodonnel'
   ORA_DB       = 'local11gr2'
 
-  CLI = 'ruby C:\Users\sodonnel\code\dbgeni\lib\dbgeni\cli.rb'
-#  CLI = 'ruby /home/sodonnel/code/dbgeni/lib/dbgeni/cli.rb'
+#  CLI = 'ruby C:\Users\sodonnel\code\dbgeni\lib\dbgeni\cli.rb'
+  CLI = 'ruby /home/sodonnel/code/dbgeni/lib/dbgeni/cli.rb'
 
   def helper_clean_temp
     FileUtils.rm_rf("#{TEMP_DIR}")

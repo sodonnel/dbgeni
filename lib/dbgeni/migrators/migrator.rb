@@ -12,10 +12,10 @@ module DBGeni
       required_method.call(config, connection)
     end
 
-    def self.logfile(filename)
-      name = File.basename(filename)
-      "#{Time.now.strftime('%Y%m%d%H%M%S')}_#{name}"
-    end
+#    def self.logfile(filename)
+#      name = File.basename(filename)
+#      "#{Time.now.strftime('%Y%m%d%H%M%S')}_#{name}"
+#    end
 
     private
 

@@ -9,6 +9,7 @@ module DBGeni
         @config = config
         # this is not actually used to run in the sql script
         @connection = connection
+        @log_dir    = DBGeni::Logger.instance("#{@config.base_directory}/log").detailed_log_dir
         ensure_executable_exists
       end
 
@@ -50,7 +51,7 @@ module DBGeni
           null_device = 'NUL:'
         end
 
-        @logfile = "#{@config.base_directory}/log/" << DBGeni::Migrator.logfile(file)
+        @logfile = "#{@config.base_directory}/log/#{@log_dir}/#{File.basename(file)}"
         IO.popen("sqlite3 #{@connection.database} > #{@logfile} 2>&1", "w") do |p|
           unless force
             p.puts ".bail on"

@@ -481,10 +481,10 @@ class TestCLIMigrations < Test::Unit::TestCase
   def test_rollback_until_bad_migration
     response = Kernel.system("#{CLI} initialize -c #{TEMP_DIR}/sqlite.conf")
     assert_equal(true, response)
-    helper_good_sqlite_migration
-    response = Kernel.system("#{CLI} migrations apply until 201108190000::test_migration -c #{TEMP_DIR}/sqlite.conf")
+    helper_many_good_sqlite_migrations(2)
+    response = Kernel.system("#{CLI} migrations apply until 201108190001::test_migration -c #{TEMP_DIR}/sqlite.conf")
     assert_equal(true, response)
-    helper_bad_sqlite_migration
+    helper_many_bad_sqlite_migrations(2)
     response = Kernel.system("#{CLI} migrations rollback until 201108190000::test_migration -c #{TEMP_DIR}/sqlite.conf")
     assert_equal(false, response)
   end
@@ -492,10 +492,10 @@ class TestCLIMigrations < Test::Unit::TestCase
   def test_rollback_until_bad_migration_force_on
     response = Kernel.system("#{CLI} initialize -c #{TEMP_DIR}/sqlite.conf")
     assert_equal(true, response)
-    helper_good_sqlite_migration
-    response = Kernel.system("#{CLI} migrations apply until 201108190000::test_migration -c #{TEMP_DIR}/sqlite.conf")
+    helper_many_good_sqlite_migrations(2)
+    response = Kernel.system("#{CLI} migrations apply until 201108190001::test_migration -c #{TEMP_DIR}/sqlite.conf")
     assert_equal(true, response)
-    helper_bad_sqlite_migration
+    helper_many_bad_sqlite_migrations(2)
     response = Kernel.system("#{CLI} migrations rollback until 201108190000::test_migration -c #{TEMP_DIR}/sqlite.conf -f")
     assert_equal(true, response)
   end

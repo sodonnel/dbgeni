@@ -21,9 +21,17 @@ module DBGeni
       @@singleton_instance = nil
     end
 
+    # This could be done in the initialize block, but then even for
+    # non destructive commands, there would be a detailed log dir
+    # created, so only create the dir when the directory is asked for.
+    def detailed_log_dir
+      FileUtils.mkdir_p(File.join(@log_location, @detailed_log_dir))
+      @detailed_log_dir
+    end
+
     private
 
-    def write_msg(msg)
+    def write_msg(msg, echo=true)
       if @fh && !@fh.closed?
         @fh.puts "#{Time.now.strftime('%Y%m%d %H:%M:%S')} - #{msg}"
       end
@@ -36,6 +44,10 @@ module DBGeni
       if @log_location
         FileUtils.mkdir_p(location)
         @fh = File.open("#{location}/log.txt", 'a')
+        @fh.puts ("\n\n\n###################################################")
+        @fh.puts ("dbgeni initialized")
+        @detailed_log_dir = Time.now.strftime('%Y%m%d%H%M%S')
+        @fh.puts ("Detailed log files will be written in #{@detailed_log_dir}")
       end
     end
 

@@ -10,6 +10,7 @@ module DBGeni
         # this is not actually used to run in the sql script
         @connection = connection
         @logfile    = nil
+        @log_dir    = DBGeni::Logger.instance("#{@config.base_directory}/log").detailed_log_dir
         ensure_executable_exists
       end
 
@@ -114,7 +115,7 @@ module DBGeni
         if Kernel.is_windows?
           null_device = 'NUL:'
         end
-        @logfile = "#{@config.base_directory}/log/#{DBGeni::Migrator.logfile(file)}"
+        @logfile = "#{@config.base_directory}/log/#{@log_dir}/#{File.basename(file)}"
 
 #        sql_parameters = parameters
 #        unless parameters

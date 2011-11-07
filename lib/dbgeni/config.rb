@@ -39,6 +39,7 @@ module DBGeni
       @code_dir             = 'code'
       @db_type              = 'sqlite'
       @db_table             = 'dbgeni_migrations'
+      @base_dir             = '.'
       @environments         = Hash.new
     end
 
