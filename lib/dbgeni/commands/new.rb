@@ -83,7 +83,7 @@ environment('development') {
 
    database 'testdb.sqlite' # this must be here, or it will error. For Oracle, this is the TNS Name
 #   username ''             # this must be here, or it will error (unless using sqlite)
-#   password ''             # If this value is missing, it will be promoted for at run time
+#   password ''             # If this value is missing, it will be promoted for if needed
 #
 #   Other parameters can be defined here and will override global_parameters
 #   param_name 'value'
@@ -93,7 +93,7 @@ environment('development') {
 # environment('test') {
 #   username 'user'        # this must be here, or it will error
 #   database 'TEST.WORLD'  # this must be here, or it will error. For Oracle, this is the TNS Name
-#   password ''            # If this value is missing, it will be promoted for if the env is used.
+#   password ''            # If this value is missing, it will be promoted for if needed.
 # }
 #
 #

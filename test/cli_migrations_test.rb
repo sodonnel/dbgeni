@@ -298,6 +298,55 @@ class TestCLIMigrations < Test::Unit::TestCase
     assert_equal(true, response)
   end
 
+  ############################
+  # Milestone
+
+  def test_apply_until_milestone_when_milestone_not_exist
+    response = `#{CLI} migrations apply milestone rel1 -c #{TEMP_DIR}/sqlite.conf`
+    assert_match(/The milestone .* does not exist/, response)
+  end
+
+  def test_apply_until_milestone_when_milestone_not_specified
+    response = `#{CLI} migrations apply milestone -c #{TEMP_DIR}/sqlite.conf`
+    assert_match(/A milestone must be specified/, response)
+  end
+
+  def test_apply_until_milestone_when_milestone_file_empty
+    FileUtils.touch(File.join(TEMP_DIR, 'migrations', 'rel1.milestone'))
+    response = `#{CLI} migrations apply milestone rel1 -c #{TEMP_DIR}/sqlite.conf`
+    assert_match(/The milestone does not contain a valid migration/, response)
+  end
+
+  def test_apply_until_milestone_when_non_existent_migration_in_file
+    File.open(File.join(TEMP_DIR, 'migrations', 'rel1.milestone'), 'w') do |f|
+      f.puts '201001011431_up_something.sql'
+    end
+    response = Kernel.system("#{CLI} initialize -c #{TEMP_DIR}/sqlite.conf")
+    response = `#{CLI} migrations apply milestone rel1 -c #{TEMP_DIR}/sqlite.conf`
+    assert_match(/.* does not exist or is not outstanding/, response)
+  end
+
+  def test_apply_until_milestone_when_badly_formed_migration_in_file
+    File.open(File.join(TEMP_DIR, 'migrations', 'rel1.milestone'), 'w') do |f|
+      f.puts 'jibberish'
+    end
+    response = `#{CLI} migrations apply milestone rel1 -c #{TEMP_DIR}/sqlite.conf`
+    assert_match(/The milestone does not contain a valid migration/, response)
+  end
+
+  def test_apply_until_milestone
+    response = Kernel.system("#{CLI} initialize -c #{TEMP_DIR}/sqlite.conf")
+    assert_equal(true, response)
+    helper_many_good_sqlite_migrations(4)
+    response = Kernel.system("#{CLI} generate milestone rel1 201108190002::test_migration -c #{TEMP_DIR}/sqlite.conf")
+    assert_equal(true, response)
+    response = Kernel.system("#{CLI} migrations apply milestone rel1 -c #{TEMP_DIR}/sqlite.conf")
+    assert_equal(true, response)
+  end
+
+  #######################
+  # invalid commands
+
   def test_invalid_apply_command
     response = Kernel.system("#{CLI} initialize -c #{TEMP_DIR}/sqlite.conf")
     assert_equal(true, response)
@@ -305,12 +354,14 @@ class TestCLIMigrations < Test::Unit::TestCase
     assert_match(/is not a valid command/, response)
   end
 
+  ######################
+  #
   def test_bad_migration_includes_logfile
     response = Kernel.system("#{CLI} initialize -c #{TEMP_DIR}/sqlite.conf")
     assert_equal(true, response)
     helper_bad_sqlite_migration
     response = `#{CLI} migrations apply all -c #{TEMP_DIR}/sqlite.conf`
-    assert_match(/Errors in/, response)
+    assert_match(/Errors in .*\.sql/, response)
   end
 
   ##################
@@ -553,6 +604,9 @@ class TestCLIMigrations < Test::Unit::TestCase
     assert_equal(true, response)
   end
 
+  #####################################
+  ##  Milestones
+
   # Rollback until milestone is basically the same as rollback until, so test it
   # all gets started correctly.
 
@@ -569,6 +623,30 @@ class TestCLIMigrations < Test::Unit::TestCase
     response = `#{CLI} migrations rollback milestone not_here -c #{TEMP_DIR}/sqlite.conf`
     assert_match(/The milestone .+ does not exist/, response)
   end
+
+  def test_rollback_until_milestone_when_milestone_file_empty
+    FileUtils.touch(File.join(TEMP_DIR, 'migrations', 'rel1.milestone'))
+    response = `#{CLI} migrations rollback milestone rel1 -c #{TEMP_DIR}/sqlite.conf`
+    assert_match(/The milestone does not contain a valid migration/, response)
+  end
+
+  def test_rollback_until_milestone_when_non_existent_migration_in_file
+    File.open(File.join(TEMP_DIR, 'migrations', 'rel1.milestone'), 'w') do |f|
+      f.puts '201001011431_up_something.sql'
+    end
+    response = Kernel.system("#{CLI} initialize -c #{TEMP_DIR}/sqlite.conf")
+    response = `#{CLI} migrations rollback milestone rel1 -c #{TEMP_DIR}/sqlite.conf`
+    assert_match(/has not been applied so cannot be rolledback/, response)
+  end
+
+  def test_rollback_until_milestone_when_badly_formed_migration_in_file
+    File.open(File.join(TEMP_DIR, 'migrations', 'rel1.milestone'), 'w') do |f|
+      f.puts 'jibberish'
+    end
+    response = `#{CLI} migrations rollback milestone rel1 -c #{TEMP_DIR}/sqlite.conf`
+    assert_match(/The milestone does not contain a valid migration/, response)
+  end
+
 
   def test_rollback_until_milestone
     response = Kernel.system("#{CLI} initialize -c #{TEMP_DIR}/sqlite.conf")
@@ -590,7 +668,8 @@ class TestCLIMigrations < Test::Unit::TestCase
     response = Kernel.system("#{CLI} migrations apply all -c #{TEMP_DIR}/sqlite.conf")
     helper_bad_sqlite_migration
     response = `#{CLI} migrations rollback all -c #{TEMP_DIR}/sqlite.conf`
-    assert_match(/Errors in/, response)
+    puts response
+    assert_match(/Errors in .+\.sql.*/, response)
   end
 
 

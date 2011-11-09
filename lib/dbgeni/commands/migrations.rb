@@ -110,7 +110,7 @@ begin
       migration_name = nil
       if sub_command == 'milestone'
         unless ARGV[0]
-          logger.error "You must specify a milestone"
+          logger.error "A milestone must be specified"
           exit(1)
         end
         unless File.exists? File.join(installer.config.migration_directory, "#{ARGV[0]}.milestone")

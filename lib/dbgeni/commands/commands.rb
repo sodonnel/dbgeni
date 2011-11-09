@@ -15,6 +15,9 @@ case $initial_command
   require 'dbgeni/commands/migrations'
   when 'code'                          ,'c'
   require 'dbgeni/commands/code'
+  when 'milestones'
+  require 'dbgeni/commands/milestones'
+
   else
   puts "Error: Command not recognized" unless %w(-h --help).include?($initial_command)
   puts <<-EOT

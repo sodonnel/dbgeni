@@ -25,7 +25,7 @@ To get the USERS table onto the development, test or production database, all yo
 
 Later, you discover version 2 of the application needs another table, USER\_ASSETS, so you do the sensible thing, and create a new script called create\_user\_assets.sql and apply that *outstanding migration* to development, test and eventually production, moving the database from version 1 to version 2.
 
-Provided each change or group of related changes is stored in a seperate migration script, moving the database between versions is a trivial task, assuming you know which migrations have not yet been applied, and in what order to apply them.
+Provided each change or group of related changes is stored in a separate migration script, moving the database between versions is a trivial task, assuming you know which migrations have not yet been applied, and in what order to apply them.
 
 ## Smarter Migrations
 
@@ -57,6 +57,8 @@ As all releases should have a tested way of rolling back, it is good practice to
 DBGeni is an installer. 
 
 If you name your database migration scripts as described here, and allow DBGeni to create a table in your database to track applied migrations, it can be used to apply, track and rollback all your database migrations easily.
+
+It can also apply stored procedures to your database intelligently, provided the naming convention is followed.
 
 DBGeni is distributed as a Ruby Gem, and it should work anywhere Ruby runs. It has been tested on Windows 7, OS X and Linux on Ruby version 1.8.7 and 1.9.2.
 

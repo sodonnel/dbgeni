@@ -24,7 +24,7 @@ module DBGeni
       end
 
       def migration_errors
-        nil
+        ''
       end
 
       def verify(migration)

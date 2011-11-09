@@ -261,11 +261,10 @@ module DBGeni
         code_obj.remove!(@config, connection, force)
         @logger.info "Removed #{code_obj.to_s}"
       rescue DBGeni::CodeRemoveFailed => e
-        # The only real way code can get here is if the user had insufficient privs
-        # to create the proc, or there was other bad stuff in the proc file.
+        # Not sure if the code can even get here. Many if timeout waiting for lock on object?
         # In this case, dbgeni should stop - but also treat the error like a migration error
-        # as the error message will be in the logfile in the format standard SQL errors are.
 
+        # TODO - not sure this is even correct - dropping code doesn't create a logfile ...
         @logger.error "Failed to remove #{code_obj.filename}. Errors in #{code_obj.logfile}"
         raise DBGeni::CodeRemoveFailed
       end
