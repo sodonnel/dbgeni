@@ -6,7 +6,7 @@ Download: [dbgeni-0.2.0.gem](/downloads/dbgeni-0.2.0.gem)
  * Better error messaging if the DB CLI is not installed
  * Better organisation of logfiles into timestamped directories
  * Milestone support
- * Prompt for password if it is left blank if the config file
+ * Prompt for password if it is left blank in the config file
 
 # 0.1.0
 
