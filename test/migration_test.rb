@@ -4,20 +4,18 @@ $:.unshift File.expand_path(File.dirname(__FILE__))
 require 'helper'
 require "dbgeni"
 require 'test/unit'
-require 'dbgeni/migrators/sqlite'
 require 'mocha'
+require 'dbgeni/migrators/sqlite'
+
 
 class TestMigration < Test::Unit::TestCase
 
   include TestHelper
 
   def setup
-    # mocha stuff
-    @mm = DBGeni::Migration.new('somedir', '201101011514_up_something.sql')
-    @mm.stubs(:ensure_file_exists).returns(true) # as the file doesn't exist
-    # mocha stuff
-
     @valid_migration = '201101011615_up_this_is_a_test_migration.sql'
+    @mm = DBGeni::Migration.new('somedir', @valid_migration)
+    @mm.stubs(:ensure_file_exists).returns(true) # as the file doesn't exist
 
     @connection = helper_sqlite_connection
     @config     = helper_sqlite_config
@@ -72,12 +70,6 @@ class TestMigration < Test::Unit::TestCase
     end
   end
 
-  def test_valid_filename_ok
-    m = DBGeni::Migration.new('anydir', @valid_migration)
-    assert_equal('this_is_a_test_migration', m.name)
-    assert_equal('201101011615', m.sequence)
-  end
-
   def test_invalid_filename_raises_exception
     # rubbish
     # missing part of the datestamp
@@ -93,13 +85,13 @@ class TestMigration < Test::Unit::TestCase
   end
 
   def test_rollback_file_correct
-    m = DBGeni::Migration.new('anydir', @valid_migration)
-    assert_equal(@valid_migration.gsub(/up/, 'down'), m.rollback_file)
+    assert_equal(@valid_migration.gsub(/up/, 'down'), @mm.rollback_file)
   end
 
-  def test_migration_file_correct
-    m = DBGeni::Migration.new('anydir', @valid_migration)
-    assert_equal(@valid_migration, m.migration_file)
+  def test_migration_file_name_and_sequence_correct
+    assert_equal(@valid_migration, @mm.migration_file)
+    assert_equal('this_is_a_test_migration', @mm.name)
+    assert_equal('201101011615', @mm.sequence)
   end
 
 
@@ -132,47 +124,41 @@ class TestMigration < Test::Unit::TestCase
   #####################################################
 
   def test_insert_pending_details_for_migration
-    m = DBGeni::Migration.new('anydir', @valid_migration)
-    m.set_pending(@config, @connection)
-    assert_equal('Pending', get_state(m))
+    @mm.set_pending(@config, @connection)
+    assert_equal('Pending', get_state(@mm))
   end
 
   def test_insert_failed_details_for_migration
-    m = DBGeni::Migration.new('anydir', @valid_migration)
-    m.set_failed(@config, @connection)
-    assert_equal('Failed', get_state(m))
+    @mm.set_failed(@config, @connection)
+    assert_equal('Failed', get_state(@mm))
   end
 
   def test_insert_rolledback_details_for_migration
-    m = DBGeni::Migration.new('anydir', @valid_migration)
-    m.set_rolledback(@config, @connection)
-    assert_equal('Rolledback', get_state(m))
+    @mm.set_rolledback(@config, @connection)
+    assert_equal('Rolledback', get_state(@mm))
   end
 
   def test_insert_completed_details_for_migration
-    m = DBGeni::Migration.new('anydir', @valid_migration)
-    m.set_completed(@config, @connection)
-    assert_equal('Completed', get_state(m))
+    @mm.set_completed(@config, @connection)
+    assert_equal('Completed', get_state(@mm))
   end
 
   def test_update_details_from_pending_to_complete_for_migration
-    m = DBGeni::Migration.new('anydir', @valid_migration)
-    m.set_pending(@config, @connection)
-    m.set_completed(@config, @connection)
-    assert_equal('Completed', get_state(m))
+    @mm.set_pending(@config, @connection)
+    @mm.set_completed(@config, @connection)
+    assert_equal('Completed', get_state(@mm))
   end
 
   def test_get_migration_state
-    m = DBGeni::Migration.new('anydir', @valid_migration)
-    assert_equal('New', m.status(@config, @connection))
-    m.set_pending(@config, @connection)
-    assert_equal('Pending', m.status(@config, @connection))
-    m.set_failed(@config, @connection)
-    assert_equal('Failed', m.status(@config, @connection))
-    m.set_completed(@config, @connection)
-    assert_equal('Completed', m.status(@config, @connection))
-    m.set_rolledback(@config, @connection)
-    assert_equal('Rolledback', m.status(@config, @connection))
+    assert_equal('New', @mm.status(@config, @connection))
+    @mm.set_pending(@config, @connection)
+    assert_equal('Pending', @mm.status(@config, @connection))
+    @mm.set_failed(@config, @connection)
+    assert_equal('Failed', @mm.status(@config, @connection))
+    @mm.set_completed(@config, @connection)
+    assert_equal('Completed', @mm.status(@config, @connection))
+    @mm.set_rolledback(@config, @connection)
+    assert_equal('Rolledback', @mm.status(@config, @connection))
   end
 
 
@@ -181,20 +167,18 @@ class TestMigration < Test::Unit::TestCase
   ############
 
   def test_not_applied_migration_is_not_applied
-    m = DBGeni::Migration.new('anydir', @valid_migration)
-    assert_equal(false, m.applied?(@config, @connection))
+    assert_equal(false, @mm.applied?(@config, @connection))
   end
 
+  # TODO - stub set calls?
   def test_pending_migration_is_not_applied
-    m = DBGeni::Migration.new('anydir', @valid_migration)
-    m.set_pending(@config, @connection)
-    assert_equal(false, m.applied?(@config, @connection))
+    @mm.set_pending(@config, @connection)
+    assert_equal(false, @mm.applied?(@config, @connection))
   end
 
   def test_completed_migration_is_applied
-    m = DBGeni::Migration.new('anydir', @valid_migration)
-    m.set_completed(@config, @connection)
-    assert_equal(true, m.applied?(@config, @connection))
+    @mm.set_completed(@config, @connection)
+    assert_equal(true, @mm.applied?(@config, @connection))
   end
 
   #############
@@ -202,28 +186,28 @@ class TestMigration < Test::Unit::TestCase
   #############
 
   def test_apply_good_migration
-    m = helper_good_sqlite_migration
+    DBGeni::Migrator::Sqlite.any_instance.stubs(:apply).with(@mm, nil)
     assert_nothing_raised do
-      m.apply!(@config, @connection)
+     @mm.apply!(@config, @connection)
     end
-    assert_equal('Completed', m.status(@config, @connection))
+    assert_equal('Completed', @mm.status(@config, @connection))
   end
 
-  def test_apply_good_migration_force_off
-    m = helper_good_sqlite_migration
+  def test_apply_good_migration_force_on
+    DBGeni::Migrator::Sqlite.any_instance.stubs(:apply).with(@mm, true)
     assert_nothing_raised do
-      m.apply!(@config, @connection, false)
+     @mm.apply!(@config, @connection, true)
     end
-    assert_equal('Completed', m.status(@config, @connection))
+    assert_equal('Completed', @mm.status(@config, @connection))
   end
 
   def test_apply_already_applied_migration_errors
-    m = helper_good_sqlite_migration
+    DBGeni::Migrator::Sqlite.any_instance.stubs(:apply).with(@mm, nil)
     assert_nothing_raised do
-      m.apply!(@config, @connection)
+      @mm.apply!(@config, @connection)
     end
     assert_raises DBGeni::MigrationAlreadyApplied do
-      m.apply!(@config, @connection)
+      @mm.apply!(@config, @connection)
     end
   end
 
@@ -254,95 +238,91 @@ class TestMigration < Test::Unit::TestCase
   #############
 
   def test_not_applied_migration_will_not_rollback
+    DBGeni::Migrator::Sqlite.any_instance.stubs(:rollback).with(@mm, nil)
+
+    assert_raises DBGeni::MigrationNotApplied do
+      @mm.rollback!(@config, @connection)
+    end
+
     # if a migration is partly applied, then it will still rollback, eg if it is PENDING etc
-    m = helper_good_sqlite_migration
+    @mm.set_pending(@config, @connection)
+    assert_nothing_raised do
+      @mm.rollback!(@config, @connection)
+      assert_equal('Rolledback', @mm.status(@config, @connection))
+    end
+    @mm.set_failed(@config, @connection)
+    assert_nothing_raised do
+      @mm.rollback!(@config, @connection)
+      assert_equal('Rolledback', @mm.status(@config, @connection))
+    end
+    @mm.set_completed(@config, @connection)
+    assert_nothing_raised do
+      @mm.rollback!(@config, @connection)
+      assert_equal('Rolledback', @mm.status(@config, @connection))
+    end
+    @mm.set_rolledback(@config, @connection)
     assert_raises DBGeni::MigrationNotApplied do
-      m.rollback!(@config, @connection)
-    end
-    m.set_pending(@config, @connection)
-    assert_nothing_raised do
-      m.rollback!(@config, @connection)
-      assert_equal('Rolledback', m.status(@config, @connection))
-    end
-    m.set_failed(@config, @connection)
-    assert_nothing_raised do
-      m.rollback!(@config, @connection)
-      assert_equal('Rolledback', m.status(@config, @connection))
-    end
-    m.set_completed(@config, @connection)
-    assert_nothing_raised do
-      m.rollback!(@config, @connection)
-      assert_equal('Rolledback', m.status(@config, @connection))
-    end
-    m.set_rolledback(@config, @connection)
-    assert_raises DBGeni::MigrationNotApplied do
-      m.rollback!(@config, @connection)
+      @mm.rollback!(@config, @connection)
     end
   end
 
 
   def test_apply_rollback_with_errors_raises_exception
-    m2 = helper_good_sqlite_migration
-    assert_nothing_raised do
-      m2.apply!(@config, @connection)
-    end
-    m  = helper_bad_sqlite_migration
+    DBGeni::Migrator::Sqlite.any_instance.stubs(:rollback).with(@mm, nil).raises(DBGeni::MigrationContainsErrors)
+    @mm.set_completed(@config, @connection)
     assert_raises DBGeni::MigrationApplyFailed do
-      m.rollback!(@config, @connection)
+      @mm.rollback!(@config, @connection)
     end
   end
 
   def test_apply_rollback_with_errors_and_force_on_raises_no_exception
-    m2 = helper_good_sqlite_migration
+    DBGeni::Migrator::Sqlite.any_instance.expects(:rollback).with(@mm, true)
+    @mm.set_completed(@config, @connection)
+
     assert_nothing_raised do
-      m2.apply!(@config, @connection)
+     @mm.rollback!(@config, @connection, true)
     end
-    m  = helper_bad_sqlite_migration
-    assert_nothing_raised do
-      m.rollback!(@config, @connection, true)
-    end
-    assert_equal(false, m.applied?(@config, @connection))
-    assert_equal('Rolledback', m.status(@config, @connection))
+    assert_equal(false, @mm.applied?(@config, @connection))
+    assert_equal('Rolledback', @mm.status(@config, @connection))
   end
 
   def test_logfile_available_on_apply
-    m = helper_good_sqlite_migration
+    DBGeni::Migrator::Sqlite.any_instance.expects(:apply).with(@mm, nil)
+    DBGeni::Migrator::Sqlite.any_instance.expects(:logfile).returns('somelog.log')
     assert_nothing_raised do
-      m.apply!(@config, @connection)
+      @mm.apply!(@config, @connection)
     end
-    assert_not_nil(m.logfile)
+    assert_equal('somelog.log', @mm.logfile)
   end
 
   def test_logfile_available_on_apply_bad_migration
-    m = helper_bad_sqlite_migration
+    DBGeni::Migrator::Sqlite.any_instance.expects(:apply).with(@mm, nil).raises(DBGeni::MigrationContainsErrors)
+    DBGeni::Migrator::Sqlite.any_instance.expects(:logfile).returns('somelog.log')
+
     assert_raises DBGeni::MigrationApplyFailed do
-      m.apply!(@config, @connection)
+      @mm.apply!(@config, @connection)
     end
-    assert_not_nil(m.logfile)
+    assert_equal('somelog.log', @mm.logfile)
   end
 
   def test_logfile_available_on_rollback
-    m = helper_good_sqlite_migration
+    DBGeni::Migrator::Sqlite.any_instance.expects(:rollback).with(@mm, nil)
+    DBGeni::Migrator::Sqlite.any_instance.expects(:logfile).returns('somelog.log')
+    @mm.set_completed(@config, @connection)
     assert_nothing_raised do
-      m.apply!(@config, @connection)
+      @mm.rollback!(@config, @connection)
     end
-    m = helper_good_sqlite_migration
-    assert_nothing_raised do
-      m.rollback!(@config, @connection)
-    end
-    assert_not_nil(m.logfile)
+    assert_equal('somelog.log', @mm.logfile)
   end
 
   def test_logfile_available_on_rollback_bad_migration
-    m = helper_good_sqlite_migration
-    assert_nothing_raised do
-      m.apply!(@config, @connection)
-    end
-    m = helper_bad_sqlite_migration
+    DBGeni::Migrator::Sqlite.any_instance.expects(:rollback).with(@mm, nil).raises(DBGeni::MigrationContainsErrors)
+    DBGeni::Migrator::Sqlite.any_instance.expects(:logfile).returns('somelog.log')
+    @mm.set_completed(@config, @connection)
     assert_raises DBGeni::MigrationApplyFailed do
-      m.rollback!(@config, @connection)
+      @mm.rollback!(@config, @connection)
     end
-    assert_not_nil(m.logfile)
+    assert_equal('somelog.log', @mm.logfile)
   end
 
   private
