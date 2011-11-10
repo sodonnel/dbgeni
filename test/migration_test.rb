@@ -4,12 +4,19 @@ $:.unshift File.expand_path(File.dirname(__FILE__))
 require 'helper'
 require "dbgeni"
 require 'test/unit'
+require 'dbgeni/migrators/sqlite'
+require 'mocha'
 
 class TestMigration < Test::Unit::TestCase
 
   include TestHelper
 
   def setup
+    # mocha stuff
+    @mm = DBGeni::Migration.new('somedir', '201101011514_up_something.sql')
+    @mm.stubs(:ensure_file_exists).returns(true) # as the file doesn't exist
+    # mocha stuff
+
     @valid_migration = '201101011615_up_this_is_a_test_migration.sql'
 
     @connection = helper_sqlite_connection
@@ -221,21 +228,24 @@ class TestMigration < Test::Unit::TestCase
   end
 
   def test_apply_migration_with_errors
-    m = helper_bad_sqlite_migration
+    DBGeni::Migrator::Sqlite.any_instance.stubs(:apply).with(@mm, nil).raises(DBGeni::MigrationContainsErrors)
+
     assert_raises DBGeni::MigrationApplyFailed do
-      m.apply!(@config, @connection)
+      @mm.apply!(@config, @connection)
     end
-    assert_equal(false, m.applied?(@config, @connection))
-    assert_equal('Failed', m.status(@config, @connection))
+    assert_equal(false, @mm.applied?(@config, @connection))
+    assert_equal('Failed', @mm.status(@config, @connection))
+    DBGeni::Migrator::Sqlite.unstub(:apply)
   end
 
   def test_apply_migration_with_errors_force_on
-    m = helper_bad_sqlite_migration
+    DBGeni::Migrator::Sqlite.any_instance.stubs(:apply).with(@mm, true)
+
     assert_nothing_raised do
-      m.apply!(@config, @connection, true)
+      @mm.apply!(@config, @connection, true)
     end
-    assert_equal(true, m.applied?(@config, @connection))
-    assert_equal('Completed', m.status(@config, @connection))
+    assert_equal(true, @mm.applied?(@config, @connection))
+    assert_equal('Completed', @mm.status(@config, @connection))
   end
 
 
