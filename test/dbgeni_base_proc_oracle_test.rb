@@ -23,7 +23,8 @@ class TestDBGeniBaseProcOracle < Test::Unit::TestCase
     end
 
     # clean out the database so it looks like nothing is installed
-    @connection = helper_oracle_connection
+    @@connection ||= helper_oracle_connection
+    @connection = @@connection
     @config     = helper_oracle_config
     @installer = DBGeni::Base.installer_for_environment(helper_oracle_single_environment_file, 'development')
     begin
@@ -39,7 +40,6 @@ class TestDBGeniBaseProcOracle < Test::Unit::TestCase
 
 
   def teardown
-    @connection.disconnect
   end
 
   #######################

@@ -4,6 +4,7 @@ $:.unshift File.expand_path(File.dirname(__FILE__))
 require 'helper'
 require "dbgeni"
 require 'test/unit'
+require 'mocha'
 
 
 class TestCodeList < Test::Unit::TestCase
@@ -19,18 +20,12 @@ class TestCodeList < Test::Unit::TestCase
         fh.puts "create or replace procedure proc1\nas\nbegin\n  null;\nend;"
       end
     end
-    @connection = helper_oracle_connection
-    @config     = helper_oracle_config
-    begin
-      DBGeni::Initializer.initialize(@connection, @config)
-    rescue DBGeni::DatabaseAlreadyInitialized
-    end
-    @connection.execute("delete from #{@config.db_table}")
+    @connection = mock('DBGeni::Connector::Oracle')
+    @config     = mock('DBGeni::Config')
   end
 
   def teardown
     FileUtils.rmdir(@code_directory)
-    @connection.disconnect
   end
 
   def test_exception_raised_when_code_directory_does_not_exist
@@ -53,13 +48,19 @@ class TestCodeList < Test::Unit::TestCase
 
   def test_code_files_that_are_current_are_identified
     c = DBGeni::CodeList.new(@code_directory)
+    c.code.each do |obj|
+      obj.stubs(:current?).with(@config, @connection).returns(false)
+    end
     assert_equal(0, c.current(@config, @connection).length)
-    c.code[0].apply!(@config, @connection)
+    c.code[0].stubs(:current?).returns(true)
     assert_equal(1, c.current(@config, @connection).length)
   end
 
   def test_code_files_that_are_outstanding_are_identified
     c = DBGeni::CodeList.new(@code_directory)
+    c.code.each do |obj|
+      obj.expects(:current?).returns(false)
+    end
     assert_equal(5, c.outstanding(@config, @connection).length)
   end
 

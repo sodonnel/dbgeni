@@ -12,7 +12,8 @@ class TestMigratorOracle < Test::Unit::TestCase
   include TestHelper
 
   def setup
-    @connection = helper_oracle_connection
+    @@connection ||= helper_oracle_connection
+    @connection = @@connection
     @config     = helper_oracle_config
     @connection.execute("delete from #{@config.db_table}")
     begin
@@ -31,7 +32,6 @@ class TestMigratorOracle < Test::Unit::TestCase
   end
 
   def teardown
-    @connection.disconnect
   end
 
   def test_good_migration_runs_without_error

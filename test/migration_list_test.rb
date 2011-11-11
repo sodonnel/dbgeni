@@ -4,6 +4,7 @@ $:.unshift File.expand_path(File.dirname(__FILE__))
 require 'helper'
 require "dbgeni"
 require 'test/unit'
+require 'mocha'
 
 
 class TestMigrationList < Test::Unit::TestCase
@@ -19,12 +20,8 @@ class TestMigrationList < Test::Unit::TestCase
        201101010000_up_not_a_migration.old).each do |f|
       FileUtils.touch(File.join(@migration_directory, f))
     end
-    @connection = helper_sqlite_connection
-    @config     = helper_sqlite_config
-    begin
-      DBGeni::Initializer.initialize(@connection, @config)
-    rescue DBGeni::DatabaseAlreadyInitialized
-    end
+    @connection = mock('DBGeni::Connector::Sqlite')
+    @config     = mock('DBGeni::Config')
   end
 
   def teardown
@@ -50,15 +47,11 @@ class TestMigrationList < Test::Unit::TestCase
 
   def test_applied_migrations_only_selected
     ml = DBGeni::MigrationList.new(@migration_directory)
-    ml.migrations[0].set_completed(@config, @connection)
-    migs = ml.applied(@config, @connection)
-    assert_equal(1, migs.length)
-    assert_equal('201101010000::test_migration_one', migs[0].to_s)
-  end
-
-  def test_applied_migrations_only_selected
-    ml = DBGeni::MigrationList.new(@migration_directory)
-    ml.migrations[0].set_completed(@config, @connection)
+    ml.migrations.each do |obj|
+      obj.stubs(:status).returns(DBGeni::Migration::NEW)
+    end
+    assert_equal(0, ml.applied(@config, @connection).length)
+    ml.migrations[0].stubs(:status).returns(DBGeni::Migration::COMPLETED)
     migs = ml.applied(@config, @connection)
     assert_equal(1, migs.length)
     assert_equal('201101010000::test_migration_one', migs[0].to_s)
@@ -66,23 +59,30 @@ class TestMigrationList < Test::Unit::TestCase
 
   def test_outstanding_migrations_only_selected
     ml = DBGeni::MigrationList.new(@migration_directory)
-    ml.migrations[0].set_completed(@config, @connection)
-    # set one as applied, it should never be found. One is NEW
+    ml.migrations.each do |obj|
+      obj.stubs(:status).returns(DBGeni::Migration::NEW)
+    end
+
+    ml.migrations[0].stubs(:status).returns(DBGeni::Migration::COMPLETED)
+
     migs = ml.outstanding(@config, @connection)
     assert_equal(1, migs.length)
     assert_equal('201101020000::test_migration_two', migs[0].to_s)
+
     # Should find rolledback
-    ml.migrations[1].set_rolledback(@config, @connection)
+    ml.migrations[1].stubs(:status).returns(DBGeni::Migration::ROLLEDBACK)
     migs = ml.outstanding(@config, @connection)
     assert_equal(1, migs.length)
     assert_equal('201101020000::test_migration_two', migs[0].to_s)
+
     # Should find failed
-    ml.migrations[1].set_failed(@config, @connection)
+    ml.migrations[1].stubs(:status).returns(DBGeni::Migration::FAILED)
     migs = ml.outstanding(@config, @connection)
     assert_equal(1, migs.length)
     assert_equal('201101020000::test_migration_two', migs[0].to_s)
+
     # Should find pending
-    ml.migrations[1].set_pending(@config, @connection)
+    ml.migrations[1].stubs(:status).returns(DBGeni::Migration::PENDING)
     migs = ml.outstanding(@config, @connection)
     assert_equal(1, migs.length)
     assert_equal('201101020000::test_migration_two', migs[0].to_s)
@@ -90,22 +90,30 @@ class TestMigrationList < Test::Unit::TestCase
 
   def test_applied_and_broken_migrations_only_selected
     ml = DBGeni::MigrationList.new(@migration_directory)
-    ml.migrations[0].set_completed(@config, @connection)
+    ml.migrations.each do |obj|
+      obj.stubs(:status).returns(DBGeni::Migration::NEW)
+    end
+
+    ml.migrations[0].stubs(:status).returns(DBGeni::Migration::COMPLETED)
+
     migs = ml.applied_and_broken(@config, @connection)
     assert_equal(1, migs.length)
     assert_equal('201101010000::test_migration_one', migs[0].to_s)
+
     # Should find pending
-    ml.migrations[0].set_pending(@config, @connection)
+    ml.migrations[0].stubs(:status).returns(DBGeni::Migration::PENDING)
     migs = ml.applied_and_broken(@config, @connection)
     assert_equal(1, migs.length)
     assert_equal('201101010000::test_migration_one', migs[0].to_s)
+
     # Should find failed
-    ml.migrations[0].set_failed(@config, @connection)
+    ml.migrations[0].stubs(:status).returns(DBGeni::Migration::FAILED)
     migs = ml.applied_and_broken(@config, @connection)
     assert_equal(1, migs.length)
     assert_equal('201101010000::test_migration_one', migs[0].to_s)
+
     # Should not find rolledback
-    ml.migrations[0].set_rolledback(@config, @connection)
+    ml.migrations[0].stubs(:status).returns(DBGeni::Migration::ROLLEDBACK)
     migs = ml.applied_and_broken(@config, @connection)
     assert_equal(0, migs.length)
   end

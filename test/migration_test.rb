@@ -29,6 +29,7 @@ class TestMigration < Test::Unit::TestCase
   end
 
   def teardown
+    Mocha::Mockery.instance.stubba.unstub_all
   end
 
   def test_internal_name_to_filename
