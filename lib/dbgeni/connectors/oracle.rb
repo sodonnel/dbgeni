@@ -18,21 +18,28 @@ module DBGeni
       end
 
       def execute(sql, *binds)
-        query = @connection.parse(sql)
-        binds.each_with_index do |b, i|
-          query.bind_param(i+1, b)
-        end
-        query.exec()
-        results = nil
-        if query.type == OCI8::STMT_SELECT
-          results = Array.new
-          while r = query.fetch()
-            results.push r
+        begin
+          query = @connection.parse(sql)
+          binds.each_with_index do |b, i|
+            query.bind_param(i+1, b)
           end
-          query.close
-        else
-          # everthing is auto commit right now ...
-          @connection.commit
+          query.exec()
+
+          results = nil
+          if query.type == OCI8::STMT_SELECT
+            results = Array.new
+            while r = query.fetch()
+              results.push r
+            end
+          else
+            # everthing is auto commit right now ...
+            @connection.commit
+          end
+        ensure
+          begin
+            query.close()
+          rescue
+          end
         end
         results
       end
