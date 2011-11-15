@@ -77,8 +77,8 @@ module DBGeni
       set_env(config, connection)
       results = connection.execute("select migration_state
                                     from #{@config.db_table}
-                                    where sequence_or_hash = :seq
-                                    and migration_name = :migration", @sequence, @name)
+                                    where sequence_or_hash = ?
+                                    and migration_name = ?", @sequence, @name)
       results.length == 1 ? results[0][0] : NEW
     end
 
@@ -184,8 +184,8 @@ module DBGeni
     def existing_db_record
       results = @connection.execute("select sequence_or_hash, migration_name, migration_type, migration_state, start_dtm, completed_dtm
                                     from #{@config.db_table}
-                                    where sequence_or_hash = :seq
-                                    and migration_name = :migration", @sequence, @name)
+                                    where sequence_or_hash = ?
+                                    and migration_name = ?", @sequence, @name)
     end
 
 
@@ -216,17 +216,17 @@ module DBGeni
       # If going to anything else, then set completed_dtm to now
       if state == PENDING
         results = @connection.execute("update #{@config.db_table}
-                                       set migration_state = :state,
+                                       set migration_state = ?,
                                            completed_dtm   = null,
                                            start_dtm       = #{@connection.date_placeholder('sdtm')}
-                                       where sequence_or_hash = :sequence
-                                    and   migration_name   = :name", state, @connection.date_as_string(Time.now), @sequence, @name)
+                                       where sequence_or_hash = ?
+                                    and   migration_name   = ?", state, @connection.date_as_string(Time.now), @sequence, @name)
       else
         results = @connection.execute("update #{@config.db_table}
-                                    set migration_state = :state,
+                                    set migration_state = ?,
                                         completed_dtm   = #{@connection.date_placeholder('sdtm')}
-                                    where sequence_or_hash = :sequence
-                                    and   migration_name   = :name", state, @connection.date_as_string(Time.now), @sequence, @name)
+                                    where sequence_or_hash = ?
+                                    and   migration_name   = ?", state, @connection.date_as_string(Time.now), @sequence, @name)
       end
     end
 

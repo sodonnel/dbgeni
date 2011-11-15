@@ -9,11 +9,22 @@ module DBGeni
       rescue NameError
         raise DBGeni::InvalidConnectorForDBType, config.db_type
       end
-      required_method.call(config.env.username,
-                           # SQLITE doesn't need a password, so prevent asking for it
-                           # or it may be promoted for
-                           config.db_type == 'sqlite' ? '' : config.env.password,
-                           config.env.database)
+      if %w(oracle sqlite).include? config.db_type
+        # don't need a host or port here, so make this a seperate call block
+        required_method.call(config.env.username,
+                             # SQLITE doesn't need a password, so prevent asking for it
+                             # or it may be promoted for
+                             config.db_type == 'sqlite' ? '' : config.env.password,
+                             config.env.database)
+      else
+        required_method.call(config.env.username,
+                             # SQLITE doesn't need a password, so prevent asking for it
+                             # or it may be promoted for
+                             config.env.password,
+                             config.env.database,
+                             config.env.hostname,
+                             config.env.port)
+      end
     end
 
     private

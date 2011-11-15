@@ -2,6 +2,7 @@ module TestHelper
 
   require 'dbgeni/connectors/sqlite'
   require 'dbgeni/connectors/oracle'
+  require 'dbgeni/connectors/mysql'
   require 'fileutils'
 
   TEMP_DIR = File.expand_path(File.join(File.dirname(__FILE__), "temp"))
@@ -10,6 +11,12 @@ module TestHelper
   ORA_USER     = 'sodonnel'
   ORA_PASSWORD = 'sodonnel'
   ORA_DB       = 'local11gr2'
+
+  MYSQL_USER     = 'sodonnel'
+  MYSQL_PASSWORD = 'sodonnel'
+  MYSQL_DB       = 'sodonnel'
+  MYSQL_HOSTNAME = '127.0.0.1'
+  MYSQL_PORT     = '3306'
 
   CLI = 'ruby C:\Users\sodonnel\code\dbgeni\lib\dbgeni\cli.rb'
 #  CLI = 'ruby /home/sodonnel/code/dbgeni/lib/dbgeni/cli.rb'
@@ -57,6 +64,11 @@ module TestHelper
     connection = DBGeni::Connector::Oracle.connect(ORA_USER, ORA_PASSWORD, ORA_DB)
   end
 
+  def helper_mysql_connection
+    connection = DBGeni::Connector::Mysql.connect(MYSQL_USER, MYSQL_PASSWORD, MYSQL_DB, MYSQL_HOSTNAME, MYSQL_PORT)
+  end
+
+
   def helper_oracle_config
     config = DBGeni::Config.new.load("database_type 'oracle'
                                       environment('development') {
@@ -67,6 +79,20 @@ module TestHelper
     config.base_directory = TEMP_DIR
     config
   end
+
+  def helper_mysql_config
+    config = DBGeni::Config.new.load("database_type 'mysql'
+                                      environment('development') {
+                                         username '#{MYSQL_USER}'
+                                         password '#{MYSQL_PASSWORD}'
+                                         database '#{MYSQL_DB}'
+                                         hostname '#{MYSQL_HOSTNAME}'
+                                         port     '#{MYSQL_PORT}'
+                                     }")
+    config.base_directory = TEMP_DIR
+    config
+  end
+
 
   def helper_sqlite_single_environment_file
     filename = "#{TEMP_DIR}/sqlite.conf"

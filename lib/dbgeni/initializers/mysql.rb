@@ -1,26 +1,26 @@
 module DBGeni
   module Initializer
-    module Sqlite
+    module Mysql
 
       def self.initialize(db_connection, config)
         raise DBGeni::DatabaseAlreadyInitialized if self.initialized?(db_connection, config)
         db_connection.execute("create table #{config.db_table}
                                (
-                                  sequence_or_hash varchar2(100) not null,
-                                  migration_name   varchar2(4000) not null,
-                                  migration_type   varchar2(20)   not null,
-                                  migration_state  varchar2(20)   not null,
-                                  start_dtm        date,
-                                  completed_dtm    date
+                                  sequence_or_hash varchar(100) not null,
+                                  migration_name   varchar(4000) not null,
+                                  migration_type   varchar(20)   not null,
+                                  migration_state  varchar(20)   not null,
+                                  start_dtm        datetime,
+                                  completed_dtm    datetime
                                )")
-        db_connection.execute("create unique index #{config.db_table}_uk1 on #{config.db_table} (sequence_or_hash, migration_name)")
+        db_connection.execute("create unique index #{config.db_table}_uk1 on #{config.db_table} (sequence_or_hash, migration_name(500))")
         db_connection.execute("create index #{config.db_table}_idx2 on #{config.db_table} (migration_name)")
       end
 
       def self.initialized?(db_connection, config)
         # it is initialized if a table called dbgeni_migrations or whatever is
         # defined in config exists
-        results = db_connection.execute("SELECT name FROM sqlite_master WHERE name = :t", config.db_table.downcase)
+        results = db_connection.execute("show tables like '#{config.db_table.upcase}'")
         if 0 == results.length
           false
         else
@@ -31,3 +31,6 @@ module DBGeni
     end
   end
 end
+
+
+
