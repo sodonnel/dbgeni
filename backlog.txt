@@ -2,7 +2,6 @@ Maybe more tests for base apply and rollback until
 Better Logging
 ----------------------------------------------
 foo is still here - where is this puts? FInd and remove!
-Refactor Migrators to have a parent class to inherit methods from
 Compile command to compile all stored procs
 MYSQL support
 ----------------------------------------------

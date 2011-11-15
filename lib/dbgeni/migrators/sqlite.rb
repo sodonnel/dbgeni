@@ -1,51 +1,37 @@
 module DBGeni
   module Migrator
 
-    class Sqlite
-
-      attr_reader :logfile
+    class Sqlite  < DBGeni::Migrator::MigratorInterface
 
       def initialize(config, connection)
-        @config = config
-        # this is not actually used to run in the sql script
-        @connection = connection
-        @log_dir    = DBGeni::Logger.instance("#{@config.base_directory}/log").detailed_log_dir
-        ensure_executable_exists
-      end
-
-      def apply(migration, force=nil)
-        filename = File.join(@config.migration_directory, migration.migration_file)
-        run_in_sqlite(filename, force)
-      end
-
-      def rollback(migration, force=nil)
-        filename = File.join(@config.migration_directory, migration.rollback_file)
-        run_in_sqlite(filename, force)
+        super(config, connection)
       end
 
       def migration_errors
         ''
       end
 
-      def verify(migration)
-        raise DBGeni::NotImplemented
-      end
+      # def apply(migration, force=nil)
+      # end
 
-      def compile(code)
-        raise DBGeni::NotImplemented
-      end
+      # def rollback(migration, force=nil)
+      # end
 
-      def remove(code)
-        raise DBGeni::NotImplemented
-      end
+      # def verify(migration)
+      # end
 
-      def code_errors
-        raise DBGeni::NotImplemented
-      end
+      # def compile(code)
+      # end
+
+      # def remove(code)
+      # end
+
+      # def code_errors
+      # end
 
       private
 
-      def run_in_sqlite(file, force=nil)
+      def run_in_client(file, force=nil)
         null_device = '/dev/null'
         if Kernel.is_windows?
           null_device = 'NUL:'

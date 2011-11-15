@@ -9,6 +9,7 @@ require 'dbgeni/code'
 require 'dbgeni/exceptions/exception'
 require 'dbgeni/initializers/initializer'
 require 'dbgeni/migrators/migrator'
+require 'dbgeni/migrators/migrator_interface'
 require 'dbgeni/connectors/connector'
 
 require 'fileutils'
