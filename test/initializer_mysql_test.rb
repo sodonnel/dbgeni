@@ -37,7 +37,7 @@ class TestInitializerMysql < Test::Unit::TestCase
 
   def test_db_can_be_initialized
     DBGeni::Initializer.initialize(@db_connection, @config)
-    results = @db_connection.execute("show tables like '#{@config.db_table.upcase}'")
+    results = @db_connection.execute("show tables like '#{@config.db_table.downcase}'")
     assert_equal(1, results.length)
   end
 

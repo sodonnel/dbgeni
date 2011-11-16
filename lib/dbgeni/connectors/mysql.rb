@@ -27,8 +27,10 @@ module DBGeni
           query.execute(*binds)
 
           results = Array.new
-          while r = query.fetch()
-            results.push r
+          if query.num_rows > 0
+            while r = query.fetch()
+              results.push r
+            end
           end
           # everthing is auto commit right now ...
           @connection.commit

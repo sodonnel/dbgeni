@@ -20,7 +20,7 @@ module DBGeni
       def self.initialized?(db_connection, config)
         # it is initialized if a table called dbgeni_migrations or whatever is
         # defined in config exists
-        results = db_connection.execute("show tables like '#{config.db_table.upcase}'")
+        results = db_connection.execute("show tables like '#{config.db_table.downcase}'")
         if 0 == results.length
           false
         else
