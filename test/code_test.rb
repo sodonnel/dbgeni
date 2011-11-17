@@ -7,7 +7,7 @@ require 'test/unit'
 require 'mocha'
 require 'dbgeni/migrators/oracle'
 
-class TestCodeWithNoClashingName < Test::Unit::TestCase
+class TestCode < Test::Unit::TestCase
 
   include TestHelper
 
