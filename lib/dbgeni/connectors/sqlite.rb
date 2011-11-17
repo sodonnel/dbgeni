@@ -1,9 +1,7 @@
 module DBGeni
 
   module Connector
-
     class Sqlite
-
       require 'sqlite3'
 
       attr_reader :connection

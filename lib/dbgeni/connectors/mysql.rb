@@ -3,7 +3,6 @@ module DBGeni
   module Connector
 
     class Mysql
-
       require 'mysql'
 
       attr_reader :connection
@@ -22,6 +21,14 @@ module DBGeni
         # However, something like create table blows up when fetch is called with noMethodError
         # so it is being caught and thrown away ... hackish, but the mysql drive seems to be
         # at fault, is badly documented and seems to be a bit rubbish. Ideall uses DBD::Mysql + DBI.
+
+        results = Array.new
+        if sql =~ /^drop\s+(procedure|function|trigger|table)/i
+          # cannot prepare these statements, need to just execute
+          @connection.query(sql)
+          return results
+        end
+
         begin
           query = @connection.prepare(sql)
           query.execute(*binds)
@@ -41,6 +48,7 @@ module DBGeni
           rescue
           end
         end
+
         results
       end
 

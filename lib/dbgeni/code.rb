@@ -79,8 +79,21 @@ module DBGeni
         migrator.compile(self) #, force)
         set_applied(config,connection)
       rescue DBGeni::MigrationContainsErrors
-        @error_messages = migrator.migration_errors
-        raise DBGeni::CodeApplyFailed #, "(#{self.to_s}) #{e.to_s}"
+        # MYSQL and Oracle procedures are handled different. In Oracle if the code fails to
+        # compile, it can be because missing objects are not there, but in mysql the proc
+        # will compile fine if objects are missing - the only reason it seems to not compile
+        # is if the syntax is bad.
+        # Also, an error loading mysql proc will result in the proc not being on the DB at all.
+        # Can argue either way if DBGeni should stop on code errors. As many oracle compile errors
+        # could be caused by objects that have not been created yet, best for Oracle to continue,
+        # but for mysql I think it is best to stop.
+        if migrator.class =~ /Oracle/
+          @error_messages = migrator.migration_errors
+          raise DBGeni::CodeApplyFailed #, "(#{self.to_s}) #{e.to_s}"
+        elsif migrator.class =~ /Mysql/
+          @error_message = migrator.code_errors
+          raise DBGeni::CodeApplyFailed
+        end
       ensure
         @logfile = migrator.logfile
         # Only set this if it has not been set in the exception handler

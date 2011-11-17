@@ -2,7 +2,6 @@ Maybe more tests for base apply and rollback until
 Better Logging
 ----------------------------------------------
 Compile command to compile all stored procs
-MYSQL Procedure support.
 MYSQL driver - ruby-mysql seems buggy. mysql is tricky to compile in some places.
 Grants for procedures - how to do them without two commands
 ----------------------------------------------

@@ -12,14 +12,14 @@ module TestHelper
   ORA_PASSWORD = 'sodonnel'
   ORA_DB       = 'local11gr2'
 
-  MYSQL_USER     = 'sodonnell'
-  MYSQL_PASSWORD = 'sodonnell'
+  MYSQL_USER     = 'sodonnel'
+  MYSQL_PASSWORD = 'sodonnel'
   MYSQL_DB       = 'sodonnel'
   MYSQL_HOSTNAME = '127.0.0.1'
   MYSQL_PORT     = '3306'
 
-#  CLI = 'ruby C:\Users\sodonnel\code\dbgeni\lib\dbgeni\cli.rb'
-  CLI = 'ruby /home/sodonnel/code/dbgeni/lib/dbgeni/cli.rb'
+  CLI = 'ruby C:\Users\sodonnel\code\dbgeni\lib\dbgeni\cli.rb'
+#  CLI = 'ruby /home/sodonnel/code/dbgeni/lib/dbgeni/cli.rb'
 
   def helper_clean_temp
     FileUtils.rm_rf("#{TEMP_DIR}")
@@ -210,6 +210,72 @@ module TestHelper
          null;
       end;", 'proc1.prc')
   end
+
+  def helper_mysql_good_procedure_file
+    create_procedure_file("delimiter $$
+      drop procedure if exists proc1$$
+      create procedure proc1()
+      begin
+      end$$", 'proc1.prc')
+  end
+
+  def helper_mysql_bad_procedure_file
+    # compile error as () is missing after proc name
+    create_procedure_file("delimiter $$
+      drop procedure if exists proc1$$
+      create procedure proc1
+      begin
+      end$$", 'proc1.prc')
+  end
+
+  def helper_mysql_good_function_file
+    # compile error as () is missing after proc name
+    create_procedure_file("delimiter $$
+      drop function if exists func1$$
+      create function func1()
+        returns int
+      begin
+        return 1;
+      end$$
+      delimiter ;", 'func1.fnc')
+  end
+
+  def helper_mysql_bad_function_file
+    # compile error as () is missing after func name
+    create_procedure_file("delimiter $$
+      drop function if exists func1$$
+      create function func1
+        returns int
+      begin
+        return 1;
+      end$$
+      delimiter ;", 'func1.fnc')
+  end
+
+  def helper_mysql_good_trigger_file
+    # compile error as () is missing after proc name
+    create_procedure_file("delimiter $$
+      drop trigger if exists trg1$$
+      CREATE TRIGGER trg1 BEFORE INSERT ON foo
+      FOR EACH ROW
+      BEGIN
+      END;$$
+      delimiter ;", 'trg1.trg')
+  end
+
+
+  def helper_mysql_bad_trigger_file
+    # compile error as () is missing after proc name
+    create_procedure_file("delimiter $$
+      drop trigger if exists trg1$$
+      CREATE TRIGGER trg1 BEFORE INSERT ON foonothere
+      FOR EACH ROW
+      BEGIN
+      END;$$
+      delimiter ;", 'trg1.trg')
+  end
+
+
 
   def helper_good_function_file
     create_procedure_file("create or replace function func1

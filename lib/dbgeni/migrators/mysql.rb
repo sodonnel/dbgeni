@@ -32,19 +32,28 @@ module DBGeni
      # def verify(migration)
      # end
 
-#      def compile(code)
-#        run_in_client(File.join(@config.code_directory, code.filename), false, true)
-#      end
+      def compile(code)
+        run_in_client(File.join(@config.code_directory, code.filename), false, true)
+      end
 
-#      def remove(code)
-#        begin
-#          @connection.execute(drop_command(code))
-#        rescue Exception => e
-#          unless e.to_s =~ /(object|trigger) .+ does not exist/
-#            raise DBGeni::CodeRemoveFailed, e.to_s
-#          end
-#        end
-#      end
+      def remove(code)
+        begin
+          @connection.execute(drop_command(code))
+        rescue Exception => e
+          unless e.to_s =~ /(procedure|function|trigger).+does not exist/i
+            raise DBGeni::CodeRemoveFailed, e.to_s
+          end
+        end
+      end
+
+      def code_errors
+        # In mysql the code errors ar just the same as migration errors
+        errors = migration_errors
+        if errors == ''
+          errors = nil
+        end
+        errors
+      end
 
       # def code_errors
       #   # The error part of the file file either looks like:
@@ -95,7 +104,6 @@ module DBGeni
 
         z = @config.env
         response = system("mysql -u#{z.username} -p#{z.password} -h#{z.hostname} -P#{z.port} -D#{z.database} -vvv #{force ? '--force' : ''} <#{file} >#{logfile} 2>&1")
-
         unless response
           raise DBGeni::MigrationContainsErrors
         end
@@ -109,10 +117,6 @@ module DBGeni
 
       def drop_command(code)
         case code.type
-        when DBGeni::Code::PACKAGE_SPEC
-          "drop package #{code.name}"
-        when DBGeni::Code::PACKAGE_BODY
-          "drop package body #{code.name}"
         when DBGeni::Code::TRIGGER
           "drop trigger #{code.name}"
         when DBGeni::Code::FUNCTION
