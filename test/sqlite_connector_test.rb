@@ -17,7 +17,9 @@ class TestSqliteConnector < Test::Unit::TestCase
       # tests work.
       @conn.execute("create table dual (dummy char(1))")
       @conn.execute("insert into dual (dummy) values ('X')")
-    rescue
+    rescue Exception => e
+      puts e.to_s
+      raise
     end
   end
 
@@ -49,6 +51,17 @@ class TestSqliteConnector < Test::Unit::TestCase
     results = @conn.execute(sql)
     assert_equal(0, results.length)
   end
+
+  def test_query_with_results_and_many_cols
+    return unless @conn
+    sql = "select 'hello', 1, 12.34 from dual"
+    results = @conn.execute(sql)
+    assert_equal(1, results.length)
+    assert_equal('hello', results[0][0])
+    assert_equal(1, results[0][1])
+    assert_equal(12.34, results[0][2])
+  end
+
 
   def test_db_file_path_plain_filename
     path = DBGeni::Connector::Sqlite.db_file_path('/base', 'db.sqlite')

@@ -6,7 +6,7 @@ module TestHelper
   require 'fileutils'
 
   TEMP_DIR = File.expand_path(File.join(File.dirname(__FILE__), "temp"))
-  SQLITE_DB_NAME  = 'sqlite.db'
+  SQLITE_DB_NAME  = 'sqlite.dbb'
 
   ORA_USER     = 'sodonnel'
   ORA_PASSWORD = 'sodonnel'

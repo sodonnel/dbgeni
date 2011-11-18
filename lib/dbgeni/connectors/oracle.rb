@@ -4,12 +4,18 @@ module DBGeni
 
     class Oracle
 
-      require 'oci8'
+      if RUBY_PLATFORM == 'java'
+        require 'java'
+        java_import 'oracle.jdbc.OracleDriver'
+        java_import 'java.sql.DriverManager'
+      else
+        require 'oci8'
+      end
 
       attr_reader :connection
       attr_reader :database
 
-      def self.connect(user, password, database)
+      def self.connect(user, password, database, host=nil, port=nil)
         self.new(user, password, database)
       end
 
@@ -18,6 +24,10 @@ module DBGeni
       end
 
       def execute(sql, *binds)
+        if RUBY_PLATFORM == 'java'
+          return execute_jdbc(sql, *binds)
+        end
+
         begin
           query = @connection.parse(sql)
           binds.each_with_index do |b, i|
@@ -71,14 +81,54 @@ module DBGeni
 
       private
 
-      def initialize(user, password, database)
+      def initialize(user, password, database, host=nil, port=nil)
         @database = database
-        begin
-          @connection = OCI8.new(user, password, database)
-        rescue Exception => e
-          raise DBGeni::DBConnectionError, e.to_s
+
+        if RUBY_PLATFORM == 'java'
+          oradriver = OracleDriver.new
+          DriverManager.registerDriver oradriver
+          begin
+            @connection = DriverManager.get_connection("jdbc:oracle:thin:@10.152.97.152/#{database}.world", user, password)
+            @connection.auto_commit = true
+          rescue Exception => e
+            raise DBGeni::DBConnectionError, e.to_s
+          end
+        else
+          begin
+            @connection = OCI8.new(user, password, database)
+          rescue Exception => e
+            raise DBGeni::DBConnectionError, e.to_s
+          end
         end
       end
+
+      def execute_jdbc(sql, *binds)
+        query = @connection.prepare_statement(sql)
+        binds.each_with_index do |b, i|
+          if b.is_a?(String)
+            query.setString(i+1, b)
+          elsif b.is_a?(Fixnum)
+            query.setInt(i+1, b)
+          end
+        end
+        results = Array.new
+        unless sql =~ /^\s*select/i
+          query.execute()
+        else
+          rset = query.execute_query()
+          cols = rset.get_meta_data.get_column_count
+          while(r = rset.next) do
+            a = Array.new
+            1.upto(cols) do |i|
+              a.push rset.get_object(i)
+            end
+            results.push a
+          end
+        end
+        query.close
+        results
+      end
+
 
     end
   end

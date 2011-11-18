@@ -2,7 +2,14 @@ module DBGeni
 
   module Connector
     class Sqlite
-      require 'sqlite3'
+
+      if RUBY_PLATFORM == 'java'
+        require 'rubygems'
+        require 'jdbc/sqlite3'
+        Java::org.sqlite.JDBC #initialize the driver
+      else
+        require 'sqlite3'
+      end
 
       attr_reader :connection
       attr_reader :database
@@ -31,6 +38,9 @@ module DBGeni
 #        unless @connection.transaction_active?
 #          @connection.transaction
 #        end
+        if RUBY_PLATFORM == 'java'
+          return execute_jdbc(sql, *binds)
+        end
         query = @connection.prepare(sql)
         binds.each_with_index do |b, i|
           query.bind_param(i+1, b)
@@ -42,6 +52,33 @@ module DBGeni
         if @connection.transaction_active?
           @connection.commit
         end
+        results
+      end
+
+      def execute_jdbc(sql, *binds)
+        query = @connection.prepare_statement(sql)
+        binds.each_with_index do |b, i|
+          if b.is_a?(String)
+            query.setString(i+1, b)
+          elsif b.is_a?(Fixnum)
+            query.setInt(i+1, b)
+          end
+        end
+        results = Array.new
+        unless sql =~ /^\s*select/i
+          query.execute()
+        else
+          rset = query.execute_query()
+          cols = rset.get_meta_data.get_column_count
+          while(r = rset.next) do
+            a = Array.new
+            1.upto(cols) do |i|
+              a.push rset.get_object(i)
+            end
+            results.push a
+          end
+        end
+        query.close
         results
       end
 
@@ -70,13 +107,43 @@ module DBGeni
       def initialize(database)
         @database   = database
         begin
-          @connection = SQLite3::Database.new(database)
+          if RUBY_PLATFORM == 'java'
+            @connection = ::JavaSql::DriverManager.getConnection("jdbc:sqlite:#{database}")
+          else
+            @connection = SQLite3::Database.new(database)
+          end
         rescue Exception => e
           raise DBGeni::DBConnectionError, e.to_s
         end
       end
 
-    end
+      def execute_jdbc(sql, *binds)
+        query = @connection.prepare_statement(sql)
+        binds.each_with_index do |b, i|
+          if b.is_a?(String)
+            query.setString(i+1, b)
+          elsif b.is_a?(Fixnum)
+            query.setInt(i+1, b)
+          end
+        end
+        results = Array.new
+        unless sql =~ /^\s*select/i
+          query.execute()
+        else
+          rset = query.execute_query()
+          cols = rset.get_meta_data.get_column_count
+          while(r = rset.next) do
+            a = Array.new
+            1.upto(cols) do |i|
+              a.push rset.get_object(i)
+            end
+            results.push a
+          end
+        end
+        query.close
+        results
+      end
 
+    end
   end
 end
