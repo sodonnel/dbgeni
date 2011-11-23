@@ -29,11 +29,15 @@ module DBGeni
         end
 
         begin
-          query = @connection.parse(sql)
-          binds.each_with_index do |b, i|
-            query.bind_param(i+1, b)
+          # OCI doesn't like the ? bind variables, so need to convert them
+          index = 0
+          new_sql = sql.gsub(/\?/) do |m|
+            index += 1
+            ":b#{index.to_s}"
           end
-          query.exec()
+
+          query = @connection.parse(new_sql)
+          query.exec(*binds)
 
           results = nil
           if query.type == OCI8::STMT_SELECT

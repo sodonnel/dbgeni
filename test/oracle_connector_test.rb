@@ -35,6 +35,14 @@ class TestOracleConnector < Test::Unit::TestCase
     assert_equal('X', results[0][0])
   end
 
+  def test_query_binds_correctly_with_question_placeholders
+    return unless @conn
+    sql = "select * from dual where 1 = ? and 2 = ?"
+    results = @conn.execute(sql, 1, 2)
+    assert_equal('X', results[0][0])
+  end
+
+
   def test_query_with_no_results_gives_empty_array
     return unless @conn
     sql = "select * from dual where 1 = 2"
