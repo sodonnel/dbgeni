@@ -15,6 +15,10 @@ class TestSqliteConnector < Test::Unit::TestCase
     begin
       # Create a fake DUAL table so the tests can behave in the same way as the Oracle
       # tests work.
+      begin
+        @conn.execute("drop table dual")
+      rescue
+      end
       @conn.execute("create table dual (dummy char(1))")
       @conn.execute("insert into dual (dummy) values ('X')")
     rescue Exception => e

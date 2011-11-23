@@ -87,10 +87,10 @@ module DBGeni
         # Can argue either way if DBGeni should stop on code errors. As many oracle compile errors
         # could be caused by objects that have not been created yet, best for Oracle to continue,
         # but for mysql I think it is best to stop.
-        if migrator.class =~ /Oracle/
+        if migrator.class.to_s =~ /Oracle/
           @error_messages = migrator.migration_errors
           raise DBGeni::CodeApplyFailed #, "(#{self.to_s}) #{e.to_s}"
-        elsif migrator.class =~ /Mysql/
+        elsif migrator.class.to_s =~ /Mysql/
           @error_message = migrator.code_errors
           raise DBGeni::CodeApplyFailed
         end
