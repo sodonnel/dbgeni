@@ -2,7 +2,7 @@ Maybe more tests for base apply and rollback until
 Better Logging
 ----------------------------------------------
 Compile command to compile all stored procs
-Search for "/" on a line all by its own - if not present, add it.
+Fill integration tests for each DB.
 Test generators for different DBs.
 Force code apply for mysql for example.
 ----------------------------------------------

@@ -25,11 +25,14 @@ milestone  Generates a milestone, which is like a tag on a particular migration 
 package    Generates a pair of files for a plsql package with the given package name
              dbgeni generate package my_package_name
 
-procedure  Generates a file for a plsql procedure with the given procedure name
+procedure  Generates a file for a stored procedure with the given procedure name
              dbgeni generate procedure my_procedure_name
 
-function   Generates a file for a plsql function with the given function name
+function   Generates a file for a stored function with the given function name
              dbgeni generate function my_procedure_name
+
+trigger    Generates a file for a trigger with the given trigger name
+             dbgeni generate trigger my_trigger_name
 
 EOF
 end
@@ -103,7 +106,7 @@ when 'procedure', 'prc', 'proc'
         f.puts "end #{name};"
         f.puts "/"
       elsif config.db_type == 'mysql'
-        f.puts "deliminator $$"
+        f.puts "delimiter $$"
         f.puts "drop procedure if exists #{name}$$"
         f.puts "create procedure #{name}()"
         f.puts "begin"
@@ -128,11 +131,12 @@ when 'function', 'fnc', 'func'
         f.puts "end #{name};"
         f.puts "/"
       elsif config.db_type == 'mysql'
-        f.puts "deliminator $$"
+        f.puts "delimiter $$"
         f.puts "drop function if exists #{name}$$"
         f.puts "create function #{name}()"
-        f.puts "  returns varchar"
+        f.puts "  returns varchar(10)"
         f.puts "begin"
+        f.puts "  return 'abcd';"
         f.puts "end$$"
       end
     end
@@ -152,7 +156,7 @@ when 'trigger', 'trg'
         f.puts "end;"
         f.puts "/"
       elsif config.db_type == 'mysql'
-        f.puts "deliminator $$"
+        f.puts "delimiter $$"
         f.puts "drop trigger if exists #{name}$$"
         f.puts "CREATE TRIGGER #{name} BEFORE INSERT ON TABLE"
         f.puts "FOR EACH ROW"

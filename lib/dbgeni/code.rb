@@ -28,8 +28,8 @@ module DBGeni
     def db_hash(config, connection)
       results = connection.execute("select sequence_or_hash
                                     from #{config.db_table}
-                                    where migration_name = :name
-                                    and   migration_type = :type", @name, @type)
+                                    where migration_name = ?
+                                    and   migration_type = ?", @name, @type)
       results.length == 1 ? results[0][0] : nil
     end
 
@@ -142,10 +142,10 @@ module DBGeni
                                     )
                                     values
                                     (
-                                       :hash,
-                                       :name,
-                                       :type,
-                                       :state,
+                                       ?,
+                                       ?,
+                                       ?,
+                                       ?,
                                        #{@connection.date_placeholder('sdtm')}
                                     )", hash, @name, @type, state, @connection.date_as_string(Time.now))
     end
@@ -153,18 +153,18 @@ module DBGeni
 
     def update_db_record(state)
       results = @connection.execute("update #{@config.db_table}
-                                    set sequence_or_hash  = :hash,
+                                    set sequence_or_hash  = ?,
                                         completed_dtm     = #{@connection.date_placeholder('sdtm')},
-                                        migration_state   = :state
-                                    where migration_type  = :type
-                                    and   migration_name  = :name", hash, @connection.date_as_string(Time.now), state, @type, @name)
+                                        migration_state   = ?
+                                    where migration_type  = ?
+                                    and   migration_name  = ?", hash, @connection.date_as_string(Time.now), state, @type, @name)
     end
 
 
     def remove_db_record
       results = @connection.execute("delete from #{@config.db_table}
-                                    where migration_type  = :type
-                                    and   migration_name  = :name", @type, @name)
+                                    where migration_type  = ?
+                                    and   migration_name  = ?", @type, @name)
     end
 
     def set_type

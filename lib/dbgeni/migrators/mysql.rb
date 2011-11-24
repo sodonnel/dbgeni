@@ -118,11 +118,11 @@ module DBGeni
       def drop_command(code)
         case code.type
         when DBGeni::Code::TRIGGER
-          "drop trigger #{code.name}"
+          "drop trigger #{code.name.downcase}"
         when DBGeni::Code::FUNCTION
-          "drop function #{code.name}"
+          "drop function #{code.name.downcase}"
         when DBGeni::Code::PROCEDURE
-          "drop procedure #{code.name}"
+          "drop procedure #{code.name.downcase}"
         end
       end
 

@@ -200,10 +200,10 @@ module DBGeni
                                     )
                                     values
                                     (
-                                       :sequence,
-                                       :name,
+                                       ?,
+                                       ?,
                                        'Migration',
-                                       :state,
+                                       ?,
                                        #{@connection.date_placeholder('sdtm')}
                                     )", @sequence, @name, state, @connection.date_as_string(Time.now))
     end

@@ -40,6 +40,15 @@ if %w(n new).include? $initial_command
     puts "error: failed to create #{directory}/migrations - #{e.to_s}"
     exit(1)
   end
+  # create the directory to hold code
+  begin
+    puts "creating directory: #{directory}/code"
+    FileUtils.mkdir_p(directory+'/code')
+  rescue Exception => e
+    puts "error: failed to create #{directory}/code - #{e.to_s}"
+    exit(1)
+  end
+
 else
   unless File.directory?(directory)
     puts "Error: The directory #{directory} does not exist"
