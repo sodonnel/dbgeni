@@ -2,8 +2,9 @@ Maybe more tests for base apply and rollback until
 Better Logging
 ----------------------------------------------
 Compile command to compile all stored procs
-MYSQL driver - ruby-mysql seems buggy. mysql is tricky to compile in some places.
-Grants for procedures - how to do them without two commands
+Search for "/" on a line all by its own - if not present, add it.
+Test generators for different DBs.
+Force code apply for mysql for example.
 ----------------------------------------------
 Parameters in SQL scripts
 Global Parameters

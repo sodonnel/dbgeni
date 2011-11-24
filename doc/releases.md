@@ -1,3 +1,13 @@
+# 0.3.0 
+
+24th November 2011
+
+Download: [dbgeni-0.3.0.gem](/downloads/dbgeni-0.3.0.gem)
+
+ * MySQL migrations support
+ * MySQL stored procedure support
+ * Experimental JRuby support for sqlite only and using --1.9 switch
+
 # 0.2.0
 
 Download: [dbgeni-0.2.0.gem](/downloads/dbgeni-0.2.0.gem)
@@ -22,7 +32,6 @@ Download: [dbgeni-0.1.0.gem](/downloads/dbgeni-0.1.0.gem)
 These are some of the features I have planned. If you have an idea for a feature let me know at stephen dot odonnell at gmail.com - I cannot guarantee I will add it, but if it makes sense I will.
 
  * Parameters in SQL files
- * Mysql support
  * DAT files to load data
  * Support for other databases (SQL Server, Postgres, Sybase ...)
  * Validation scripts

@@ -71,6 +71,7 @@ when 'package', 'pkg'
       f.puts "begin"
       f.puts ""
       f.puts "end #{name};"
+      f.puts "/"
     end
   end
   filename = File.join(config.code_dir, "#{name}.pkb")
@@ -84,6 +85,7 @@ when 'package', 'pkg'
       f.puts "begin"
       f.puts ""
       f.puts "end #{name};"
+      f.puts "/"
     end
   end
 when 'procedure', 'prc', 'proc'
@@ -93,26 +95,70 @@ when 'procedure', 'prc', 'proc'
   else
     puts "creating: #{filename}"
     File.open(filename, 'w') do |f|
-      f.puts "create or replace procedure #{name}"
-      f.puts "as"
-      f.puts "begin"
-      f.puts "  null;"
-      f.puts "end #{name};"
+      if config.db_type == 'oracle'
+        f.puts "create or replace procedure #{name}"
+        f.puts "as"
+        f.puts "begin"
+        f.puts "  null;"
+        f.puts "end #{name};"
+        f.puts "/"
+      elsif config.db_type == 'mysql'
+        f.puts "deliminator $$"
+        f.puts "drop procedure if exists #{name}$$"
+        f.puts "create procedure #{name}()"
+        f.puts "begin"
+        f.puts "end$$"
+      end
+
     end
   end
 when 'function', 'fnc', 'func'
-  filename = File.join(config.code_dir, "#{name}.prc")
+  filename = File.join(config.code_dir, "#{name}.fnc")
   if File.exists?(filename)
     puts "exists: #{filename}"
   else
     puts "creating: #{filename}"
     File.open(filename, 'w') do |f|
-      f.puts "create or replace function #{name}"
-      f.puts "  return varchar2"
-      f.puts "as"
-      f.puts "begin"
-      f.puts "  null;"
-      f.puts "end #{name};"
+      if config.db_type == 'oracle'
+        f.puts "create or replace function #{name}"
+        f.puts "  return varchar2"
+        f.puts "as"
+        f.puts "begin"
+        f.puts "  null;"
+        f.puts "end #{name};"
+        f.puts "/"
+      elsif config.db_type == 'mysql'
+        f.puts "deliminator $$"
+        f.puts "drop function if exists #{name}$$"
+        f.puts "create function #{name}()"
+        f.puts "  returns varchar"
+        f.puts "begin"
+        f.puts "end$$"
+      end
+    end
+  end
+when 'trigger', 'trg'
+  filename = File.join(config.code_dir, "#{name}.trg")
+  if File.exists?(filename)
+    puts "exists: #{filename}"
+  else
+    puts "creating: #{filename}"
+    File.open(filename, 'w') do |f|
+      if config.db_type == 'oracle'
+        f.puts "create or replace trigger #{name} before insert on TABLE"
+        f.puts "for each row"
+        f.puts "begin"
+        f.puts "  null;"
+        f.puts "end;"
+        f.puts "/"
+      elsif config.db_type == 'mysql'
+        f.puts "deliminator $$"
+        f.puts "drop trigger if exists #{name}$$"
+        f.puts "CREATE TRIGGER #{name} BEFORE INSERT ON TABLE"
+        f.puts "FOR EACH ROW"
+        f.puts "BEGIN"
+        f.puts "END$$"
+      end
     end
   end
 when 'milestone'

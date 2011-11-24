@@ -110,6 +110,11 @@ module DBGeni
 #          sql_parameters = checkSQLPlusParameters(file)
 #        end
 
+        add_terminator = true
+        if is_proc
+          add_terminator = !file_contains_terminator?(file)
+        end
+
         IO.popen("sqlplus -L #{@config.env.username}/#{@config.env.password}@#{@config.env.database} > #{null_device}", "w") do |p|
           p.puts "set TERM on"
           p.puts "set ECHO on"
@@ -123,7 +128,7 @@ module DBGeni
           p.puts "spool #{@logfile}"
           p.puts "START #{file}"
           if is_proc
-            p.puts "/"
+            p.puts "/" if add_terminator
             p.puts "show err"
           end
           p.puts "spool off"
@@ -160,6 +165,17 @@ module DBGeni
         when DBGeni::Code::PROCEDURE
           "drop procedure #{code.name}"
         end
+      end
+
+      def file_contains_terminator?(filename)
+        has_slash = false
+        File.open(filename, 'r').each_line do |l|
+          if l =~ /^\s*\/\s*$/
+            has_slash = true
+            break
+          end
+        end
+        has_slash
       end
 
     end

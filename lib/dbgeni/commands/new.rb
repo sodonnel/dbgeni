@@ -63,7 +63,6 @@ code_directory "./code"
 # This specifies the type of database this installer is applied against
 # Valid values are oracle, mysql, sqlite however this is not validated
 # to enable different database plugins to easily be added.
-# Default is oracle
 database_type "sqlite"
 
 # This is the table the installer logs applied migrations in the database
@@ -82,8 +81,13 @@ database_table "dbgeni_migrations"
 environment('development') {
 
    database 'testdb.sqlite' # this must be here, or it will error. For Oracle, this is the TNS Name
+                            # for mysql this is the database selected after logon by the 'use database'
+                            # command. For Sqlite, this is the filename of the database
 #   username ''             # this must be here, or it will error (unless using sqlite)
 #   password ''             # If this value is missing, it will be promoted for if needed
+#   hostname '127.0.0.1'    # For mysql, specify the ip or hostname the server is running on.
+                            # If it is running on localhost, use 127.0.0.1 - not localhost
+#   port     '3306'         # For mysql, this specifies the port the server is running on, eg 3306
 #
 #   Other parameters can be defined here and will override global_parameters
 #   param_name 'value'

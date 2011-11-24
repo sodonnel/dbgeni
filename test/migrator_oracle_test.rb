@@ -108,7 +108,17 @@ class TestMigratorOracle < Test::Unit::TestCase
     assert_nothing_raised do
       @migrator.compile(code)
     end
+    assert_equal(1, @connection.execute("select count(*) from all_objects where object_name = 'PROC1'")[0][0])
   end
+
+  def test_good_procedure_no_terminator_loads_without_error
+    code = helper_good_procedure_file_no_terminator
+    assert_nothing_raised do
+      @migrator.compile(code)
+    end
+    assert_equal(1, @connection.execute("select count(*) from all_objects where object_name = 'PROC1'")[0][0])
+  end
+
 
   def test_bad_procedure_loads_without_error
     code = helper_bad_procedure_file

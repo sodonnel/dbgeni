@@ -208,8 +208,18 @@ module TestHelper
       as
       begin
          null;
+      end;
+      /", 'proc1.prc')
+  end
+
+  def helper_good_procedure_file_no_terminator
+    create_procedure_file("create or replace procedure proc1
+      as
+      begin
+         null;
       end;", 'proc1.prc')
   end
+
 
   def helper_mysql_good_procedure_file
     create_procedure_file("delimiter $$
@@ -291,14 +301,16 @@ module TestHelper
                            before insert on dbgeni_migrations
       begin
          null;
-      end;", 'trg1.trg')
+      end;
+      /", 'trg1.trg')
   end
 
   def helper_good_package_spec_file
     create_procedure_file("create or replace package pkg1
       as
         procedure foobar;
-      end;", 'pkg1.pks')
+      end;
+      /", 'pkg1.pks')
     create_procedure_file("create or replace package body pkg1
       as
         procedure foobar
@@ -306,7 +318,8 @@ module TestHelper
         begin
           null;
         end;
-      end;", 'pkg1.pkb')
+      end;
+      /", 'pkg1.pkb')
   end
 
   def helper_good_package_body_file
@@ -317,7 +330,8 @@ module TestHelper
         begin
           null;
         end;
-      end;", 'pkg1.pkb')
+      end;
+      /", 'pkg1.pkb')
   end
 
   def helper_bad_procedure_file
@@ -325,7 +339,8 @@ module TestHelper
       as
       begin
          null -- compile error here
-      end;", 'proc1.prc')
+      end;
+      /", 'proc1.prc')
   end
 
 
