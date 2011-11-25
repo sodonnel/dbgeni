@@ -12,14 +12,14 @@ module TestHelper
   ORA_PASSWORD = 'sodonnel'
   ORA_DB       = 'local11gr2'
 
-  MYSQL_USER     = 'sodonnell'
-  MYSQL_PASSWORD = 'sodonnell'
+  MYSQL_USER     = 'sodonnel'
+  MYSQL_PASSWORD = 'sodonnel'
   MYSQL_DB       = 'sodonnel'
   MYSQL_HOSTNAME = '127.0.0.1'
   MYSQL_PORT     = '3306'
 
-#  CLI = 'ruby C:\Users\sodonnel\code\dbgeni\lib\dbgeni\cli.rb'
-  CLI = 'ruby /home/sodonnel/code/dbgeni/lib/dbgeni/cli.rb'
+  CLI = 'ruby C:\Users\sodonnel\code\dbgeni\lib\dbgeni\cli.rb'
+#  CLI = 'ruby /home/sodonnel/code/dbgeni/lib/dbgeni/cli.rb'
 
   def helper_clean_temp
     FileUtils.rm_rf("#{TEMP_DIR}")
@@ -32,7 +32,7 @@ module TestHelper
     config = helper_oracle_config
     begin
       DBGeni::Initializer.initialize(conn, config)
-      conn.initialize_database
+     # conn.initialize_database
     rescue DBGeni::DatabaseAlreadyInitialized
     end
     conn.execute("delete from dbgeni_migrations")
@@ -40,6 +40,30 @@ module TestHelper
       conn.execute("drop procedure proc1")
     rescue
     end
+    conn.disconnect
+  end
+
+  def helper_reinitialize_mysql
+    conn   = helper_mysql_connection
+    config = helper_mysql_config
+    begin
+      DBGeni::Initializer.initialize(conn, config)
+     # conn.initialize_database
+    rescue DBGeni::DatabaseAlreadyInitialized
+    end
+    conn.execute("delete from dbgeni_migrations")
+    conn.disconnect
+  end
+
+  def helper_reinitialize_sqlite
+    conn   = helper_sqlite_connection
+    config = helper_sqlite_config
+    begin
+      DBGeni::Initializer.initialize(conn, config)
+     # conn.initialize_database
+    rescue DBGeni::DatabaseAlreadyInitialized
+    end
+    conn.execute("delete from dbgeni_migrations")
     conn.disconnect
   end
 
@@ -153,6 +177,22 @@ module TestHelper
     filename
   end
 
+  def helper_mysql_single_environment_file
+    filename = "#{TEMP_DIR}/mysql.conf"
+    File.open(filename, 'w') do |f|
+      f.puts "database_type 'mysql'
+                                   environment('development') {
+                                     username '#{MYSQL_USER}'
+                                     password '#{MYSQL_PASSWORD}'
+                                     database '#{MYSQL_DB}'
+                                     hostname '#{MYSQL_HOSTNAME}'
+                                     port     '#{MYSQL_PORT}'
+             }"
+    end
+    filename
+  end
+
+
 
   def helper_good_oracle_migration
     create_migration_files("select * from dual;")
@@ -160,6 +200,10 @@ module TestHelper
 
   def helper_good_sqlite_migration
     create_migration_files("select * from sqlite_master;")
+  end
+
+  def helper_good_mysql_migration
+    create_migration_files("select 1 from dual;")
   end
 
   def helper_many_good_sqlite_migrations(number)
@@ -177,6 +221,27 @@ module TestHelper
       create_migration_files("select * from tab_not_exist;\ncreate table foo (c1 integer);", datestamp.to_s)
     end
   end
+
+  def helper_many_good_oracle_migrations(number)
+    datestamp = 201108190000 - 1
+    1.upto(number) do
+      datestamp += 1
+      create_migration_files("select 1 from dual;", datestamp.to_s)
+    end
+  end
+
+  def helper_many_bad_oracle_migrations(number)
+    helper_many_bad_sqlite_migrations(number)
+  end
+
+  def helper_many_good_mysql_migrations(number)
+    helper_many_good_oracle_migrations(number)
+  end
+
+  def helper_many_bad_mysql_migrations(number)
+    helper_many_bad_sqlite_migrations(number)
+  end
+
 
   def helper_good_mysql_migration
     create_migration_files("select 1 + 1 from dual;")
