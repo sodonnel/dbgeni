@@ -344,6 +344,7 @@ class TestCLIMigrations < Test::Unit::TestCase
   end
 
   def test_apply_until_milestone
+    helper_many_good_sqlite_migrations(4)
     response = Kernel.system("#{CLI} generate milestone rel1 201108190002::test_migration -c #{TEMP_DIR}/sqlite.conf")
     @dbs.each do |db|
       self.send("helper_many_good_#{db}_migrations".intern, 4)
@@ -357,8 +358,6 @@ class TestCLIMigrations < Test::Unit::TestCase
   # invalid commands
 
   def test_invalid_apply_command
-    response = Kernel.system("#{CLI} initialize -c #{TEMP_DIR}/sqlite.conf")
-    assert_equal(true, response)
     response = `#{CLI} migrations apply foobar -c #{TEMP_DIR}/sqlite.conf`
     assert_match(/is not a valid command/, response)
   end
@@ -450,80 +449,79 @@ class TestCLIMigrations < Test::Unit::TestCase
     end
   end
 
-## CONTINUE
-
   def test_rollback_specific_good_migration
-    response = Kernel.system("#{CLI} initialize -c #{TEMP_DIR}/sqlite.conf")
-    assert_equal(true, response)
-    helper_good_sqlite_migration
-    response = Kernel.system("#{CLI} migrations apply 201108190000::test_migration -c #{TEMP_DIR}/sqlite.conf")
-    assert_equal(true, response)
-    response = Kernel.system("#{CLI} migrations rollback 201108190000::test_migration -c #{TEMP_DIR}/sqlite.conf")
-    assert_equal(true, response)
+    @dbs.each do |db|
+      self.send("helper_good_#{db}_migration".intern)
+      response = Kernel.system("#{CLI} migrations apply 201108190000::test_migration -c #{TEMP_DIR}/#{db}.conf")
+      assert_equal(true, response)
+      response = Kernel.system("#{CLI} migrations rollback 201108190000::test_migration -c #{TEMP_DIR}/#{db}.conf")
+      assert_equal(true, response)
+    end
   end
 
+
   def test_rollback_specific_bad_migration
-    response = Kernel.system("#{CLI} initialize -c #{TEMP_DIR}/sqlite.conf")
-    assert_equal(true, response)
-    helper_good_sqlite_migration
-    response = Kernel.system("#{CLI} migrations apply 201108190000::test_migration -c #{TEMP_DIR}/sqlite.conf")
-    assert_equal(true, response)
-    helper_bad_sqlite_migration
-    response = `#{CLI} migrations rollback 201108190000::test_migration -c #{TEMP_DIR}/sqlite.conf`
-    assert_match(/There was a problem rolling back/, response)
+    @dbs.each do |db|
+      self.send("helper_good_#{db}_migration".intern)
+      response = Kernel.system("#{CLI} migrations apply 201108190000::test_migration -c #{TEMP_DIR}/#{db}.conf")
+      assert_equal(true, response)
+      self.send("helper_bad_#{db}_migration".intern)
+      response = `#{CLI} migrations rollback 201108190000::test_migration -c #{TEMP_DIR}/#{db}.conf`
+      assert_match(/There was a problem rolling back/, response)
+    end
   end
 
   def test_rollback_specific_bad_migration_with_force
-    response = Kernel.system("#{CLI} initialize -c #{TEMP_DIR}/sqlite.conf")
-    assert_equal(true, response)
-    helper_good_sqlite_migration
-    response = Kernel.system("#{CLI} migrations apply 201108190000::test_migration -c #{TEMP_DIR}/sqlite.conf")
-    assert_equal(true, response)
-    helper_bad_sqlite_migration
-    response = Kernel.system("#{CLI} migrations rollback 201108190000::test_migration -c #{TEMP_DIR}/sqlite.conf -f")
-    assert_equal(true, response)
+    @dbs.each do |db|
+      self.send("helper_good_#{db}_migration".intern)
+      response = Kernel.system("#{CLI} migrations apply 201108190000::test_migration -c #{TEMP_DIR}/#{db}.conf")
+      assert_equal(true, response)
+      self.send("helper_bad_#{db}_migration".intern)
+      response = Kernel.system("#{CLI} migrations rollback 201108190000::test_migration -c #{TEMP_DIR}/#{db}.conf -f")
+      assert_equal(true, response)
+    end
   end
 
   # Would expect this to raise an error indicating the file does not exist,
   # but it doesn't even get to that point as it doesn't get past the 'not applied'
   # check.
   def test_apply_specific_rollback_when_not_exist
-    response = Kernel.system("#{CLI} initialize -c #{TEMP_DIR}/sqlite.conf")
-    assert_equal(true, response)
-    response = `#{CLI} migrations rollback 201108190000::not_there -c #{TEMP_DIR}/sqlite.conf`
-    assert_match(/has not been applied so cannot be rolledback/, response)
+    @dbs.each do |db|
+      response = `#{CLI} migrations rollback 201108190000::not_there -c #{TEMP_DIR}/#{db}.conf`
+      assert_match(/has not been applied so cannot be rolledback/, response)
+    end
   end
 
   def test_rollback_migration_that_has_not_been_applied
-    response = Kernel.system("#{CLI} initialize -c #{TEMP_DIR}/sqlite.conf")
-    assert_equal(true, response)
-    helper_good_sqlite_migration
-    response = `#{CLI} migrations rollback 201108190000::test_migration -c #{TEMP_DIR}/sqlite.conf`
-    assert_match(/has not been applied so cannot be rolledback/, response)
+    @dbs.each do |db|
+      self.send("helper_good_#{db}_migration".intern)
+      response = `#{CLI} migrations rollback 201108190000::test_migration -c #{TEMP_DIR}/#{db}.conf`
+      assert_match(/has not been applied so cannot be rolledback/, response)
+    end
   end
 
   def test_rollback_migration_that_has_already_been_rolledback
-    response = Kernel.system("#{CLI} initialize -c #{TEMP_DIR}/sqlite.conf")
-    assert_equal(true, response)
-    helper_good_sqlite_migration
-    response = Kernel.system("#{CLI} migrations apply 201108190000::test_migration -c #{TEMP_DIR}/sqlite.conf")
-    assert_equal(true, response)
-    response = Kernel.system("#{CLI} migrations rollback 201108190000::test_migration -c #{TEMP_DIR}/sqlite.conf")
-    assert_equal(true, response)
-    response = `#{CLI} migrations rollback 201108190000::test_migration -c #{TEMP_DIR}/sqlite.conf`
-    assert_match(/has not been applied so cannot be rolledback/, response)
+    @dbs.each do |db|
+      self.send("helper_good_#{db}_migration".intern)
+      response = Kernel.system("#{CLI} migrations apply 201108190000::test_migration -c #{TEMP_DIR}/#{db}.conf")
+      assert_equal(true, response)
+      response = Kernel.system("#{CLI} migrations rollback 201108190000::test_migration -c #{TEMP_DIR}/#{db}.conf")
+      assert_equal(true, response)
+      response = `#{CLI} migrations rollback 201108190000::test_migration -c #{TEMP_DIR}/#{db}.conf`
+      assert_match(/has not been applied so cannot be rolledback/, response)
+    end
   end
 
-  def test_rollback_specific_migration_that_has_already_been_rolledback_force_on
-    response = Kernel.system("#{CLI} initialize -c #{TEMP_DIR}/sqlite.conf")
-    assert_equal(true, response)
-    helper_good_sqlite_migration
-    response = Kernel.system("#{CLI} migrations apply 201108190000::test_migration -c #{TEMP_DIR}/sqlite.conf")
-    assert_equal(true, response)
-    response = Kernel.system("#{CLI} migrations rollback 201108190000::test_migration -c #{TEMP_DIR}/sqlite.conf")
-    assert_equal(true, response)
-    response = Kernel.system("#{CLI} migrations rollback 201108190000::test_migration -c #{TEMP_DIR}/sqlite.conf -f")
-    assert_equal(true, response)
+  def test_rollback_migration_that_has_already_been_rolledback_force_on
+    @dbs.each do |db|
+      self.send("helper_good_#{db}_migration".intern)
+      response = Kernel.system("#{CLI} migrations apply 201108190000::test_migration -c #{TEMP_DIR}/#{db}.conf")
+      assert_equal(true, response)
+      response = Kernel.system("#{CLI} migrations rollback 201108190000::test_migration -c #{TEMP_DIR}/#{db}.conf")
+      assert_equal(true, response)
+      response = Kernel.system("#{CLI} migrations rollback 201108190000::test_migration -c #{TEMP_DIR}/#{db}.conf -f")
+      assert_equal(true, response)
+    end
   end
 
   ##########
@@ -531,88 +529,88 @@ class TestCLIMigrations < Test::Unit::TestCase
   ##########
 
   def test_rollback_until_good_migration
-    response = Kernel.system("#{CLI} initialize -c #{TEMP_DIR}/sqlite.conf")
-    assert_equal(true, response)
-    helper_good_sqlite_migration
-    response = Kernel.system("#{CLI} migrations apply until 201108190000::test_migration -c #{TEMP_DIR}/sqlite.conf")
-    assert_equal(true, response)
-    response = Kernel.system("#{CLI} migrations rollback until 201108190000::test_migration -c #{TEMP_DIR}/sqlite.conf")
-    assert_equal(true, response)
+    @dbs.each do |db|
+      self.send("helper_good_#{db}_migration".intern)
+      response = Kernel.system("#{CLI} migrations apply until 201108190000::test_migration -c #{TEMP_DIR}/#{db}.conf")
+      assert_equal(true, response)
+      response = Kernel.system("#{CLI} migrations rollback until 201108190000::test_migration -c #{TEMP_DIR}/#{db}.conf")
+      assert_equal(true, response)
+    end
   end
 
   def test_rollback_until_bad_migration
-    response = Kernel.system("#{CLI} initialize -c #{TEMP_DIR}/sqlite.conf")
-    assert_equal(true, response)
-    helper_many_good_sqlite_migrations(2)
-    response = Kernel.system("#{CLI} migrations apply until 201108190001::test_migration -c #{TEMP_DIR}/sqlite.conf")
-    assert_equal(true, response)
-    helper_many_bad_sqlite_migrations(2)
-    response = Kernel.system("#{CLI} migrations rollback until 201108190000::test_migration -c #{TEMP_DIR}/sqlite.conf")
-    assert_equal(false, response)
+    @dbs.each do |db|
+      self.send("helper_many_good_#{db}_migrations".intern, 2)
+      response = Kernel.system("#{CLI} migrations apply until 201108190001::test_migration -c #{TEMP_DIR}/#{db}.conf")
+      assert_equal(true, response)
+      self.send("helper_many_bad_#{db}_migrations".intern, 2)
+      response = Kernel.system("#{CLI} migrations rollback until 201108190000::test_migration -c #{TEMP_DIR}/#{db}.conf")
+      assert_equal(false, response)
+    end
   end
 
   def test_rollback_until_bad_migration_force_on
-    response = Kernel.system("#{CLI} initialize -c #{TEMP_DIR}/sqlite.conf")
-    assert_equal(true, response)
-    helper_many_good_sqlite_migrations(2)
-    response = Kernel.system("#{CLI} migrations apply until 201108190001::test_migration -c #{TEMP_DIR}/sqlite.conf")
-    assert_equal(true, response)
-    helper_many_bad_sqlite_migrations(2)
-    response = Kernel.system("#{CLI} migrations rollback until 201108190000::test_migration -c #{TEMP_DIR}/sqlite.conf -f")
-    assert_equal(true, response)
+    @dbs.each do |db|
+      self.send("helper_many_good_#{db}_migrations".intern, 2)
+      response = Kernel.system("#{CLI} migrations apply until 201108190001::test_migration -c #{TEMP_DIR}/#{db}.conf")
+      assert_equal(true, response)
+      self.send("helper_many_bad_#{db}_migrations".intern, 2)
+      response = Kernel.system("#{CLI} migrations rollback until 201108190000::test_migration -c #{TEMP_DIR}/#{db}.conf -f")
+      assert_equal(true, response)
+    end
   end
 
   def test_rollback_until_migration_that_does_not_exist
-    response = Kernel.system("#{CLI} initialize -c #{TEMP_DIR}/sqlite.conf")
-    assert_equal(true, response)
-    response = `#{CLI} migrations rollback until 201108200000::test_migration -c #{TEMP_DIR}/sqlite.conf`
-    assert_match(/has not been applied so cannot be rolledback/, response)
+    @dbs.each do |db|
+      response = `#{CLI} migrations rollback until 201108200000::test_migration -c #{TEMP_DIR}/#{db}.conf`
+      assert_match(/has not been applied so cannot be rolledback/, response)
+    end
   end
 
   def test_rollback_until_migration_with_invalid_name
-    response = Kernel.system("#{CLI} initialize -c #{TEMP_DIR}/sqlite.conf")
-    assert_equal(true, response)
-    response = `#{CLI} migrations rollback until 2011000000::test_migration -c #{TEMP_DIR}/sqlite.conf`
-    assert_match(/is not a valid migration name/, response)
+    @dbs.each do |db|
+      response = `#{CLI} migrations rollback until 2011000000::test_migration -c #{TEMP_DIR}/#{db}.conf`
+      assert_match(/is not a valid migration name/, response)
+    end
   end
 
   def test_rollback_until_migration_missing_name
-    response = Kernel.system("#{CLI} initialize -c #{TEMP_DIR}/sqlite.conf")
-    assert_equal(true, response)
-    response = `#{CLI} migrations rollback until -c #{TEMP_DIR}/sqlite.conf`
-    assert_match(/A migration name must be specified/, response)
+    @dbs.each do |db|
+      response = `#{CLI} migrations rollback until -c #{TEMP_DIR}/#{db}.conf`
+      assert_match(/A migration name must be specified/, response)
+    end
   end
 
   def test_rollback_until_migration_many_migrations
-    response = Kernel.system("#{CLI} initialize -c #{TEMP_DIR}/sqlite.conf")
-    assert_equal(true, response)
-    helper_many_good_sqlite_migrations(4)
-    response = Kernel.system("#{CLI} migrations apply all -c #{TEMP_DIR}/sqlite.conf")
-    assert_equal(true, response)
-    response = Kernel.system("#{CLI} migrations rollback until 201108190002::test_migration -c #{TEMP_DIR}/sqlite.conf")
-    assert_equal(true, response)
+    @dbs.each do |db|
+      self.send("helper_many_good_#{db}_migrations".intern, 4)
+      response = Kernel.system("#{CLI} migrations apply all -c #{TEMP_DIR}/#{db}.conf")
+      assert_equal(true, response)
+      response = Kernel.system("#{CLI} migrations rollback until 201108190002::test_migration -c #{TEMP_DIR}/#{db}.conf")
+      assert_equal(true, response)
+    end
   end
 
   def test_rollback_until_migration_many_bad_migrations
-    response = Kernel.system("#{CLI} initialize -c #{TEMP_DIR}/sqlite.conf")
-    assert_equal(true, response)
-    helper_many_good_sqlite_migrations(4)
-    response = Kernel.system("#{CLI} migrations apply until 201108190002::test_migration -c #{TEMP_DIR}/sqlite.conf")
-    assert_equal(true, response)
-    helper_many_bad_sqlite_migrations(4)
-    response = Kernel.system("#{CLI} migrations apply until 201108190002::test_migration -c #{TEMP_DIR}/sqlite.conf")
-    assert_equal(false, response)
+    @dbs.each do |db|
+      self.send("helper_many_good_#{db}_migrations".intern, 4)
+      response = Kernel.system("#{CLI} migrations apply until 201108190002::test_migration -c #{TEMP_DIR}/#{db}.conf")
+      assert_equal(true, response)
+      self.send("helper_many_bad_#{db}_migrations".intern, 4)
+      response = Kernel.system("#{CLI} migrations apply until 201108190002::test_migration -c #{TEMP_DIR}/#{db}.conf")
+      assert_equal(false, response)
+    end
   end
 
   def test_rollback_until_migration_many_bad_migrations_force_on
-    response = Kernel.system("#{CLI} initialize -c #{TEMP_DIR}/sqlite.conf")
-    assert_equal(true, response)
-    helper_many_good_sqlite_migrations(4)
-    response = Kernel.system("#{CLI} migrations apply until 201108190002::test_migration -c #{TEMP_DIR}/sqlite.conf")
-    assert_equal(true, response)
-    helper_many_bad_sqlite_migrations(4)
-    response = Kernel.system("#{CLI} migrations rollback until 201108190002::test_migration -c #{TEMP_DIR}/sqlite.conf -f")
-    assert_equal(true, response)
+    @dbs.each do |db|
+      self.send("helper_many_good_#{db}_migrations".intern, 4)
+      response = Kernel.system("#{CLI} migrations apply until 201108190002::test_migration -c #{TEMP_DIR}/#{db}.conf")
+      assert_equal(true, response)
+      self.send("helper_many_bad_#{db}_migrations".intern, 4)
+      response = Kernel.system("#{CLI} migrations rollback until 201108190002::test_migration -c #{TEMP_DIR}/#{db}.conf -f")
+      assert_equal(true, response)
+    end
   end
 
   #####################################
@@ -622,65 +620,71 @@ class TestCLIMigrations < Test::Unit::TestCase
   # all gets started correctly.
 
   def test_rollback_until_milestone_when_no_milestone_specified
-    response = Kernel.system("#{CLI} initialize -c #{TEMP_DIR}/sqlite.conf")
-    assert_equal(true, response)
-    response = `#{CLI} migrations rollback milestone -c #{TEMP_DIR}/sqlite.conf`
-    assert_match(/You must specify a milestone/, response)
+    @dbs.each do |db|
+      response = `#{CLI} migrations rollback milestone -c #{TEMP_DIR}/#{db}.conf`
+      assert_match(/You must specify a milestone/, response)
+    end
   end
 
   def test_rollback_until_milestone_when_milestone_not_exist
-    response = Kernel.system("#{CLI} initialize -c #{TEMP_DIR}/sqlite.conf")
-    assert_equal(true, response)
-    response = `#{CLI} migrations rollback milestone not_here -c #{TEMP_DIR}/sqlite.conf`
-    assert_match(/The milestone .+ does not exist/, response)
+    @dbs.each do |db|
+      response = `#{CLI} migrations rollback milestone not_here -c #{TEMP_DIR}/#{db}.conf`
+      assert_match(/The milestone .+ does not exist/, response)
+    end
   end
 
   def test_rollback_until_milestone_when_milestone_file_empty
-    FileUtils.touch(File.join(TEMP_DIR, 'migrations', 'rel1.milestone'))
-    response = `#{CLI} migrations rollback milestone rel1 -c #{TEMP_DIR}/sqlite.conf`
-    assert_match(/The milestone does not contain a valid migration/, response)
+    @dbs.each do |db|
+      FileUtils.touch(File.join(TEMP_DIR, 'migrations', 'rel1.milestone'))
+      response = `#{CLI} migrations rollback milestone rel1 -c #{TEMP_DIR}/#{db}.conf`
+      assert_match(/The milestone does not contain a valid migration/, response)
+    end
   end
 
   def test_rollback_until_milestone_when_non_existent_migration_in_file
-    File.open(File.join(TEMP_DIR, 'migrations', 'rel1.milestone'), 'w') do |f|
-      f.puts '201001011431_up_something.sql'
+    @dbs.each do |db|
+      File.open(File.join(TEMP_DIR, 'migrations', 'rel1.milestone'), 'w') do |f|
+        f.puts '201001011431_up_something.sql'
+      end
+      response = `#{CLI} migrations rollback milestone rel1 -c #{TEMP_DIR}/#{db}.conf`
+      assert_match(/has not been applied so cannot be rolledback/, response)
     end
-    response = Kernel.system("#{CLI} initialize -c #{TEMP_DIR}/sqlite.conf")
-    response = `#{CLI} migrations rollback milestone rel1 -c #{TEMP_DIR}/sqlite.conf`
-    assert_match(/has not been applied so cannot be rolledback/, response)
   end
 
   def test_rollback_until_milestone_when_badly_formed_migration_in_file
-    File.open(File.join(TEMP_DIR, 'migrations', 'rel1.milestone'), 'w') do |f|
-      f.puts 'jibberish'
+    @dbs.each do |db|
+      File.open(File.join(TEMP_DIR, 'migrations', 'rel1.milestone'), 'w') do |f|
+        f.puts 'jibberish'
+      end
+      response = `#{CLI} migrations rollback milestone rel1 -c #{TEMP_DIR}/#{db}.conf`
+      assert_match(/The milestone does not contain a valid migration/, response)
     end
-    response = `#{CLI} migrations rollback milestone rel1 -c #{TEMP_DIR}/sqlite.conf`
-    assert_match(/The milestone does not contain a valid migration/, response)
   end
 
-
   def test_rollback_until_milestone
-    response = Kernel.system("#{CLI} initialize -c #{TEMP_DIR}/sqlite.conf")
-    assert_equal(true, response)
+    # need to generate the files and then the milestone as the milestone generator
+    # errors if you try to generate a milestone for a migration that doesn't exist
     helper_many_good_sqlite_migrations(4)
     response = Kernel.system("#{CLI} generate milestone rel1 201108190002::test_migration -c #{TEMP_DIR}/sqlite.conf")
     assert_equal(true, response)
-    response = Kernel.system("#{CLI} migrations apply all 201108190002::test_migration -c #{TEMP_DIR}/sqlite.conf")
-    assert_equal(true, response)
-    response = Kernel.system("#{CLI} migrations rollback milestone rel1 -c #{TEMP_DIR}/sqlite.conf")
-    assert_equal(true, response)
+    @dbs.each do |db|
+      self.send("helper_many_good_#{db}_migrations".intern, 4)
+      response = Kernel.system("#{CLI} migrations apply all 201108190002::test_migration -c #{TEMP_DIR}/#{db}.conf")
+      assert_equal(true, response)
+      response = Kernel.system("#{CLI} migrations rollback milestone rel1 -c #{TEMP_DIR}/#{db}.conf")
+      assert_equal(true, response)
+    end
   end
 
 
-  def test_rollback_migration_that_error_includes_logfile
-    response = Kernel.system("#{CLI} initialize -c #{TEMP_DIR}/sqlite.conf")
-    assert_equal(true, response)
-    helper_good_sqlite_migration
-    response = Kernel.system("#{CLI} migrations apply all -c #{TEMP_DIR}/sqlite.conf")
-    helper_bad_sqlite_migration
-    response = `#{CLI} migrations rollback all -c #{TEMP_DIR}/sqlite.conf`
-    puts response
-    assert_match(/Errors in .+\.sql.*/, response)
+  def test_rollback_migration_that_errors_includes_logfile
+    @dbs.each do |db|
+      self.send("helper_good_#{db}_migration".intern)
+      response = Kernel.system("#{CLI} migrations apply all -c #{TEMP_DIR}/#{db}.conf")
+      self.send("helper_bad_#{db}_migration".intern)
+      response = `#{CLI} migrations rollback all -c #{TEMP_DIR}/#{db}.conf`
+      assert_match(/Errors in .+\.sql.*/, response)
+    end
   end
 
 
@@ -692,8 +696,6 @@ class TestCLIMigrations < Test::Unit::TestCase
   ##################################
 
   def test_invalid_rollback_command
-    response = Kernel.system("#{CLI} initialize -c #{TEMP_DIR}/sqlite.conf")
-    assert_equal(true, response)
     response = `#{CLI} migrations rollback foobar -c #{TEMP_DIR}/sqlite.conf`
     assert_match(/is not a valid command/, response)
   end
