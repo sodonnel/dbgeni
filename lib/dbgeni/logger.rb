@@ -44,10 +44,10 @@ module DBGeni
       if @log_location
         FileUtils.mkdir_p(location)
         @fh = File.open("#{location}/log.txt", 'a')
-        @fh.puts ("\n\n\n###################################################")
-        @fh.puts ("dbgeni initialized")
+        @fh.puts("\n\n\n###################################################")
+        @fh.puts("dbgeni initialized")
         @detailed_log_dir = Time.now.strftime('%Y%m%d%H%M%S')
-        @fh.puts ("Detailed log files will be written in #{@detailed_log_dir}")
+        @fh.puts("Detailed log files will be written in #{@detailed_log_dir}")
       end
     end
 

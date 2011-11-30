@@ -3,6 +3,7 @@ module TestHelper
   require 'dbgeni/connectors/sqlite'
   require 'dbgeni/connectors/oracle'
   require 'dbgeni/connectors/mysql'
+  require 'dbgeni/connectors/sybase'
   require 'fileutils'
 
   TEMP_DIR = File.expand_path(File.join(File.dirname(__FILE__), "temp"))
@@ -17,6 +18,15 @@ module TestHelper
   MYSQL_DB       = 'sodonnel'
   MYSQL_HOSTNAME = '127.0.0.1'
   MYSQL_PORT     = '3306'
+
+  SYBASE_USER     = 'sa'
+  SYBASE_PASSWORD = 'sa1234'
+  SYBASE_DB       = 'cfg'
+  SYBASE_HOSTNAME = '10.152.97.152'
+  SYBASE_PORT     = '5000'
+  SYBASE_SERVICE  = 'localsyb'
+
+
 
   CLI = 'ruby C:\Users\sodonnel\code\dbgeni\lib\dbgeni\cli.rb'
 #  CLI = 'ruby /home/sodonnel/code/dbgeni/lib/dbgeni/cli.rb'
@@ -92,6 +102,10 @@ module TestHelper
     connection = DBGeni::Connector::Mysql.connect(MYSQL_USER, MYSQL_PASSWORD, MYSQL_DB, MYSQL_HOSTNAME, MYSQL_PORT)
   end
 
+  def helper_sybase_connection
+    connection = DBGeni::Connector::Sybase.connect(SYBASE_USER, SYBASE_PASSWORD, SYBASE_DB, SYBASE_HOSTNAME, SYBASE_PORT)
+  end
+
 
   def helper_oracle_config
     config = DBGeni::Config.new.load("database_type 'oracle'
@@ -116,6 +130,21 @@ module TestHelper
     config.base_directory = TEMP_DIR
     config
   end
+
+  def helper_sybase_config
+    config = DBGeni::Config.new.load("database_type 'sybase'
+                                      environment('development') {
+                                         username '#{SYBASE_USER}'
+                                         password '#{SYBASE_PASSWORD}'
+                                         database '#{SYBASE_DB}'
+                                         hostname '#{SYBASE_HOSTNAME}'
+                                         port     '#{SYBASE_PORT}'
+                                         sybase_service '#{SYBASE_SERVICE}'
+                                     }")
+    config.base_directory = TEMP_DIR
+    config
+  end
+
 
 
   def helper_sqlite_single_environment_file
@@ -201,6 +230,16 @@ module TestHelper
   def helper_good_sqlite_migration
     create_migration_files("select * from sqlite_master;")
   end
+
+  def helper_good_sybase_migration
+    create_migration_files("select 1\ngo")
+  end
+
+  def helper_bad_sybase_migration
+    create_migration_files("select 1 from biggles\ngo\ncreate table foo (c1 varchar(10))\ngo")
+  end
+
+
 
   def helper_good_mysql_migration
     create_migration_files("select 1 from dual;")

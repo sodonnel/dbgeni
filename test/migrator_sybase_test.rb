@@ -4,19 +4,19 @@ $:.unshift File.expand_path(File.dirname(__FILE__))
 require 'helper'
 require "dbgeni"
 require 'test/unit'
-require 'dbgeni/migrators/mysql'
-require 'dbgeni/initializers/mysql'
+require 'dbgeni/migrators/sybase'
+require 'dbgeni/initializers/sybase'
 
-class TestMigratorMysql < Test::Unit::TestCase
+class TestMigratorSybase < Test::Unit::TestCase
 
   include TestHelper
 
   def setup
-    @connection = helper_mysql_connection
-    @config     = helper_mysql_config
+    @connection = helper_sybase_connection #DBGeni::Connector::Sybase.connect('sa', 'sa1234', 'cfg', '10.152.97.152' ,5000)
+    @config     = helper_sybase_config
     FileUtils.mkdir_p(File.join(TEMP_DIR, 'log'))
-    unless DBGeni::Initializer::Mysql.initialized?(@connection, @config)
-      DBGeni::Initializer::Mysql.initialize(@connection, @config)
+    unless DBGeni::Initializer::Sybase.initialized?(@connection, @config)
+      DBGeni::Initializer::Sybase.initialize(@connection, @config)
     end
     @connection.execute("delete from #{@config.db_table}")
     begin
@@ -42,7 +42,7 @@ class TestMigratorMysql < Test::Unit::TestCase
   end
 
   def test_good_migration_runs_without_error
-    migration = helper_good_mysql_migration
+    migration = helper_good_sybase_migration
     assert_nothing_raised do
       @migrator.apply(migration)
     end
@@ -53,49 +53,33 @@ class TestMigratorMysql < Test::Unit::TestCase
 
   def test_bad_migration_runs_with_error
     # reusing sqlite migration ...
-    migration = helper_bad_sqlite_migration
+    migration = helper_bad_sybase_migration
     assert_raises DBGeni::MigrationContainsErrors do
       @migrator.apply(migration)
     end
-    # also ensure that the command after the bad command does not get run
-    results = @connection.execute("show tables like 'foo'")
-    assert_equal(0, results.length)
+    # For sybase, the command after the error will get run
+    # isql does not give you a way to stop that. This is different to all the other
+    # databases.
+    results = @connection.execute("select name from sysobjects where name = 'foo'")
+    assert_equal(1, results.length)
     assert_raises DBGeni::MigrationContainsErrors do
       @migrator.rollback(migration)
     end
-    results = @connection.execute("show tables like 'foo'")
-    assert_equal(0, results.length)
   end
 
-  def test_bad_migration_runs_with_error_force_off
-    migration = helper_bad_sqlite_migration
-    assert_raises DBGeni::MigrationContainsErrors do
-      @migrator.apply(migration, false)
-    end
-    # also ensure that the command after the bad command does not get run
-    results = @connection.execute("show tables like 'foo'")
-    assert_equal(0, results.length)
-    assert_raises DBGeni::MigrationContainsErrors do
-      @migrator.rollback(migration, false)
-    end
-    results = @connection.execute("show tables like 'foo'")
-    assert_equal(0, results.length)
-  end
-
-
-  def test_bad_migration_runs_to_completion_with_force_on
-    migration = helper_bad_sqlite_migration
+  def test_bad_migration_runs_to_completion_force_on
+    migration = helper_bad_sybase_migration
     assert_nothing_raised do
       @migrator.apply(migration, true)
     end
-    # also ensure that the command after the bad command does get run
-    results = @connection.execute("show tables like 'foo'")
+    # For sybase, the command after the error will get run
+    # isql does not give you a way to stop that. This is different to all the other
+    # databases.
+    results = @connection.execute("select name from sysobjects where name = 'foo'")
     assert_equal(1, results.length)
     assert_nothing_raised do
       @migrator.rollback(migration, true)
     end
-    results = @connection.execute("show tables like 'foo'")
-    assert_equal(1, results.length)
   end
 
 
@@ -110,7 +94,7 @@ class TestMigratorMysql < Test::Unit::TestCase
   end
 
   def test_logfile_accessible
-    migration = helper_good_mysql_migration
+    migration = helper_good_sybase_migration
     assert_nothing_raised do
       @migrator.apply(migration)
     end
@@ -118,21 +102,24 @@ class TestMigratorMysql < Test::Unit::TestCase
   end
 
   def test_error_message_retrieved_on_bad_migration
-    migration = helper_bad_sqlite_migration
+    migration = helper_bad_sybase_migration
     assert_raises DBGeni::MigrationContainsErrors do
       @migrator.apply(migration)
     end
-    assert_match(/^ERROR/, @migrator.migration_errors)
+    assert_match(/^Msg/, @migrator.migration_errors)
   end
 
   def test_empty_error_message_retrieved_on_good_migration
-    migration = helper_good_mysql_migration
+    migration = helper_good_sybase_migration
     assert_nothing_raised do
       @migrator.apply(migration)
     end
     assert_equal('', @migrator.migration_errors)
   end
 
+#### code tests
+
+  
   # def test_no_code_errors_reported_for_good_procedure
   #   code = helper_mysql_good_procedure_file
   #   assert_nothing_raised do
