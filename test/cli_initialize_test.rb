@@ -11,39 +11,60 @@ class TestCLIInitialize < Test::Unit::TestCase
   def setup
     helper_clean_temp
     helper_sqlite_single_environment_file
+    helper_oracle_single_environment_file
+    helper_mysql_single_environment_file
+    @dbs = %w(sqlite oracle mysql)
+    @dbs.each do |db|
+      begin
+        conn = self.send("helper_#{db}_connection".intern)
+        conn.execute("drop table dbgeni_migrations")
+        conn.disconnect
+      rescue Exception => e
+      end
+    end
   end
 
   def teardown
   end
 
   def test_database_can_be_initialized
-    response = Kernel.system("#{CLI} initialize -c  #{TEMP_DIR}/sqlite.conf")
-    assert_equal(true, response)
+    @dbs.each do |db|
+      response = Kernel.system("#{CLI} initialize -c  #{TEMP_DIR}/#{db}.conf")
+      assert_equal(true, response, db)
+    end
   end
 
   def test_database_can_be_initialized_many_environments
-    helper_sqlite_multiple_environment_file
-    response = Kernel.system("#{CLI} initialize -c  #{TEMP_DIR}/sqlite.conf -e development")
-    assert_equal(true, response)
+    @dbs.each do |db|
+      self.send("helper_#{db}_multiple_environment_file".intern)
+      response = Kernel.system("#{CLI} initialize -c  #{TEMP_DIR}/#{db}.conf -e development")
+      assert_equal(true, response)
+    end
   end
 
   def test_errors_when_no_env_specified_and_many_environments
-    helper_sqlite_multiple_environment_file
-    response = `#{CLI} initialize -c #{TEMP_DIR}/sqlite.conf`
-    assert_match(/environment specified and config file defines more than one environment/, response)
+    @dbs.each do |db|
+      self.send("helper_#{db}_multiple_environment_file".intern)
+      response = `#{CLI} initialize -c #{TEMP_DIR}/#{db}.conf`
+      assert_match(/environment specified and config file defines more than one environment/, response)
+    end
   end
 
   def test_errors_when_env_specified_that_does_not_exist
-    helper_sqlite_multiple_environment_file
-    response = `#{CLI} initialize -c  #{TEMP_DIR}/sqlite.conf -e foobar`
-    assert_match(/The environment .* does not exist/, response)
+    @dbs.each do |db|
+      self.send("helper_#{db}_multiple_environment_file".intern)
+      response = `#{CLI} initialize -c  #{TEMP_DIR}/#{db}.conf -e foobar`
+      assert_match(/The environment .* does not exist/, response)
+    end
   end
 
   def test_errors_when_db_already_initialized
-    response = Kernel.system("#{CLI} initialize -c  #{TEMP_DIR}/sqlite.conf")
-    assert_equal(true, response)
-    response = `#{CLI} initialize -c #{TEMP_DIR}/sqlite.conf`
-    assert_match(/The Database has already been initialized/, response)
+    @dbs.each do |db|
+      response = Kernel.system("#{CLI} initialize -c  #{TEMP_DIR}/#{db}.conf")
+      assert_equal(true, response)
+      response = `#{CLI} initialize -c #{TEMP_DIR}/#{db}.conf`
+      assert_match(/The Database has already been initialized/, response)
+    end
   end
 
   def test_errors_when_no_config_file

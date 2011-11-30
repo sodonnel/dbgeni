@@ -55,62 +55,20 @@ module DBGeni
         begin
           @connection.execute(drop_command(code))
         rescue Exception => e
-          unless e.to_s =~ /(procedure|function|trigger).+does not exist/i
+          unless e.to_s =~ /Cannot drop the .*(procedure|function|trigger).+exist in the system catalogs/i
             raise DBGeni::CodeRemoveFailed, e.to_s
           end
         end
       end
 
       def code_errors
-        # In mysql the code errors ar just the same as migration errors
+        # In sybase the code errors are just the same as migration errors
         errors = migration_errors
         if errors == ''
           errors = nil
         end
         errors
       end
-
-      # def code_errors
-      #   # The error part of the file file either looks like:
-
-      #   # SQL> show err
-      #   # No errors.
-      #   # SQL> spool off
-
-      #   # or
-
-      #   # SQL> show err
-      #   # Errors for PACKAGE BODY PKG1:
-
-      #   # LINE/COL ERROR
-      #   # -------- -----------------------------------------------------------------
-      #   # 5/1      PLS-00103: Encountered the symbol "END" when expecting one of the
-      #   # following:
-      #   # Error messages here
-      #   # SQL> spool off
-
-      #   # In the first case, return nil, but in the second case get everything after show err
-
-      #   error_msg = ''
-      #   start_search = false
-      #   File.open(@logfile, 'r').each_line do |l|
-      #     if !start_search && l =~ /^SQL> show err/
-      #       start_search = true
-      #       next
-      #     end
-      #     if start_search
-      #       if l =~ /^No errors\./
-      #         error_msg = nil
-      #         break
-      #       elsif l =~ /^SQL> spool off/
-      #         break
-      #       else
-      #         error_msg << l
-      #       end
-      #     end
-      #   end
-      #   error_msg
-      # end
 
       private
 

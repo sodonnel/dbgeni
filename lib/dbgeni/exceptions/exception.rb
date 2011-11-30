@@ -55,5 +55,7 @@ module DBGeni
   class NotImplemented              < Exception; end
 
   class MilestoneHasNoMigration     < Exception; end
+  class UnsupportedRubyPlatform     < Exception; end
+  class ConnectionError             < Exception; end
 
 end

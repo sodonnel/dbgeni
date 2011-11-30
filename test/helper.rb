@@ -3,7 +3,9 @@ module TestHelper
   require 'dbgeni/connectors/sqlite'
   require 'dbgeni/connectors/oracle'
   require 'dbgeni/connectors/mysql'
-  require 'dbgeni/connectors/sybase'
+  if RUBY_PLATFORM == 'java'
+    require 'dbgeni/connectors/sybase'
+  end
   require 'fileutils'
 
   TEMP_DIR = File.expand_path(File.join(File.dirname(__FILE__), "temp"))
@@ -206,6 +208,25 @@ module TestHelper
     filename
   end
 
+  def helper_oracle_multiple_environment_file
+    filename = "#{TEMP_DIR}/oracle.conf"
+    File.open(filename, 'w') do |f|
+      f.puts "database_type 'oracle'
+                                      environment('development') {
+                                         username '#{ORA_USER}'
+                                         password '#{ORA_PASSWORD}'
+                                         database '#{ORA_DB}'
+                                     }
+                                      environment('test') {
+                                         username '#{ORA_USER}'
+                                         password '#{ORA_PASSWORD}'
+                                         database '#{ORA_DB}'
+                                     }"
+    end
+    filename
+  end
+
+
   def helper_mysql_single_environment_file
     filename = "#{TEMP_DIR}/mysql.conf"
     File.open(filename, 'w') do |f|
@@ -220,6 +241,29 @@ module TestHelper
     end
     filename
   end
+
+  def helper_mysql_multiple_environment_file
+    filename = "#{TEMP_DIR}/mysql.conf"
+    File.open(filename, 'w') do |f|
+      f.puts "database_type 'mysql'
+                                   environment('development') {
+                                     username '#{MYSQL_USER}'
+                                     password '#{MYSQL_PASSWORD}'
+                                     database '#{MYSQL_DB}'
+                                     hostname '#{MYSQL_HOSTNAME}'
+                                     port     '#{MYSQL_PORT}'
+             }
+                                   environment('test') {
+                                     username '#{MYSQL_USER}'
+                                     password '#{MYSQL_PASSWORD}'
+                                     database '#{MYSQL_DB}'
+                                     hostname '#{MYSQL_HOSTNAME}'
+                                     port     '#{MYSQL_PORT}'
+             }"
+    end
+    filename
+  end
+
 
 
 
@@ -388,6 +432,85 @@ module TestHelper
       END;$$
       delimiter ;", 'trg1.trg')
   end
+
+  def helper_sybase_good_procedure_file
+    create_procedure_file("if exists (select 1 from sysobjects
+where name = 'proc1'
+and type in ('P', 'TR'))
+  drop proc proc1
+go
+create proc proc1
+as
+  return(0)
+go", 'proc1.prc')
+  end
+
+  def helper_sybase_bad_procedure_file
+    create_procedure_file("if exists (select 1 from sysobjects
+where name = 'proc1'
+and type in ('P', 'TR'))
+  drop proc proc1
+go
+create proc proc1()
+as
+  return(0)
+go", 'proc1.prc')
+  end
+
+  def helper_sybase_good_function_file
+    create_procedure_file("if exists (select 1 from sysobjects
+where name = 'func1'
+and type in ('P', 'TR'))
+  drop func proc1
+go
+create function func1
+  returns int
+as
+  return(0)
+go", 'func1.fnc')
+  end
+
+
+  def helper_sybase_bad_function_file
+    create_procedure_file("if exists (select 1 from sysobjects
+where name = 'func1'
+and type in ('P', 'TR'))
+  drop func proc1
+go
+create function func1()
+  returns int
+as
+  return(0)
+go", 'func1.fnc')
+  end
+
+  def helper_sybase_good_trigger_file
+    create_procedure_file("if exists (select 1 from sysobjects
+where name = 'trg1'
+and type in ('P', 'TR'))
+  drop trigger trg1
+go
+create trigger trg1
+on foo
+for insert, update as
+print \"Don't forget to print a report for accounting.\"
+go", 'trg1.trg')
+  end
+
+
+  def helper_sybase_bad_trigger_file
+    create_procedure_file("if exists (select 1 from sysobjects
+where name = 'trg1'
+and type in ('P', 'TR'))
+  drop trigger trg1
+go
+create trigger trg1()
+on foo
+for insert, update as
+print \"Don't forget to print a report for accounting.\"
+go", 'trg1.trg')
+  end
+
 
 
 

@@ -11,7 +11,7 @@ module DBGeni
       require 'java'
       java_import 'net.sourceforge.jtds.jdbc.Driver'
       require 'dbi'
-      
+
       attr_reader :connection
       attr_reader :database
 
@@ -20,7 +20,7 @@ module DBGeni
       end
 
       def disconnect
-        @connection.logoff
+        @connection.close
       end
 
       def execute(sql, *binds)

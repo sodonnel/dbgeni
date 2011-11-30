@@ -79,7 +79,8 @@ module DBGeni
         migrator.compile(self) #, force)
         set_applied(config,connection)
       rescue DBGeni::MigrationContainsErrors
-        # MYSQL and Oracle procedures are handled different. In Oracle if the code fails to
+        # MYSQL (and sybase is like mysql) and Oracle procedures are handled different.
+        # In Oracle if the code fails to
         # compile, it can be because missing objects are not there, but in mysql the proc
         # will compile fine if objects are missing - the only reason it seems to not compile
         # is if the syntax is bad.
@@ -90,7 +91,7 @@ module DBGeni
         if migrator.class.to_s =~ /Oracle/
           @error_messages = migrator.migration_errors
           raise DBGeni::CodeApplyFailed #, "(#{self.to_s}) #{e.to_s}"
-        elsif migrator.class.to_s =~ /Mysql/
+        elsif migrator.class.to_s =~ /(Mysql|Sybase)/
           @error_message = migrator.code_errors
           raise DBGeni::CodeApplyFailed
         end
