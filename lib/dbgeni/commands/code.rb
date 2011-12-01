@@ -85,9 +85,9 @@ begin
     sub_command = ARGV.shift
     case sub_command
     when 'all'
-      installer.apply_all_code
+      installer.apply_all_code($force)
     when 'outstanding'
-      installer.apply_outstanding_code
+      installer.apply_outstanding_code($force)
     when /\.(#{DBGeni::Code::EXT_MAP.keys.join('|')})$/
       # The param list are specific code files. One is
       # stored in sub_command and the rest are in ARGV. Grab all params that match the
@@ -107,7 +107,7 @@ begin
     sub_command = ARGV.shift
     case sub_command
     when 'all'
-      installer.remove_all_code
+      installer.remove_all_code($force)
     when /\.(#{DBGeni::Code::EXT_MAP.keys.join('|')})$/
       files = ARGV.select{ |f| f =~ /\.(#{DBGeni::Code::EXT_MAP.keys.join('|')})$/ }
       files.unshift sub_command

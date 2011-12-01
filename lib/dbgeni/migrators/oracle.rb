@@ -40,11 +40,11 @@ module DBGeni
      # def verify(migration)
      # end
 
-      def compile(code)
-        run_in_client(File.join(@config.code_directory, code.filename), false, true)
+      def compile(code, force=false)
+        run_in_client(File.join(@config.code_directory, code.filename), force, true)
       end
 
-      def remove(code)
+      def remove(code, force=false)
         begin
           @connection.execute(drop_command(code))
         rescue Exception => e

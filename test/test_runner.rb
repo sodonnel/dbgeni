@@ -12,9 +12,11 @@ if ARGV.include?('--no-cli')
   no_cli = true
 end
 
+
 # Find all files that end in _test.rb and require them ...
 files = Dir.entries(current_dir).grep(/^[^#].+_test\.rb$/).sort
 files.each do |f|
   next if (no_cli && f =~ /^cli/)
+  next if (RUBY_PLATFORM != 'java' && f =~ /sybase/)
   require File.join(current_dir, f)
 end

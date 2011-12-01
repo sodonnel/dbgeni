@@ -204,25 +204,25 @@ module DBGeni
     # Applying and removing code modules #
     ######################################
 
-    def apply_all_code
+    def apply_all_code(force=nil)
       ensure_initialized
       code_files = code
       if code_files.length == 0
         raise DBGeni::NoOutstandingCode
       end
       code_files.each do |c|
-        apply_code(c, true)
+        apply_code(c, true) #force)
       end
     end
 
-    def apply_outstanding_code
+    def apply_outstanding_code(force=nil)
       ensure_initialized
       code_files = outstanding_code
       if code_files.length == 0
         raise DBGeni::NoOutstandingCode
       end
       code_files.each do |c|
-        apply_code(c, true)
+        apply_code(c, force)
       end
     end
 
@@ -231,7 +231,14 @@ module DBGeni
       begin
         code_obj.apply!(@config, connection, force)
         if code_obj.error_messages
-          @logger.info "Applied #{code_obj.to_s} (with errors)\n\n#{code_obj.error_messages}\nFull errors in #{code_obj.logfile}\n\n"
+          # Oracle can apply procs that still have errors. This is expected. Other databases
+          # have errors raised for invalid procs, except when force is on, so this logic is
+          # for when they are being forced through.
+          if @config.db_type == 'oracle'
+            @logger.info "Applied #{code_obj.to_s} (with errors)\n\n#{code_obj.error_messages}\nFull errors in #{code_obj.logfile}\n\n"
+          else
+            @logger.error "Failed to apply #{code_obj.filename}. Errors in #{code_obj.logfile}\n\n#{code_obj.error_messages}\n\n"
+          end
         else
           @logger.info "Applied #{code_obj.to_s}"
         end
@@ -245,14 +252,14 @@ module DBGeni
       end
     end
 
-    def remove_all_code
+    def remove_all_code(force=nil)
       ensure_initialized
       code_files = code
       if code_files.length == 0
         raise DBGeni::NoCodeFilesExist
       end
       code_files.each do |c|
-        remove_code(c)
+        remove_code(c, force)
       end
     end
 

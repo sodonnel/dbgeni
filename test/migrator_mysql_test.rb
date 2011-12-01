@@ -133,109 +133,117 @@ class TestMigratorMysql < Test::Unit::TestCase
     assert_equal('', @migrator.migration_errors)
   end
 
-  # def test_no_code_errors_reported_for_good_procedure
-  #   code = helper_mysql_good_procedure_file
-  #   assert_nothing_raised do
-  #     @migrator.compile(code)
-  #   end
-  #   assert_nil(@migrator.code_errors)
-  # end
+  def test_no_code_errors_reported_for_good_procedure
+    code = helper_mysql_good_procedure_file
+    assert_nothing_raised do
+      @migrator.compile(code)
+    end
+    assert_nil(@migrator.code_errors)
+  end
 
-  # def test_code_errors_reported_for_bad_procedure
-  #   code = helper_bad_procedure_file
-  #   assert_raises DBGeni::MigrationContainsErrors do
-  #     @migrator.compile(code)
-  #   end
-  #   assert_not_nil(@migrator.code_errors)
-  # end
+  def test_code_errors_reported_for_bad_procedure
+    code = helper_bad_procedure_file
+    assert_raises DBGeni::MigrationContainsErrors do
+      @migrator.compile(code)
+    end
+    assert_not_nil(@migrator.code_errors)
+  end
 
-  # def test_no_error_dropping_procedure_that_is_not_on_database
-  #   code = helper_mysql_good_procedure_file
-  #   assert_nothing_raised do
-  #     @migrator.remove(code)
-  #   end
-  # end
+  def test_code_errors_reported_for_bad_procedure_with_force
+    code = helper_bad_procedure_file
+    assert_nothing_raised do
+      @migrator.compile(code, true)
+    end
+    assert_not_nil(@migrator.code_errors)
+  end
 
-  # def test_procedure_is_dropped_successfully
-  #   code = helper_mysql_good_procedure_file
-  #   assert_nothing_raised do
-  #     @migrator.compile(code)
-  #     assert_equal(1, @connection.execute("show procedure status like 'proc1'").length)
-  #     @migrator.remove(code)
-  #   end
-  #   assert_equal(0, @connection.execute("show procedure status like 'proc1'").length)
-  # end
+  def test_no_error_dropping_procedure_that_is_not_on_database
+    code = helper_mysql_good_procedure_file
+    assert_nothing_raised do
+      @migrator.remove(code)
+    end
+  end
 
-  # def test_no_code_errors_reported_for_good_function
-  #   code = helper_mysql_good_function_file
-  #   assert_nothing_raised do
-  #     @migrator.compile(code)
-  #   end
-  #   assert_nil(@migrator.code_errors)
-  # end
+  def test_procedure_is_dropped_successfully
+    code = helper_mysql_good_procedure_file
+    assert_nothing_raised do
+      @migrator.compile(code)
+      assert_equal(1, @connection.execute("show procedure status like 'proc1'").length)
+      @migrator.remove(code)
+    end
+    assert_equal(0, @connection.execute("show procedure status like 'proc1'").length)
+  end
 
-  # def test_code_errors_reported_for_bad_function
-  #   code = helper_mysql_bad_function_file
-  #   assert_raises DBGeni::MigrationContainsErrors do
-  #     @migrator.compile(code)
-  #   end
-  #   assert_not_nil(@migrator.code_errors)
-  # end
+  def test_no_code_errors_reported_for_good_function
+    code = helper_mysql_good_function_file
+    assert_nothing_raised do
+      @migrator.compile(code)
+    end
+    assert_nil(@migrator.code_errors)
+  end
 
-  # def test_no_error_dropping_function_that_is_not_on_database
-  #   code = helper_mysql_good_function_file
-  #   assert_nothing_raised do
-  #     @migrator.remove(code)
-  #   end
-  # end
+  def test_code_errors_reported_for_bad_function
+    code = helper_mysql_bad_function_file
+    assert_raises DBGeni::MigrationContainsErrors do
+      @migrator.compile(code)
+    end
+    assert_not_nil(@migrator.code_errors)
+  end
 
-  # def test_function_is_dropped_successfully
-  #   code = helper_mysql_good_function_file
-  #   assert_nothing_raised do
-  #     @migrator.compile(code)
-  #     assert_equal(1, @connection.execute("show function status like 'func1'").length)
-  #     @migrator.remove(code)
-  #   end
-  #   assert_equal(0, @connection.execute("show function status like 'func1'").length)
-  # end
+  def test_no_error_dropping_function_that_is_not_on_database
+    code = helper_mysql_good_function_file
+    assert_nothing_raised do
+      @migrator.remove(code)
+    end
+  end
 
-  # def test_no_code_errors_reported_for_good_trigger
-  #   code = helper_mysql_good_trigger_file
-  #   @connection.execute('create table foo (c1 varchar(10))')
-  #   assert_nothing_raised do
-  #     @migrator.compile(code)
-  #   end
-  #   assert_nil(@migrator.code_errors)
-  #   # show triggers like needs the table name , not the trigger name
-  #   assert_equal(1, @connection.execute("show triggers like 'foo'").length)
-  # end
+  def test_function_is_dropped_successfully
+    code = helper_mysql_good_function_file
+    assert_nothing_raised do
+      @migrator.compile(code)
+      assert_equal(1, @connection.execute("show function status like 'func1'").length)
+      @migrator.remove(code)
+    end
+    assert_equal(0, @connection.execute("show function status like 'func1'").length)
+  end
 
-  # def test_code_errors_reported_for_bad_trigger
-  #   code = helper_mysql_bad_trigger_file
-  #   @connection.execute('create table foo (c1 varchar(10))')
-  #   assert_raises DBGeni::MigrationContainsErrors do
-  #     @migrator.compile(code)
-  #   end
-  #   assert_not_nil(@migrator.code_errors)
-  # end
+  def test_no_code_errors_reported_for_good_trigger
+    code = helper_mysql_good_trigger_file
+    @connection.execute('create table foo (c1 varchar(10))')
+    assert_nothing_raised do
+      @migrator.compile(code)
+    end
+    assert_nil(@migrator.code_errors)
+    # show triggers like needs the table name , not the trigger name
+    assert_equal(1, @connection.execute("show triggers like 'foo'").length)
+  end
 
-  # def test_no_error_dropping_trigger_that_is_not_on_database
-  #   code = helper_mysql_good_trigger_file
-  #   assert_nothing_raised do
-  #     @migrator.remove(code)
-  #   end
-  # end
+  def test_code_errors_reported_for_bad_trigger
+    code = helper_mysql_bad_trigger_file
+    @connection.execute('create table foo (c1 varchar(10))')
+    assert_raises DBGeni::MigrationContainsErrors do
+      @migrator.compile(code)
+    end
+    assert_not_nil(@migrator.code_errors)
+  end
 
-  # def test_trigger_is_dropped_successfully
-  #   @connection.execute('create table foo (c1 varchar(10))')
-  #   code = helper_mysql_good_trigger_file
-  #   assert_nothing_raised do
-  #     @migrator.compile(code)
-  #     assert_equal(1, @connection.execute("show triggers like 'foo'").length)
-  #     @migrator.remove(code)
-  #   end
-  #   assert_equal(0, @connection.execute("show triggers like 'foo'").length)
-  # end
+  def test_no_error_dropping_trigger_that_is_not_on_database
+    code = helper_mysql_good_trigger_file
+    assert_nothing_raised do
+      @migrator.remove(code)
+    end
+  end
+
+  def test_trigger_is_dropped_successfully
+    @connection.execute('create table foo (c1 varchar(10))')
+    code = helper_mysql_good_trigger_file
+    assert_nothing_raised do
+      @migrator.compile(code)
+      assert_equal(1, @connection.execute("show triggers like 'foo'").length)
+      @migrator.remove(code)
+    end
+    assert_equal(0, @connection.execute("show triggers like 'foo'").length)
+  end
 
 
 end

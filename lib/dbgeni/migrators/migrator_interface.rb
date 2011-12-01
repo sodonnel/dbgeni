@@ -22,11 +22,11 @@ module DBGeni
         raise DBGeni::NotImplemented
       end
 
-      def compile(code)
+      def compile(code, force=false)
         raise DBGeni::NotImplemented
       end
 
-      def remove(code)
+      def remove(code, force=false)
         raise DBGeni::NotImplemented
       end
 

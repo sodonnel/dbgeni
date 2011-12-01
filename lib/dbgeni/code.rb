@@ -32,6 +32,7 @@ module DBGeni
                                     and   migration_type = ?", @name, @type)
       results.length == 1 ? results[0][0] : nil
     end
+#" THis line i just to fix the bad syntax highlighting!
 
     def hash
       # TODO what if file is empty?
@@ -76,7 +77,7 @@ module DBGeni
       end
       migrator = DBGeni::Migrator.initialize(config, connection)
       begin
-        migrator.compile(self) #, force)
+        migrator.compile(self)
         set_applied(config,connection)
       rescue DBGeni::MigrationContainsErrors
         # MYSQL (and sybase is like mysql) and Oracle procedures are handled different.
@@ -90,9 +91,10 @@ module DBGeni
         # but for mysql I think it is best to stop.
         if migrator.class.to_s =~ /Oracle/
           @error_messages = migrator.migration_errors
-          raise DBGeni::CodeApplyFailed #, "(#{self.to_s}) #{e.to_s}"
         elsif migrator.class.to_s =~ /(Mysql|Sybase)/
-          @error_message = migrator.code_errors
+          @error_messages = migrator.code_errors
+        end
+        unless force
           raise DBGeni::CodeApplyFailed
         end
       ensure

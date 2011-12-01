@@ -6,6 +6,7 @@ require "dbgeni"
 require 'test/unit'
 require 'mocha'
 require 'dbgeni/migrators/oracle'
+require 'dbgeni/migrators/mysql'
 
 class TestCode < Test::Unit::TestCase
 
@@ -249,6 +250,45 @@ class TestCode < Test::Unit::TestCase
     end
     assert_not_nil(@code.error_messages)
   end
+
+  def test_migration_error_messages_available_for_bad_procedure_with_exception_and_force
+    DBGeni::Migrator::Oracle.any_instance.expects(:compile).with(@code).raises(DBGeni::MigrationContainsErrors)
+    DBGeni::Migrator::Oracle.any_instance.expects(:logfile).returns('somelog.log')
+    DBGeni::Migrator::Oracle.any_instance.expects(:migration_errors).returns('something')
+
+    assert_nothing_raised do
+      @code.apply!(@config, @connection, true)
+    end
+    assert_not_nil(@code.error_messages)
+  end
+
+  ##### MYSQL
+  def test_mysql_migration_error_messages_available_for_bad_procedure
+    DBGeni::Migrator::Mysql.any_instance.expects(:compile).with(@code).raises(DBGeni::MigrationContainsErrors)
+    DBGeni::Migrator::Mysql.any_instance.expects(:logfile).returns('somelog.log')
+    DBGeni::Migrator::Mysql.any_instance.expects(:code_errors).returns('something')
+    @config = helper_mysql_config
+
+    assert_raises(DBGeni::CodeApplyFailed) do
+      @code.apply!(@config, @connection, false)
+    end
+    assert_not_nil(@code.error_messages)
+  end
+
+  ##### MYSQL
+  def test_mysql_migration_error_messages_available_for_bad_procedure_with_force
+    DBGeni::Migrator::Mysql.any_instance.expects(:compile).with(@code).raises(DBGeni::MigrationContainsErrors)
+    DBGeni::Migrator::Mysql.any_instance.expects(:logfile).returns('somelog.log')
+    DBGeni::Migrator::Mysql.any_instance.expects(:code_errors).returns('something')
+    @config = helper_mysql_config
+
+    assert_nothing_raised do
+      @code.apply!(@config, @connection, true)
+    end
+    assert_not_nil(@code.error_messages)
+  end
+
+
 
 
   private
