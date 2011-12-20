@@ -33,6 +33,7 @@ module DBGeni
       begin
         require "dbgeni/connectors/#{db_type}"
       rescue Exception => e
+        puts "Error requiring connector: #{e.to_s}"
         raise DBGeni::NoConnectorForDBType, db_type
       end
 

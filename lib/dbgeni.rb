@@ -5,6 +5,7 @@ module Kernel
 
   def self.is_windows?
     Config::CONFIG['host_os'] =~ /mswin|mingw/
+    puts Config::CONFIG.keys
   end
 
   def suppress_warnings
@@ -31,6 +32,10 @@ end
 if RUBY_PLATFORM == 'java'
   require 'rubygems'
   require 'java'
+
+  if Config::CONFIG['ruby_version'] =~ /1\.8/
+    raise "DBGeni requires the --1.9 switch to be passed to jruby (or set env variable JRUBY_OPTS=--1.9)"
+  end
 
   module JavaLang
     include_package "java.lang"
