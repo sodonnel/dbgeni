@@ -47,10 +47,6 @@ module DBGeni
      # def verify(migration)
      # end
 
-      def compile(code, force=false)
-        run_in_client(File.join(@config.code_directory, code.filename), force, true)
-      end
-
       def remove(code, force=false)
         begin
           @connection.execute(drop_command(code))
@@ -85,7 +81,7 @@ module DBGeni
           # For empty migrations, sometimes no logfile?
           if File.exists? @logfile
             File.open(@logfile, 'r').each do |l|
-              if l =~ /^(Msg|Error)\s\d+/ 
+              if l =~ /^(Msg|Error)\s\d+/
                 has_errors = true
                 break
               end

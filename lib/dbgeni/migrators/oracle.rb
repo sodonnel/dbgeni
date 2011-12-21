@@ -41,7 +41,7 @@ module DBGeni
      # end
 
       def compile(code, force=false)
-        run_in_client(File.join(@config.code_directory, code.filename), force, true)
+        run_in_client(code.runnable_code, force, true)
       end
 
       def remove(code, force=false)

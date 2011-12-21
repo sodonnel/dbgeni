@@ -6,13 +6,11 @@ module DBGeni
       attr_reader :logfile
 
       def apply(migration, force=nil)
-        filename = File.join(@config.migration_directory, migration.migration_file)
-        run_in_client(filename, force)
+        run_in_client(migration.runnable_migration, force)
       end
 
       def rollback(migration, force=nil)
-        filename = File.join(@config.migration_directory, migration.rollback_file)
-        run_in_client(filename, force)
+        run_in_client(migration.runnable_rollback, force)
       end
 
       def migration_errors
@@ -23,7 +21,7 @@ module DBGeni
       end
 
       def compile(code, force=false)
-        raise DBGeni::NotImplemented
+        run_in_client(code.runnable_code, force, true)
       end
 
       def remove(code, force=false)

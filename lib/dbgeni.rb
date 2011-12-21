@@ -5,7 +5,6 @@ module Kernel
 
   def self.is_windows?
     Config::CONFIG['host_os'] =~ /mswin|mingw/
-    puts Config::CONFIG.keys
   end
 
   def suppress_warnings

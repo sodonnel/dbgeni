@@ -29,10 +29,6 @@ module DBGeni
         error
       end
 
-      def compile(code, force=false)
-        run_in_client(File.join(@config.code_directory, code.filename), force, true)
-      end
-
       def remove(code, force=false)
         begin
           @connection.execute(drop_command(code))

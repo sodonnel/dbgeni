@@ -1,6 +1,9 @@
 Maybe more tests for base apply and rollback until
 Better Logging
 ----------------------------------------------
+Tests for convert and runnable_migration/rollback in migration
+Tests for convert and runnable_code in code
+
 Compile command to compile all stored procs
 Fill integration tests for each DB.
 Test generators for different DBs.

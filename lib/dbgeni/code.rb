@@ -21,6 +21,7 @@ module DBGeni
     def initialize(directory, filename)
       @directory = directory
       @filename  = filename
+      @runnable_code = nil
       set_type
       set_name
     end
@@ -76,6 +77,7 @@ module DBGeni
         raise DBGeni::CodeModuleCurrent, self.to_s
       end
       migrator = DBGeni::Migrator.initialize(config, connection)
+      convert_code(config)
       begin
         migrator.compile(self)
         set_applied(config,connection)
@@ -120,6 +122,17 @@ module DBGeni
       "#{@name} - #{@type}"
     end
 
+    def convert_code(config)
+      @runnable_code = FileConverter.convert(@directory, @filename, config)
+    end
+
+    def runnable_code
+      if @runnable_code
+        @runnable_code
+      else
+        File.join(@directory, @filename)
+      end
+    end
 
     private
 

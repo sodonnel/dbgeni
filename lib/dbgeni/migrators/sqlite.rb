@@ -20,8 +20,9 @@ module DBGeni
       # def verify(migration)
       # end
 
-      # def compile(code)
-      # end
+      def compile(code, force=false)
+        raise DBGeni::NotImplemented
+      end
 
       # def remove(code)
       # end

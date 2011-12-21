@@ -54,6 +54,8 @@ module DBGeni
       @migration_file = migration
       parse_file
       @rollback_file  = "#{sequence}_down_#{name}.sql"
+      @runnable_migration = nil
+      @runnable_rollback  = nil
     end
 
     def migration_file(dir='up')
@@ -81,6 +83,7 @@ module DBGeni
                                     and migration_name = ?", @sequence, @name)
       results.length == 1 ? results[0][0] : NEW
     end
+    #"
 
     def apply!(config, connection, force=nil)
       set_env(config, connection)
@@ -89,6 +92,7 @@ module DBGeni
       end
       ensure_file_exists
       migrator = DBGeni::Migrator.initialize(config, connection)
+      convert_migration(config)
       set_pending!
       begin
         migrator.apply(self, force)
@@ -109,6 +113,7 @@ module DBGeni
       end
       ensure_file_exists('down')
       migrator = DBGeni::Migrator.initialize(config, connection)
+      convert_rollback(config)
       set_pending!
       begin
         migrator.rollback(self, force)
@@ -149,6 +154,32 @@ module DBGeni
       "#{@sequence}::#{@name}"
     end
 
+    def convert_migration(config)
+      @runnable_migration = FileConverter.convert(@directory, @migration_file, config)
+    end
+
+    def convert_rollback(config)
+      @runnable_rollback = FileConverter.convert(@directory, @rollback_file, config)
+    end
+
+
+    def runnable_migration
+      if @runnable_migration
+        @runnable_migration
+      else
+        File.join(@directory, @migration_file)
+      end
+    end
+
+    def runnable_rollback
+      if @runnable_rollback
+        @runnable_rollback
+      else
+        File.join(@directory, @rollback_file)
+      end
+    end
+
+
     private
 
     def set_pending!
@@ -187,7 +218,7 @@ module DBGeni
                                     where sequence_or_hash = ?
                                     and migration_name = ?", @sequence, @name)
     end
-
+#"
 
     def add_db_record(state)
       results = @connection.execute("insert into #{@config.db_table}
