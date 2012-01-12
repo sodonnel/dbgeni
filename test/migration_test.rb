@@ -16,7 +16,8 @@ class TestMigration < Test::Unit::TestCase
     @valid_migration = '201101011615_up_this_is_a_test_migration.sql'
     @mm = DBGeni::Migration.new('somedir', @valid_migration)
     @mm.stubs(:ensure_file_exists).returns(true) # as the file doesn't exist
-    @mm.stubs(:convert_code).returns(true)
+    @mm.stubs(:convert_migration)
+    @mm.stubs(:convert_rollback)
 
     @connection = helper_sqlite_connection
     @config     = helper_sqlite_config
@@ -326,6 +327,32 @@ class TestMigration < Test::Unit::TestCase
     end
     assert_equal('somelog.log', @mm.logfile)
   end
+
+  def test_convert_migration_called_on_migration
+    mm = DBGeni::Migration.new('somedir', @valid_migration)
+    mm.stubs(:ensure_file_exists).returns(true) # as the file doesn't exist
+
+    DBGeni::FileConverter.expects(:convert).returns('newfile')
+    DBGeni::Migrator::Sqlite.any_instance.stubs(:apply).with(mm, nil)
+
+    assert_nothing_raised do
+      mm.apply!(@config, @connection)
+    end
+  end
+
+  def test_convert_migration_called_on_rollback
+    mm = DBGeni::Migration.new('somedir', @valid_migration)
+    mm.stubs(:ensure_file_exists).returns(true) # as the file doesn't exist
+
+    DBGeni::FileConverter.expects(:convert).returns('newfile')
+    DBGeni::Migrator::Sqlite.any_instance.stubs(:rollback).with(mm, nil)
+
+    mm.set_completed(@config, @connection)
+    assert_nothing_raised do
+      mm.rollback!(@config, @connection)
+    end
+  end
+
 
   private
 
