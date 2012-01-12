@@ -123,7 +123,7 @@ module DBGeni
     end
 
     def convert_code(config)
-      @runnable_code = FileConverter.convert(@directory, @filename, config)
+      @runnable_code = DBGeni::FileConverter.convert(@directory, @filename, config)
     end
 
     def runnable_code

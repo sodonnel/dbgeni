@@ -16,6 +16,8 @@ class TestCode < Test::Unit::TestCase
     @code = DBGeni::Code.new('directory', 'proc1.prc')
     @code.stubs(:ensure_file_exists).returns(true)
     @code.stubs(:hash).returns('abcdefgh')
+    @code.stubs(:convert_code)
+
 
     # Instance variables are clobbered after each test so store connection in class var
     @@connection ||= helper_oracle_connection
@@ -288,8 +290,23 @@ class TestCode < Test::Unit::TestCase
     assert_not_nil(@code.error_messages)
   end
 
+  def test_convert_code_is_invoked_on_compile
+    # This test is a MESS. At the top convert_code is stubbed out, so in this method, it needs to be
+    # unstubbed. However, it seems to trip up Mocha when I do @code.unstub(:convert_code), so I have
+    # duplicated a lot of the logic down here.
+    code =DBGeni::Code.new('directory', 'proc1.prc')
+    code.stubs(:ensure_file_exists).returns(true)
+    code.stubs(:hash).returns('abcdefgh')
+    DBGeni::FileConverter.expects(:convert).returns('newfile')
+    DBGeni::Migrator::Oracle.any_instance.expects(:compile).with(code)
+    DBGeni::Migrator::Oracle.any_instance.expects(:code_errors).returns('')
 
-
+    assert_nothing_raised do
+      code.apply!(@config, @connection)
+    end
+    assert_equal(true, @code.current?(@config,@connection))
+    DBGeni::FileConverter.unstub(:convert)
+  end
 
   private
 

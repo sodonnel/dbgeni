@@ -16,6 +16,7 @@ class TestMigration < Test::Unit::TestCase
     @valid_migration = '201101011615_up_this_is_a_test_migration.sql'
     @mm = DBGeni::Migration.new('somedir', @valid_migration)
     @mm.stubs(:ensure_file_exists).returns(true) # as the file doesn't exist
+    @mm.stubs(:convert_code).returns(true)
 
     @connection = helper_sqlite_connection
     @config     = helper_sqlite_config
