@@ -353,6 +353,39 @@ class TestMigration < Test::Unit::TestCase
     end
   end
 
+  def test_runable_migration_returns_original_file_when_not_converted
+    mm = DBGeni::Migration.new('somedir', @valid_migration)
+    #mm.stubs(:ensure_file_exists).returns(true) # as the file doesn't exist
+    DBGeni::FileConverter.expects(:convert).returns('newfile')
+
+    assert_equal('newfile', mm.runnable_migration)
+  end
+
+  def test_runable_migration_returns_original_file_when_not_converted
+    assert_equal(File.join('somedir', @valid_migration), @mm.runnable_migration)
+  end
+
+  def test_runable_rollback_returns_original_file_when_not_converted
+    assert_equal(File.join('somedir', @valid_migration.gsub(/up/, 'down')), @mm.runnable_rollback)
+  end
+
+
+  def test_runable_migration_returns_new_file_when_converted
+    mm = DBGeni::Migration.new('somedir', @valid_migration)
+    #mm.stubs(:ensure_file_exists).returns(true) # as the file doesn't exist
+    DBGeni::FileConverter.expects(:convert).returns('newfile')
+    mm.convert_migration(@config)
+
+    assert_equal('newfile', mm.runnable_migration)
+  end
+
+  def test_runable_rollback_returns_new_file_when_converted
+    mm = DBGeni::Migration.new('somedir', @valid_migration)
+    DBGeni::FileConverter.expects(:convert).returns('newfile')
+    mm.convert_rollback(@config)
+
+    assert_equal('newfile', mm.runnable_rollback)
+  end
 
   private
 

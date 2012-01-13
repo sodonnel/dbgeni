@@ -7,12 +7,13 @@ At runtime, database drivers are required too:
  * For Oracle ensure you have a working sqlplus and install [oci8](http://ruby-oci8.rubyforge.org/)
  * For MySQL ensure you have a working mysql command and install the ruby-mysql gem
  * For Sqlite, ensure the sqlite3 command line shell works and install the sqlite3 gem
+ * For Sybase you require isql, jruby and a few other modules. Refer to the [manual](/manual.html)
 
 # Install
 
-Download [dbgeni-0.3.0.gem](/downloads/dbgeni-0.3.0.gem) and install it locally: 
+Download [dbgeni-0.4.0.gem](/downloads/dbgeni-0.4.0.gem) and install it locally: 
 
-    $ wget http://dbgeni.com/downloads/dbgeni-0.3.0.gem
+    $ wget http://dbgeni.com/downloads/dbgeni-0.4.0.gem
     $ gem install dbgeni-0.3.0.gem
 
 At the moment dbgeni is not on Rubyforge.

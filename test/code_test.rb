@@ -294,7 +294,7 @@ class TestCode < Test::Unit::TestCase
     # This test is a MESS. At the top convert_code is stubbed out, so in this method, it needs to be
     # unstubbed. However, it seems to trip up Mocha when I do @code.unstub(:convert_code), so I have
     # duplicated a lot of the logic down here.
-    code =DBGeni::Code.new('directory', 'proc1.prc')
+    code = DBGeni::Code.new('directory', 'proc1.prc')
     code.stubs(:ensure_file_exists).returns(true)
     code.stubs(:hash).returns('abcdefgh')
     DBGeni::FileConverter.expects(:convert).returns('newfile')
@@ -307,6 +307,20 @@ class TestCode < Test::Unit::TestCase
     assert_equal(true, @code.current?(@config,@connection))
     DBGeni::FileConverter.unstub(:convert)
   end
+
+  def test_runable_code_returns_original_file_when_not_converted
+    assert_equal(File.join('directory', 'proc1.prc'), @code.runnable_code)
+  end
+
+  def test_runable_code_returns_new_file_when_converted
+    code = DBGeni::Code.new('directory', 'proc1.prc')
+    DBGeni::FileConverter.expects(:convert).returns('newfile')
+    code.convert_code(@config)
+
+    assert_equal('newfile', code.runnable_code)
+    DBGeni::FileConverter.unstub(:convert)
+  end
+
 
   private
 

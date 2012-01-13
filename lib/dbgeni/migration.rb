@@ -162,7 +162,6 @@ module DBGeni
       @runnable_rollback = FileConverter.convert(@directory, @rollback_file, config)
     end
 
-
     def runnable_migration
       if @runnable_migration
         @runnable_migration

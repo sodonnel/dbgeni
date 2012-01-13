@@ -70,7 +70,7 @@ migrations_directory "./migrations"
 code_directory "./code"
 
 # This specifies the type of database this installer is applied against
-# Valid values are oracle, mysql, sqlite however this is not validated
+# Valid values are oracle, mysql, sqlite, sybase however this is not validated
 # to enable different database plugins to easily be added.
 database_type "sqlite"
 
@@ -89,16 +89,35 @@ database_table "dbgeni_migrations"
 
 environment('development') {
 
-   database 'testdb.sqlite' # this must be here, or it will error. For Oracle, this is the TNS Name
-                            # for mysql this is the database selected after logon by the 'use database'
-                            # command. For Sqlite, this is the filename of the database
-#   username ''             # this must be here, or it will error (unless using sqlite)
-#   password ''             # If this value is missing, it will be promoted for if needed
-#   hostname '127.0.0.1'    # For mysql, specify the ip or hostname the server is running on.
-                            # If it is running on localhost, use 127.0.0.1 - not localhost
-#   port     '3306'         # For mysql, this specifies the port the server is running on, eg 3306
+### SQLITE
+  database 'testdb.sqlite' # This is the only required connection parameter for sqlite
+
+### ORACLE
 #
-#   Other parameters can be defined here and will override global_parameters
+#  database 'DEV1'    # This is the name of an entry in the tns_names.ora file
+#  username 'scott'   # This is the username to connect as, and also the default schema
+#  password 'tiger'   # This is the password for the username
+
+### MYSQL
+#
+#  database 'DEV1'      # This is the database to use after connection
+#  username 'scott'     # This is the username to connect as
+#  password 'tiger'     # This is the password for the username
+#  hostname '127.0.0.1' # This is the hostname or IP mysql is running on
+                        # For localhost use the IP 127.0.0.1 or it will not work.
+#  port     '3306'      # This the port of the mysql service
+
+### SYBASE
+#
+#  database 'DEV1'       # This is the database to use after connection
+#  username 'scott'      # This is the username to connect as
+#  password 'tiger'      # This is the password for the username
+#  hostname '127.0.0.1'  # This is the hostname or IP sybase is running on
+#  port     '3306'       # This the port of the sybase service
+#  sybase_service 'dev1' # THis is the sybase service name defined in the sql.ini file
+
+
+#   Other parameters can be defined here and will override global_parameters (currently unused)
 #   param_name 'value'
 }
 

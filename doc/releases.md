@@ -1,3 +1,13 @@
+# 0.4.0
+
+14th January 2011
+
+Download: [dbgeni-0.4.0.gem](/downloads/dbgeni-0.4.0.gem)
+
+ * Sybase support (JRuby only)
+ * Force code applies on error in Mysql and Sybase
+ * Remove DOS line endings from files before executing
+
 # 0.3.0 
 
 24th November 2011
@@ -33,7 +43,7 @@ These are some of the features I have planned. If you have an idea for a feature
 
  * Parameters in SQL files
  * DAT files to load data
- * Support for other databases (SQL Server, Postgres, Sybase ...)
+ * Support for other databases (SQL Server, Postgres, ...)
  * Validation scripts
  * Pre and post migration hooks
 

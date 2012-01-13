@@ -1,8 +1,10 @@
 Maybe more tests for base apply and rollback until
 Better Logging
 ----------------------------------------------
-Tests for convert and runnable_migration/rollback in migration
-Tests for convert and runnable_code in code
+Tests for file converter - ensure it removes the dos line endings
+Manual 
+Release notes - check for changes in change log
+Generate sybase code files
 
 Compile command to compile all stored procs
 Fill integration tests for each DB.
