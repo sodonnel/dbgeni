@@ -1,6 +1,6 @@
 # 0.4.0
 
-14th January 2011
+15th January 2011
 
 Download: [dbgeni-0.4.0.gem](/downloads/dbgeni-0.4.0.gem)
 

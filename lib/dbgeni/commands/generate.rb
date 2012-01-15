@@ -111,8 +111,18 @@ when 'procedure', 'prc', 'proc'
         f.puts "create procedure #{name}()"
         f.puts "begin"
         f.puts "end$$"
+      elsif config.db_type == 'sybase'
+        f.puts "if exists (select 1 from sysobjects"
+        f.puts "           where name = '#{name}'"
+        f.puts "           and type in ('P', 'TR'))"
+        f.puts "  drop proc #{name}"
+        f.puts "go"
+        f.puts ""
+        f.puts "create proc #{name}"
+        f.puts "as"
+        f.puts "return(0)"
+        f.puts "go"
       end
-
     end
   end
 when 'function', 'fnc', 'func'
@@ -138,6 +148,18 @@ when 'function', 'fnc', 'func'
         f.puts "begin"
         f.puts "  return 'abcd';"
         f.puts "end$$"
+      elsif config.db_type == 'sybase'
+        f.puts "if exists (select 1 from sysobjects"
+        f.puts "           where name = '#{name}'"
+        f.puts "           and type in ('P', 'TR'))"
+        f.puts "  drop func #{name}"
+        f.puts "go"
+        f.puts ""
+        f.puts "create func #{name}"
+        f.puts "  returns int"
+        f.puts "as"
+        f.puts "  return(0)"
+        f.puts "go"
       end
     end
   end
@@ -162,6 +184,18 @@ when 'trigger', 'trg'
         f.puts "FOR EACH ROW"
         f.puts "BEGIN"
         f.puts "END$$"
+      elsif config.db_type == 'sybase'
+        f.puts "if exists (select 1 from sysobjects"
+        f.puts "           where name = '#{name}'"
+        f.puts "           and type in ('P', 'TR'))"
+        f.puts "  drop trigger #{name}"
+        f.puts "go"
+        f.puts ""
+        f.puts "create trigger #{name}"
+        f.puts "on MYTABLE"
+        f.puts "for insert, update"
+        f.puts ""
+        f.puts "go"
       end
     end
   end

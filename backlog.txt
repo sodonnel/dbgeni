@@ -3,8 +3,6 @@ Better Logging
 ----------------------------------------------
 Tests for file converter - ensure it removes the dos line endings
 Manual 
-Release notes - check for changes in change log
-Generate sybase code files
 
 Compile command to compile all stored procs
 Fill integration tests for each DB.

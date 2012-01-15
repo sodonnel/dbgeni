@@ -461,7 +461,7 @@ go", 'proc1.prc')
     create_procedure_file("if exists (select 1 from sysobjects
 where name = 'func1'
 and type in ('P', 'TR'))
-  drop func proc1
+  drop func func1
 go
 create function func1
   returns int
