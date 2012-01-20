@@ -11,7 +11,7 @@ class TestSybaseConnector < Test::Unit::TestCase
   include TestHelper
 
   def setup
-    @conn = DBGeni::Connector::Sybase.connect('sa', '', 'cfg', '10.152.97.152' ,5000)
+    @conn = DBGeni::Connector::Sybase.connect('sa', 'sa1234', 'cfg', '10.152.97.152' ,5000)
   end
 
   def teardown

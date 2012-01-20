@@ -10,7 +10,7 @@ module DBGeni
 
       require 'java'
       java_import 'net.sourceforge.jtds.jdbc.Driver'
-      require 'dbi'
+      java_import 'java.sql.DriverManager'
 
       attr_reader :connection
       attr_reader :database
@@ -24,16 +24,29 @@ module DBGeni
       end
 
       def execute(sql, *binds)
-        query = @connection.prepare(sql)
+        query = @connection.prepare_statement(sql)
         binds.each_with_index do |b, i|
-          query.bind_param(i+1, b)
+          if b.is_a?(String)
+            query.setString(i+1, b)
+          elsif b.is_a?(Fixnum)
+            query.setInt(i+1, b)
+          end
         end
         results = Array.new
-        query.execute()
-        while(r = query.fetch()) do
-          results.push r
+        unless sql =~ /^\s*select/i
+          query.execute()
+        else
+          rset = query.execute_query()
+          cols = rset.get_meta_data.get_column_count
+          while(r = rset.next) do
+            a = Array.new
+            1.upto(cols) do |i|
+              a.push rset.get_object(i)
+            end
+            results.push a
+          end
         end
-        query.finish
+        query.close
         results
       end
 
@@ -64,12 +77,16 @@ module DBGeni
 
       private
 
+
+      #
       def initialize(user, password, database, host=nil, port=nil)
         @database = database
 
+        sybdriver = Driver.new
+        DriverManager.registerDriver sybdriver
         begin
-          @connection = DBI.connect("dbi:Jdbc:jtds:sybase://#{host}:#{port}/#{database}", user, password,
-                                    {'driver' => 'net.sourceforge.jtds.jdbc.Driver'} )
+          @connection = DriverManager.get_connection("jdbc:jtds:sybase://#{host}:#{port}/#{database}", user, password)
+          @connection.auto_commit = true
         rescue Exception => e
           raise DBGeni::DBConnectionError, e.to_s
         end

@@ -85,14 +85,14 @@ module DBGeni
 
       private
 
-      def initialize(user, password, database, host=nil, port=nil)
+      def initialize(user, password, database, host=nil, port=1521)
         @database = database
 
         if RUBY_PLATFORM == 'java'
           oradriver = OracleDriver.new
           DriverManager.registerDriver oradriver
           begin
-            @connection = DriverManager.get_connection("jdbc:oracle:thin:@10.152.97.152/#{database}.world", user, password)
+            @connection = DriverManager.get_connection("jdbc:oracle:thin:@#{host}:#{port}/#{database}", user, password)
             @connection.auto_commit = true
           rescue Exception => e
             raise DBGeni::DBConnectionError, e.to_s
