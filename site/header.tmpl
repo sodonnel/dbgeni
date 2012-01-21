@@ -1,6 +1,6 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html> <head>
-<title>dbgeni - a univeral database installer that applies migrations to various databases</title>
+<title>dbgeni - a univeral database installer that applies migrations to sqlite, oracle, sybase and mysql</title>
   <link rel="stylesheet" href="stylesheets/blueprint/screen.css" type="text/css" media="screen, projection">
   <link rel="stylesheet" href="stylesheets/blueprint/print.css" type="text/css" media="print">
   <!--[if lt IE 8]>
@@ -36,11 +36,20 @@
   <div id="bevel">
     <div class="container">
 
-      <div class="span-24">
+      <div class="span-21">
         <div id="banner" class="span-18 prepend-3 last">
-          <h1 id="siteheading">DBGeni</h1>
-          <p>A universal database installer</p>
-          <hr />
+
+        <div class="span-2">
+          <p style="text-align: center">
+            <img src="dbgeni-icon.png" height="90">
+          </p>
+        </div>
+	
+        <div class="span-12">
+          <h1 id="siteheading" style="font-size: 32px;">DBGeni</h1>
+          <p style="font-size: 18px;">Simplifies database changes without wishing</p>
+	</div>
+        <hr />
           <div id="menu">
             <ul>
              <li _-_selected_index><a href="/index.html">DBGeni</a></li><li _-_selected_overview><a href="/overview.html">Overview</a></li><li _-_selected_manual><a href="/manual.html">Manual</a></li><li _-_selected_releases><a href="/releases.html">Releases</a></li><li _-_selected_faq><a href="/faq.html">FAQ</a></li><li _-_selected_about><a href="/about.html">About</a></li>
@@ -49,6 +58,9 @@
           </div><!-- menu -->
         </div><!-- banner -->
       </div><!-- holder -->
+
+      <div id="right-header" class="span-3 last">
+      </div>
     </div><!-- container -->
 
     <div class="container" id="main">
