@@ -3,6 +3,7 @@
 Download: [dbgeni-0.4.0.gem](/downloads/dbgeni-0.4.0.gem)
 
  * Removed the dbi and dbd dependencies for Sybase
+ * Allow a prefix to be given to code files to control install order
 
 
 # 0.4.0

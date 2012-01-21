@@ -2,7 +2,7 @@ Maybe more tests for base apply and rollback until
 Better Logging
 ----------------------------------------------
 Tests for file converter - ensure it removes the dos line endings
-Order of install for procs
+manual for order of install for procs
 
 SQL script parameters
 

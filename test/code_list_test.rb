@@ -64,5 +64,35 @@ class TestCodeList < Test::Unit::TestCase
     assert_equal(5, c.outstanding(@config, @connection).length)
   end
 
+  def test_files_with_ordering_prefix_ordered_first
+    File.open(File.join(@code_directory, '001_p5.prc'), 'w') do |fh|
+      fh.puts "create or replace procedure proc5\nas\nbegin\n  null;\nend;"
+    end
+    c = DBGeni::CodeList.new(@code_directory)
+    assert_equal(c.code[0].filename, '001_p5.prc')
+  end
+
+  def test_current_files_with_ordering_prefix_ordered_first
+    File.open(File.join(@code_directory, '001_p5.prc'), 'w') do |fh|
+      fh.puts "create or replace procedure proc5\nas\nbegin\n  null;\nend;"
+    end
+    c = DBGeni::CodeList.new(@code_directory)
+    c.code.each {|c| c.stubs(:current?).with(@config, @connection).returns(true) }
+    current_code = c.current(@config, @connection)
+    assert_equal(current_code[0].filename, '001_p5.prc')
+    assert_equal(current_code[1].filename, 'p1.prc')
+  end
+
+  def test_outstanding_files_with_ordering_prefix_ordered_first
+    File.open(File.join(@code_directory, '001_p5.prc'), 'w') do |fh|
+      fh.puts "create or replace procedure proc5\nas\nbegin\n  null;\nend;"
+    end
+    c = DBGeni::CodeList.new(@code_directory)
+    c.code.each {|c| c.stubs(:current?).with(@config, @connection).returns(false) }
+    outstanding_code = c.outstanding(@config, @connection)
+    assert_equal(outstanding_code[0].filename, '001_p5.prc')
+    assert_equal(outstanding_code[1].filename, 'p1.prc')
+  end
+
 end
 
