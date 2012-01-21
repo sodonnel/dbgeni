@@ -13,6 +13,7 @@ raise "Directory does not exist [#{source_dir}]" unless Dir.exist?(source_dir)
 
 FileUtils.mkdir_p target_dir
 FileUtils.cp_r File.join(source_dir, "stylesheets"), target_dir
+FileUtils.cp   File.join(source_dir, "dbgeni-icon.png"), target_dir
 
 source_files = Dir.entries(source_dir).grep(/.+\.(html)$/)
 
