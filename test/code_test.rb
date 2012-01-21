@@ -67,6 +67,18 @@ class TestCode < Test::Unit::TestCase
     assert_equal('PROC1', @code.name)
   end
 
+  def test_sets_correct_name_when_file_has_order_prefix
+    assert_equal('PROC1', DBGeni::Code.new('directory', '001_proc1.prc'))
+    assert_equal('_PROC1', DBGeni::Code.new('directory', '_proc1.prc'))
+    assert_equal('NEW_PROC1', DBGeni::Code.new('directory', 'new_proc1.prc'))
+  end
+
+  def test_sets_correct_name_when_file_has_order_prefix
+    assert_equal('PROC1', DBGeni::Code.new('directory', '001_proc1.prc'))
+  end
+
+
+
   # Cannot stub this one - need to see if the file actually gets hashed!
   def test_file_hash_generated
     helper_good_procedure_file

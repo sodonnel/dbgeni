@@ -14,7 +14,7 @@ At runtime, database drivers are required too:
 Download [dbgeni-0.4.0.gem](/downloads/dbgeni-0.4.0.gem) and install it locally: 
 
     $ wget http://dbgeni.com/downloads/dbgeni-0.4.0.gem
-    $ gem install dbgeni-0.3.0.gem
+    $ gem install dbgeni-0.4.0.gem
 
 At the moment dbgeni is not on Rubyforge.
 

@@ -2,12 +2,13 @@ Maybe more tests for base apply and rollback until
 Better Logging
 ----------------------------------------------
 Tests for file converter - ensure it removes the dos line endings
-Manual 
+Order of install for procs
+
+SQL script parameters
 
 Compile command to compile all stored procs
 Fill integration tests for each DB.
 Test generators for different DBs.
-Force code apply for mysql for example.
 ----------------------------------------------
 Parameters in SQL scripts
 Global Parameters

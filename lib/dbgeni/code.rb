@@ -33,7 +33,7 @@ module DBGeni
                                     and   migration_type = ?", @name, @type)
       results.length == 1 ? results[0][0] : nil
     end
-#" THis line i just to fix the bad syntax highlighting!
+#" THis line is just to fix the bad syntax highlighting in emacs!
 
     def hash
       # TODO what if file is empty?
@@ -193,7 +193,9 @@ module DBGeni
     end
 
     def set_name
-      @filename =~ /^(.+)\.[a-z]{3}$/
+      # If a filename starts with <digit>+_ then that part should be
+      # stripped away to get the real name. It is purely for ordering.
+      @filename =~ /^(?:\d+_{1}){0,1}(.+)\.[a-z]{3}$/  #/^[\d+_]*(.+)\.[a-z]{3}$/
       @name = $1.upcase
     end
 

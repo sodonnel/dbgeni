@@ -143,11 +143,7 @@ In addition to JRuby, the following components are required:
  * Ensure any databases are in the sql.ini file (and you can connect to them from isql)
  * [Download the open source jTDS drivers](http://jtds.sourceforge.net/) and put them in the JRuby lib directory, eg:
 
-
     C:\jruby-1.6.5\lib\jtds-1.2.5.jar
-
- * Install the dbi gem
- * Install the dbd-jdbc gem
 
 
 # Default Setup<a id="default_setup"></a>
