@@ -21,6 +21,7 @@
    * [Generating Migrations](#migrations_generating)
    * [Milestones](#migrations_milestones)
  * [Stored Procedures](#stored_procedures)
+   * [Installation Order](#stored_procedures_order)
    * [Oracle Specific](#stored_procedures_oracle)
    * [MySQL Specific](#stored_procedures_mysql)
    * [Sybase Specific](#stored_procedures_sybase)
@@ -101,10 +102,10 @@ All DBGeni needs to run is the [Ruby](http://ruby-lang.org) programming language
 
 # Install<a id="install"></a>
 
-For now, dbgeni is not available in the Ruby gem libraries, so [download it](/downloads/dbgeni-0.3.0.gem) and install it locally:
+For now, dbgeni is not available in the Ruby gem libraries, so [download it](/downloads/dbgeni-0.5.0.gem) and install it locally:
 
-    $ wget http://dbgeni.com/downloads/dbgeni-0.3.0.gem
-    $ gem install dbgeni-0.3.0.gem
+    $ wget http://dbgeni.com/downloads/dbgeni-0.5.0.gem
+    $ gem install dbgeni-0.5.0.gem
 
 If Ruby is on your path, then after installation the dbgeni command should also be on your path. Running the following command will display the usage instructions:
 
@@ -427,6 +428,22 @@ Dbgeni considers stored procedure code to be in one of two states:
 To determine if a code module is current, dbgeni generates a hash of the relevant file in the code_directory, and compares it to a hash that was stored in the dbgeni\_migrations table on the database. If the two match, then the code is considered current. 
 
 If the code module is changed on the database manually or using another tool, then dbgeni will not see the change, and will still consider the module current.
+
+## Installation Order<a id="stored_procedures_order"></a>
+
+Outstanding procedure code is installed in alphabetical order based on the filename. For some applications this may be acceptable, but often one stored procedure depends on another, and the order of installation is important.
+
+To control the order of installation a numeric prefix can be added to the procedure name. For example, if the application has two procedures:
+
+ * check\_or\_install_customer.prc
+ * install_customer.prc
+
+Normally check\_or\_install\_customer will be installed first. However, if it depends on install\_customer, a numeric prefix can be added to the install\_customer.prc filename, forcing it to be installed first:
+
+ * 001\_install\_customer.prc
+
+If it is required to control install order, the numeric prefix can be any length, but it must end with an underscore character.
+
 
 ## Oracle Specific<a id="stored_procedures_oracle"></a>
 
