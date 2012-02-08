@@ -18,8 +18,6 @@ module DBGeni
                              config.env.database)
       else
         required_method.call(config.env.username,
-                             # SQLITE doesn't need a password, so prevent asking for it
-                             # or it may be promoted for
                              config.env.password,
                              config.env.database,
                              config.env.hostname,

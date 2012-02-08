@@ -1,3 +1,9 @@
+# 0.6.0
+
+Download: [dbgeni-0.6.0.gem](/downloads/dbgeni-0.6.0.gem)
+
+ * Reprompt for password If a blank string is supplied
+
 # 0.5.0
 
 4th February 2012

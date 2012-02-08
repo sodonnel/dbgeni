@@ -66,8 +66,11 @@ module DBGeni
         # Password is a special case - if it is not defined it should be prompted for
         if name == 'password'
           puts "Please enter the password for #{@params['database']} in the #{@environment_name} environment\n"
-          print "password: "
-          password = gets.chomp
+          password = ''
+          while (password == '')
+            print "password: "
+            password = gets.chomp
+          end
           @params[name] = password
           password
         end
