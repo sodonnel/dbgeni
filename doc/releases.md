@@ -3,6 +3,7 @@
 Download: [dbgeni-0.6.0.gem](/downloads/dbgeni-0.6.0.gem)
 
  * Reprompt for password If a blank string is supplied
+ * Don't echo password to screen when entering (not windows)
 
 # 0.5.0
 

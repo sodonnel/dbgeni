@@ -16,7 +16,7 @@ Global Parameters
 DAT files
 Validation hooks
 Validation scripts
-Make password be hidden when typing it in from a prompt
+Make password be hidden when typing it in from a promot on windows
 Bad NLS_LANG setting causes a very strange error.
 Tests to ensure error message is extracted for (1) migration error (2) rollback error (3) code compile (4) code blow up (at least partially tested)
 

@@ -67,9 +67,23 @@ module DBGeni
         if name == 'password'
           puts "Please enter the password for #{@params['database']} in the #{@environment_name} environment\n"
           password = ''
-          while (password == '')
-            print "password: "
-            password = gets.chomp
+          begin
+            while (password == '')
+              print "password: "
+              unless is_windows?
+                system "stty -echo"
+              end
+              password = gets.chomp
+              unless is_windows?
+                system "stty echo"
+              end
+              print "\n"
+            end
+          rescue Interrupt
+            unless is_windows?
+              system "stty echo"
+            end
+            exit(1)
           end
           @params[name] = password
           password
