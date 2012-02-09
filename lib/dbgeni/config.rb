@@ -238,6 +238,25 @@ module DBGeni
     def global_parameters(name, &block)
     end
 
+
+    def include_file(*p)
+      file = p[0]
+      if !is_absolute_path?(file)
+        file = File.join(@base_directory, file)
+      end
+      begin
+        raw_config = ''
+        File.open(file) do |f|
+          raw_config = f.read
+        end
+        self.load(raw_config)
+      rescue Errno::ENOENT
+        raise DBGeni::ConfigFileNotExist, "Included config #{file} does not exist"
+      rescue DBGeni::ConfigSyntaxError
+        raise DBGeni::ConfigSyntaxError,  "Included config #{file} contains errors: #{e.to_s}"
+      end
+    end
+
     private
 
     def is_absolute_path?(path)

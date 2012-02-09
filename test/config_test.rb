@@ -1,9 +1,13 @@
 $:.unshift File.expand_path(File.join(File.dirname(__FILE__), "..", "lib"))
+$:.unshift File.expand_path(File.dirname(__FILE__))
 
+require "helper"
 require "dbgeni"
 require 'test/unit'
 
 class TestConfig < Test::Unit::TestCase
+
+  include TestHelper
 
   def setup
   end
@@ -257,6 +261,25 @@ class TestConfig < Test::Unit::TestCase
     cfg.base_directory = '/somedir'
     assert_equal('/somedir/code', cfg.code_dir)
   end
+
+
+  def test_config_file_can_load_other_relative_file
+    File.open("#{TestHelper::TEMP_DIR}/simple.conf", 'w') do |f|
+      f.puts "database_type 'sqlite'
+              include_file 'inc_config'"
+    end
+    File.open("#{TestHelper::TEMP_DIR}/inc_config", 'w') do |f|
+      f.puts "environment('development') {
+                           user     ''
+                           password ''
+                          database 'anything'
+             }"
+    end
+    cfg = DBGeni::Config.load_from_file("#{TestHelper::TEMP_DIR}/simple.conf")
+    assert(cfg.environments.has_key?('development'))
+    assert_equal('anything', cfg.environments['development'].database)
+  end
+
 
 
 
