@@ -1,10 +1,13 @@
 # 0.6.0
 
+27th February 2012
+
 Download: [dbgeni-0.6.0.gem](/downloads/dbgeni-0.6.0.gem)
 
  * Reprompt for password If a blank string is supplied
- * Don't echo password to screen when entering (not windows)
+ * Don't echo password to screen when entering password (not windows)
  * Ability to include another config file into the current config file
+ * Exit with a zero status when 'migration apply outstanding' and 'code apply outstanding' have nothing to do
 
 # 0.5.0
 

@@ -204,8 +204,8 @@ begin
     logger.error "#{command} is not a valid command"
   end
 rescue DBGeni::NoOutstandingMigrations => e
-  logger.error "There are no outstanding migrations to apply"
-  exit(1)
+  logger.info "There are no outstanding migrations to apply"
+  exit(0)
 rescue DBGeni::MigrationApplyFailed => e
   logger.error "There was a problem #{command == 'rollback' ? 'rolling back' : 'applying' } #{e.to_s}"
   exit(1)

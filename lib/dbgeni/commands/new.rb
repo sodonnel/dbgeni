@@ -78,6 +78,11 @@ database_type "sqlite"
 # The default is dbgeni_migrations
 database_table "dbgeni_migrations"
 
+# Use the include_file option to load another config file, perhaps
+# containing environment details for many different environments in one place
+#
+# include_file '/path/to/include/file'
+
 
 # Environment Section
 #

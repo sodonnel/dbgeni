@@ -123,8 +123,8 @@ begin
     logger.error "#{command} is not a valid command"
   end
 rescue DBGeni::NoOutstandingCode => e
-  logger.error "There are no outstanding code modules to apply"
-  exit(1)
+  logger.info "There are no outstanding code modules to apply"
+  exit(0)
 rescue DBGeni::NoCodeFilesExist => e
   logger.error "There are no code files in the code_directory"
   exit(1)
