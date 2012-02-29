@@ -37,7 +37,7 @@ module DBGeni
 
     def hash
       # TODO what if file is empty?
-      @hash ||= Digest::SHA1.file(File.join(@directory, @filename))
+      @hash ||= Digest::SHA1.file(File.join(@directory, @filename)).hexdigest
     end
 
     # if the DB hash equals the file hash then it is current
