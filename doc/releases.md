@@ -1,3 +1,11 @@
+# 0.6.1
+
+1st March 2012
+
+Download: [dbgeni-0.6.0.gem](/downloads/dbgeni-0.6.1.gem)
+
+ * Fix issue where code file hashes different between Windows and Linux
+
 # 0.6.0
 
 27th February 2012
