@@ -51,7 +51,7 @@ module DBGeni
       private
 
       def run_in_client(file, force, is_proc=false)
-        @logfile = "#{@config.base_directory}/log/#{@log_dir}/#{File.basename(file)}"
+        @logfile = "#{@log_dir}/#{File.basename(file)}"
 
         z = @config.env
         response = system("mysql -u#{z.username} -p#{z.password} -h#{z.hostname} -P#{z.port} -D#{z.database} -vvv #{force ? '--force' : ''} <#{file} >#{logfile} 2>&1")

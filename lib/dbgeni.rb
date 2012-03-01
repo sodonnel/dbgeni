@@ -4,7 +4,7 @@ require 'digest/sha1'
 module Kernel
 
   def self.is_windows?
-    Config::CONFIG['host_os'] =~ /mswin|mingw/
+    RbConfig::CONFIG['host_os'] =~ /mswin|mingw/
   end
 
   def suppress_warnings

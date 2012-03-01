@@ -305,10 +305,14 @@ module DBGeni
       DBGeni::Initializer.initialize(connection, @config)
     end
 
+    def database_initialized?
+      DBGeni::Initializer.initialized?(connection, @config)
+    end
+
     private
 
     def ensure_initialized
-      raise DBGeni::DatabaseNotInitialized unless DBGeni::Initializer.initialized?(connection, @config)
+      raise DBGeni::DatabaseNotInitialized unless database_initialized?
     end
 
     def initialize_logger

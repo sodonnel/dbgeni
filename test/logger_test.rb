@@ -57,7 +57,15 @@ class TestLogger < Test::Unit::TestCase
   def test_logger_creates_detailed_dir
     instance = DBGeni::Logger.instance(TestHelper::TEMP_DIR)
     assert_not_nil(instance.detailed_log_dir)
-    assert_equal(true, File.exists?(File.join(TestHelper::TEMP_DIR, instance.detailed_log_dir)))
+    assert_equal(true, File.exists?(instance.detailed_log_dir))
+  end
+
+  def test_detailed_dir_can_be_rese
+    instance = DBGeni::Logger.instance(TestHelper::TEMP_DIR)
+    old_dir = instance.detailed_log_dir
+    sleep(2)
+    instance.reset_detailed_log_dir
+    assert_not_equal(old_dir, instance.detailed_log_dir)
   end
 
 

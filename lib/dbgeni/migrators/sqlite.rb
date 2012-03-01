@@ -38,7 +38,7 @@ module DBGeni
           null_device = 'NUL:'
         end
 
-        @logfile = "#{@config.base_directory}/log/#{@log_dir}/#{File.basename(file)}"
+        @logfile = "#{@log_dir}/#{File.basename(file)}"
         IO.popen("sqlite3 #{@connection.database} > #{@logfile} 2>&1", "w") do |p|
           unless force
             p.puts ".bail on"

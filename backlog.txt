@@ -1,8 +1,8 @@
 Maybe more tests for base apply and rollback until
 Better Logging
 ----------------------------------------------
-Tests for file converter - ensure it removes the dos line endings
-No outstanding code or migrations should exit with a 0, not a 1.
+Config vs RbConfig in main dbgeni boot file - is this a ruby 1.9.3 thing?
+Update releases with changes for log_dir fix and extra methods in ::Base
 
 SQL script parameters
 

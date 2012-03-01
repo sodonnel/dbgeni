@@ -69,7 +69,7 @@ module DBGeni
       private
 
       def run_in_client(file, force, is_proc=false)
-        @logfile = "#{@config.base_directory}/log/#{@log_dir}/#{File.basename(file)}"
+        @logfile = "#{@log_dir}/#{File.basename(file)}"
 
         z = @config.env
         # -e echos input

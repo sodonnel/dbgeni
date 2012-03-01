@@ -103,7 +103,8 @@ module DBGeni
         if Kernel.is_windows?
           null_device = 'NUL:'
         end
-        @logfile = "#{@config.base_directory}/log/#{@log_dir}/#{File.basename(file)}"
+
+        @logfile = "#{@log_dir}/#{File.basename(file)}"
 
 #        sql_parameters = parameters
 #        unless parameters
