@@ -36,12 +36,12 @@ Destructive
 
 apply       Apply code modules to the given environment. Can specify:
 
-              all     Apply all code modules, even if they have already been applied.
-              changed Apply only code modules that have changed since they were last applied
+              all         Apply all code modules, even if they have already been applied.
+              outstanding Apply only code modules that have changed since they were last applied
               specific code modules to apply
 
             dbgeni code apply all     --environment-name test --config-file /home/myapp/.dbgeni <--force>
-            dbgeni code apply changed --environment-name test --config-file /home/myapp/.dbgeni <--force>
+            dbgeni code apply outstanding --environment-name test --config-file /home/myapp/.dbgeni <--force>
             dbgeni code apply insert_t1_proc.prc admin_package.pkb --environment-name test --config-file /home/myapp/.dbgeni <--force>
 
 remove      Remove code modules from the given environment. Can specify:
