@@ -102,6 +102,9 @@ environment('development') {
 #  database 'DEV1'    # This is the name of an entry in the tns_names.ora file
 #  username 'scott'   # This is the username to connect as, and also the default schema
 #  password 'tiger'   # This is the password for the username
+#
+#  install_schema 'other' # Optional: If dbgeni connects as a database user, but the application is owned
+                          # by another user, set the application schema here
 
 ### MYSQL
 #

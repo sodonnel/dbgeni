@@ -127,6 +127,11 @@ module DBGeni
           end
           #            p.puts "START #{File.basename(file)} #{sql_parameters}"
           p.puts "spool #{@logfile}"
+          # Switch the current schema but only if the override is in the config file
+          if @config.env.install_schema
+            puts "switchin schema"
+            p.puts "alter session set current_schema=#{@config.env.install_schema};"
+          end
           p.puts "START #{file}"
           if is_proc
             p.puts "/" if add_terminator

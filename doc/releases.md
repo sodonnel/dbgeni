@@ -1,3 +1,11 @@
+# 0.7.0
+
+Download: [dbgeni-0.6.0.gem](/downloads/dbgeni-0.7.0.gem)
+
+ * Allow current schema to be set for Oracle installs
+ * Changed the logger to use absolute paths for logfiles
+ * Added the database_initialized? method to base
+
 # 0.6.1
 
 1st March 2012

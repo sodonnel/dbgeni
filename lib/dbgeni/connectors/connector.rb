@@ -11,11 +11,19 @@ module DBGeni
       end
       if %w(oracle sqlite).include? config.db_type
         # don't need a host or port here, so make this a seperate call block
-        required_method.call(config.env.username,
-                             # SQLITE doesn't need a password, so prevent asking for it
-                             # or it may be promoted for
-                             config.db_type == 'sqlite' ? '' : config.env.password,
-                             config.env.database)
+        conn = required_method.call(config.env.username,
+                               # SQLITE doesn't need a password, so prevent asking for it
+                               # or it may be promoted for
+                               config.db_type == 'sqlite' ? '' : config.env.password,
+                               config.env.database)
+        if config.db_type == 'oracle'
+          if config.env.install_schema
+            if config.env.username != config.env.install_schema
+              conn.execute("alter session set current_schema=#{config.env.install_schema}")
+            end
+          end
+        end
+        conn
       else
         required_method.call(config.env.username,
                              config.env.password,

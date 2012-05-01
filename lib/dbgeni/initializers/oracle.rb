@@ -20,7 +20,9 @@ module DBGeni
       def self.initialized?(db_connection, config)
         # it is initialized if a table called dbgeni_migrations or whatever is
         # defined in config exists
-        results = db_connection.execute("select table_name from user_tables where table_name = :t", config.db_table.upcase)
+        results = db_connection.execute("select table_name from all_tables where table_name = :t and owner = :o",
+                                        config.db_table.upcase,
+                                        config.env.install_schema ? config.env.install_schema.upcase : config.env.username.upcase)
         if 0 == results.length
           false
         else

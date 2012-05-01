@@ -1,14 +1,15 @@
 Maybe more tests for base apply and rollback until
 Better Logging
 ----------------------------------------------
+Document switch schema in Oracle
 Config vs RbConfig in main dbgeni boot file - is this a ruby 1.9.3 thing?
-Update releases with changes for log_dir fix and extra methods in ::Base
 
 SQL script parameters
 
 Compile command to compile all stored procs
 Fill integration tests for each DB.
 Test generators for different DBs.
+Test for Oracle set current_schema (manually tested and doesn't break anything)
 ----------------------------------------------
 Parameters in SQL scripts
 Global Parameters
