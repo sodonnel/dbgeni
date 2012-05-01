@@ -4,7 +4,10 @@ require 'digest/sha1'
 module Kernel
 
   def self.is_windows?
-    RbConfig::CONFIG['host_os'] =~ /mswin|mingw/
+    # Ruby 1.9.3 warns if you use Config (instead of RbConfig) while older Ruby
+    # doesn't have RbConfig, only Config :-/
+    conf = Object.const_get(defined?(RbConfig) ? :RbConfig : :Config)::CONFIG
+    conf['host_os'] =~ /mswin|mingw/
   end
 
   def suppress_warnings
@@ -32,7 +35,8 @@ if RUBY_PLATFORM == 'java'
   require 'rubygems'
   require 'java'
 
-  if Config::CONFIG['ruby_version'] =~ /1\.8/
+  conf = Object.const_get(defined?(RbConfig) ? :RbConfig : :Config)::CONFIG
+  if conf['ruby_version'] =~ /1\.8/
     raise "DBGeni requires the --1.9 switch to be passed to jruby (or set env variable JRUBY_OPTS=--1.9)"
   end
 
