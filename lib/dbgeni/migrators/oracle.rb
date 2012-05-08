@@ -169,6 +169,10 @@ module DBGeni
           "drop function #{code.name}"
         when DBGeni::Code::PROCEDURE
           "drop procedure #{code.name}"
+        when DBGeni::Code::TYPE
+          "drop type #{code.name}"
+        when DBGeni::Code::UNKNOWN
+          derive_drop_command_from_db(code.name)
         end
       end
 
@@ -181,6 +185,17 @@ module DBGeni
           end
         end
         has_slash
+      end
+
+      def derive_drop_command_from_db(object_name)
+        # This is tricky because of packages - will give two objects with the same name :-/
+        raise CannotRemoveUnknownObject
+
+        # owner = @config.env.install_schema ? @config.env.install_schema : @config.env.username
+        # results = @connection.execute ("select object_type
+        #                                 from all_objects
+        #                                 where owner = :b1 and object_name = b2", owner.upcase, object_name.upcase)
+        # unless results
       end
 
     end

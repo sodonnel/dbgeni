@@ -49,6 +49,7 @@ module DBGeni
   class CodeDirectoryNotExist       < Exception; end
   class NoOutstandingCode           < Exception; end
   class NoCodeFilesExist            < Exception; end
+  class CannotRemoveUnknownObject   < Exception; end
 
   class DBCLINotOnPath              < Exception; end
   class CodeRemoveFailed            < Exception; end

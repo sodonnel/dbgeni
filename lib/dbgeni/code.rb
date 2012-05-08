@@ -7,6 +7,9 @@ module DBGeni
     PROCEDURE    = 'PROCEDURE'
     FUNCTION     = 'FUNCTION'
     TRIGGER      = 'TRIGGER'
+    TYPE         = 'TYPE'
+
+    UNKNOWN      = 'UNKNOWN'
 
     APPLIED = 'Applied'
 
@@ -15,7 +18,9 @@ module DBGeni
                'pkb' => PACKAGE_BODY,
                'prc' => PROCEDURE,
                'fnc' => FUNCTION,
-               'trg' => TRIGGER
+               'trg' => TRIGGER,
+               'typ' => TYPE,
+               'sql' => UNKNOWN
     }
 
     def initialize(directory, filename)

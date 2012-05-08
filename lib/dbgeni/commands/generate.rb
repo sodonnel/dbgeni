@@ -34,6 +34,9 @@ function   Generates a file for a stored function with the given function name
 trigger    Generates a file for a trigger with the given trigger name
              dbgeni generate trigger my_trigger_name
 
+type       Generates a file for a type definition with the given type name
+             dbgeni generate type my_type_name
+
 EOF
 end
 
@@ -197,6 +200,18 @@ when 'trigger', 'trg'
         f.puts ""
         f.puts "go"
       end
+    end
+  end
+when 'type', 'typ'
+  filename = File.join(config.code_dir, "#{name}.typ")
+  if File.exists?(filename)
+    puts "exists: #{filename}"
+  else
+    puts "creating: #{filename}"
+    File.open(filename, 'w') do |f|
+      f.puts "create or replace type #{name}"
+      f.puts "as"
+      f.puts "/"
     end
   end
 when 'milestone'

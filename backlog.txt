@@ -1,10 +1,16 @@
 Maybe more tests for base apply and rollback until
 Better Logging
 ----------------------------------------------
+Test sql file extensions inc drop errors
+Test create/drop for Oracle types
+Format output of code apply - make it type (padded) and then object name
+Document sql extension
+Document Oracle types
 Document switch schema in Oracle
 Config vs RbConfig in main dbgeni boot file - is this a ruby 1.9.3 thing?
 
 SQL script parameters
+Think - should missing code files be highlighted? Should there be a missing command for code?
 
 Compile command to compile all stored procs
 Fill integration tests for each DB.
