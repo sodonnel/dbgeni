@@ -49,7 +49,9 @@ class TestCode < Test::Unit::TestCase
              'pkb' => 'PACKAGE BODY',
              'prc' => 'PROCEDURE',
              'fnc' => 'FUNCTION',
-             'trg' => 'TRIGGER'
+             'trg' => 'TRIGGER',
+             'typ' => 'TYPE',
+             'sql' => 'UNKNOWN'
     }
     types.keys.each do |k|
       c = DBGeni::Code.new('somedirectory', "package.#{k}")

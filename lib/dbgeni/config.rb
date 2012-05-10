@@ -34,6 +34,9 @@ module DBGeni
     attr_reader   :config_file
     attr_reader   :base_directory
 
+    DEFAULTS_ENV = '__defaults__'
+
+
     def initialize
       @migration_directory  = 'migrations'
       @code_dir             = 'code'
@@ -108,8 +111,8 @@ module DBGeni
     def current_env
       if @current_environment
         @environments[@current_environment]
-      elsif @environments.keys.length == 1
-        @environments[@environments.keys.first]
+      elsif @environments.keys.reject{|i| i == DEFAULTS_ENV}.length == 1
+        @environments[@environments.keys.reject{|i| i == DEFAULTS_ENV}.first]
       else
         raise DBGeni::ConfigAmbiguousEnvironment, "More than one environment is defined"
       end
@@ -118,8 +121,9 @@ module DBGeni
 
     def set_env(name=nil)
       if name == nil
-        if @environments.keys.length == 1
-          @current_environment = @environments.keys.first
+        valid_envs = @environments.keys.reject{|i| i == DEFAULTS_ENV}
+        if valid_envs.length == 1
+          @current_environment = valid_envs.first
         else
           raise DBGeni::ConfigAmbiguousEnvironment, "More than one environment is defined"
         end
@@ -131,15 +135,24 @@ module DBGeni
     end
 
 
-    def load(raw_config)
+    def load(raw_config, recursed=false)
       begin
         self.instance_eval(raw_config)
       rescue Exception => e
         raise DBGeni::ConfigSyntaxError, e.to_s
       end
+      merge_defaults unless recursed
       self
     end
 
+    def merge_defaults
+      if @environments.has_key? DEFAULTS_ENV
+        @environments.keys.each do |k|
+          next if k == DEFAULTS_ENV
+          @environments[k].__merge_defaults(@environments[DEFAULTS_ENV].__params)
+        end
+      end
+    end
 
     def to_s
       str = ''
@@ -226,16 +239,18 @@ module DBGeni
     #
     #   some_dir_path '/path_to_directory'
     def environment(name, &block)
-      if @environments.has_key?(name)
-        warn "Environment #{name} has been previously defined"
-      end
       env = Environment.new(name)
       block.arity < 1 ? env.instance_eval(&block) : block.call(env)
       env.__completed_loading
-      @environments[name] = env
+      if @environments.has_key?(name)
+        @environments[name].__merge_environment(env)
+      else
+        @environments[name] = env
+      end
     end
 
-    def global_parameters(name, &block)
+    def defaults(&block)
+      environment(DEFAULTS_ENV, &block)
     end
 
 

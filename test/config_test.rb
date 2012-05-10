@@ -78,6 +78,13 @@ class TestConfig < Test::Unit::TestCase
     assert_equal('foo', cfg.current_environment)
   end
 
+  def test_single_environment_with_default_set_env_no_name
+    cfg = DBGeni::Config.new
+    cfg.load("environment('foo') { } \n defaults { p1 'a' }")
+    cfg.set_env
+    assert_equal('foo', cfg.current_environment)
+  end
+
   def test_single_environment_set_env_name
     cfg = DBGeni::Config.new
     cfg.load("environment('foo') { } \n")
@@ -122,12 +129,13 @@ class TestConfig < Test::Unit::TestCase
     assert_equal('foo', cfg.current_env.__environment_name)
   end
 
-  def test_single_environment_get_current_env_set
+  def test_single_environment_with_defaults_get_current_env_not_set
     cfg = DBGeni::Config.new
-    cfg.load("environment('foo') { } \n")
-    cfg.set_env('foo')
+    cfg.load("environment('foo') { } \n defaults { p1 'a' }")
     assert_equal('foo', cfg.current_env.__environment_name)
   end
+
+
 
   def test_many_environment_get_current_env_not_set
     cfg = DBGeni::Config.new
@@ -144,10 +152,66 @@ class TestConfig < Test::Unit::TestCase
     assert_equal('foo', cfg.current_env.__environment_name)
   end
 
+  def test_specifying_same_environment_twice_merges
+    cfg = DBGeni::Config.new
+    cfg.load("environment('foo') {
+                p1 'hello'
+                p2 'there'
+              } \n
+              environment('foo') {
+                p2 'bob'
+                p3 'jimmy'
+             } \n")
+    assert_equal('hello', cfg.env.p1)
+    assert_equal('bob',   cfg.env.p2)
+    assert_equal('jimmy', cfg.env.p3)
+  end
+
+  def test_specifying_defaults_sets_internal_environment
+    cfg = DBGeni::Config.new
+    cfg.load("defaults {
+                p1 'hello'
+                p2 'there'
+              } \n
+              defaults {
+                p2 'bob'
+                p3 'jimmy'
+             } \n")
+    cfg.set_env('__defaults__')
+    assert_equal('hello', cfg.env.p1)
+    assert_equal('bob',   cfg.env.p2)
+    assert_equal('jimmy', cfg.env.p3)
+  end
+
+  def test_defaults_merged_when_defined_at_start
+    cfg = DBGeni::Config.new
+    cfg.load("defaults {
+               p1 'hello'
+             } \n
+             environment('foo') {
+               p2 'bob'
+            } \n")
+    assert_equal('hello', cfg.env.p1)
+    assert_equal('bob',   cfg.env.p2)
+  end
+
+  def test_defaults_merged_when_defined_at_end
+    cfg = DBGeni::Config.new
+    cfg.load("environment('foo') {
+               p2 'bob'
+            } \n
+            defaults {
+               p1 'hello'
+             } \n")
+    assert_equal('hello', cfg.env.p1)
+    assert_equal('bob',   cfg.env.p2)
+  end
+
+
   ## End get, set current_env tests ##
 
 
-  def test__environment_set_env_name_not_exist
+  def test_environment_set_env_name_not_exist
     cfg = DBGeni::Config.new
     cfg.load("environment('foo') { } \n")
     assert_raises DBGeni::EnvironmentNotExist do

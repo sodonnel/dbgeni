@@ -209,6 +209,14 @@ class TestMigratorOracle < Test::Unit::TestCase
     assert_equal(0, @connection.execute("select count(*) from all_objects where object_name = 'TRG1'")[0][0])
   end
 
-
+  def test_type_is_dropped_successfully
+    code = helper_good_type_file
+    assert_nothing_raised do
+      @migrator.compile(code)
+      assert_equal(1, @connection.execute("select count(*) from all_objects where object_name = 'TYPE1'")[0][0])
+      @migrator.remove(code)
+    end
+    assert_equal(0, @connection.execute("select count(*) from all_objects where object_name = 'TYPE1'")[0][0])
+  end
 
 end

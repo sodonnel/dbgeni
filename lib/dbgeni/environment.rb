@@ -8,6 +8,11 @@ module DBGeni
       @loading          = true
     end
 
+
+    def __merge_environment(new_env)
+      @params.merge!(new_env.__params)
+    end
+
     def __enable_loading
       @loading = true
     end
@@ -22,6 +27,10 @@ module DBGeni
 
     def __environment_name
       @environment_name
+    end
+
+    def __params
+      @params
     end
 
     def __merge_defaults(default_params)

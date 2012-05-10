@@ -91,5 +91,22 @@ class TestEnvironment < Test::Unit::TestCase
     assert_equal(nil, env.param)
   end
 
+  def test_environment_can_be_merged_with_another
+    env  = DBGeni::Environment.new('test_env')
+    env2 = DBGeni::Environment.new('test_env')
+    env.param   = 'foo'
+    env.param2  = 'foobar'
+    env2.merged = 'original'
+    env2.param  = 'overide'
+    env.__completed_loading
+    env2.__completed_loading
+
+    env.__merge_environment(env2)
+
+    assert_equal('overide', env.param)
+    assert_equal('foobar'  , env.param2)
+    assert_equal('original'  , env.merged)
+  end
+
 
 end

@@ -15,7 +15,7 @@ class TestCodeList < Test::Unit::TestCase
     @code_directory = File.expand_path(File.join(File.dirname(__FILE__), "temp", "code"))
     FileUtils.rm_rf(File.join(TestHelper::TEMP_DIR, 'code'))
     FileUtils.mkdir_p(@code_directory)
-    %w(p1.prc p2.pks p3.pkb p4.fnc p5.trg p6.abc).each do |f|
+    %w(p1.prc p2.pks p3.pkb p4.fnc p5.trg p6.typ p7.sql p8.abc).each do |f|
       File.open(File.join(@code_directory, f), 'w') do |fh|
         fh.puts "create or replace procedure proc1\nas\nbegin\n  null;\nend;"
       end
@@ -41,9 +41,9 @@ class TestCodeList < Test::Unit::TestCase
   end
 
   def test_correct_number_of_code_files_loaded
-    # There are 6 files, but one has an invalid extension so shouldn't load
+    # There are 8 files, but one has an invalid extension so shouldn't load
     c = DBGeni::CodeList.new(@code_directory)
-    assert_equal(5, c.code.length)
+    assert_equal(7, c.code.length)
   end
 
   def test_code_files_that_are_current_are_identified
@@ -61,7 +61,7 @@ class TestCodeList < Test::Unit::TestCase
     c.code.each do |obj|
       obj.expects(:current?).returns(false)
     end
-    assert_equal(5, c.outstanding(@config, @connection).length)
+    assert_equal(7, c.outstanding(@config, @connection).length)
   end
 
   def test_files_with_ordering_prefix_ordered_first
