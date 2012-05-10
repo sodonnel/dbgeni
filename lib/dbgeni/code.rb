@@ -119,7 +119,7 @@ module DBGeni
     end
 
     def to_s
-      "#{@name} - #{@type}"
+      "#{@type.ljust(12)} #{@name}"
     end
 
     def convert_code(config)

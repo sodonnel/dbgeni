@@ -3,8 +3,12 @@
 Download: [dbgeni-0.6.0.gem](/downloads/dbgeni-0.7.0.gem)
 
  * Allow current schema to be set for Oracle installs
- * Changed the logger to use absolute paths for logfiles
- * Added the database_initialized? method to base
+ * Added support for Oracle types and code files with .sql extension
+ * Enhanced config loader be more flexible
+ * Added utility methods to make dbgeni scriptable
+   * Changed the logger to use absolute paths for logfiles
+   * Added the database_initialized? method to base
+
 
 # 0.6.1
 

@@ -219,4 +219,13 @@ class TestMigratorOracle < Test::Unit::TestCase
     assert_equal(0, @connection.execute("select count(*) from all_objects where object_name = 'TYPE1'")[0][0])
   end
 
+  def test_error_raised_if_code_type_sql_is_dropped
+    code = helper_good_sqlcode_file
+    assert_raises DBGeni::CodeRemoveFailed do
+      @migrator.compile(code)
+      assert_equal(1, @connection.execute("select count(*) from all_objects where object_name = 'FUNC1'")[0][0])
+      @migrator.remove(code)
+    end
+  end
+
 end

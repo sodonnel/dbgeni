@@ -87,10 +87,24 @@ database_table "dbgeni_migrations"
 # Environment Section
 #
 # There must be at least one environment, and at a minimum each environment
-# should define a username, database and password.
+# should define a username, database and password (except sqlite which only
+# requires a database to be specified)
 #
 # Typically there will be more than one enviroment block detailling development,
 # test and production but any number of environments are valid provided there is at least one.
+#
+# The environments can be defined here or in an included file.
+
+# Defaults - this section is optional and can be used to define parameters that must
+# appear in every environment, for example install_schema. If a parameter is defined
+# here, and also defined in the environment, then the value in the environment block
+# will override the default. If many default blocks are specified, in included files
+# for example, the parameters are merged. If any parameters are duplicated, the last to
+# be loaded will used.
+#
+# defaults {
+#  username 'scott'
+# }
 
 environment('development') {
 
@@ -125,30 +139,19 @@ environment('development') {
 #  sybase_service 'dev1' # THis is the sybase service name defined in the sql.ini file
 
 
-#   Other parameters can be defined here and will override global_parameters (currently unused)
+#   Other parameters can be defined here to be used as replacement parameters in scripts
+#   or in plugins in future versions of dbgeni.
 #   param_name 'value'
 }
 
 #
 # environment('test') {
-#   username 'user'        # this must be here, or it will error
-#   database 'TEST.WORLD'  # this must be here, or it will error. For Oracle, this is the TNS Name
-#   password ''            # If this value is missing, it will be promoted for if needed.
+#   username 'user'
+#   database 'TEST.WORLD'
+#   password ''
 # }
 #
-#
-# Global Parameters
-#
-# There can only be one Global Parameter block.
-#
-# This is used to define parameters that are common to all environments.
-# If the parameter is redefined in an environment block, then the value in the environment block
-# overrides the global parameter.
-#
-# global_parameters { # These are common parameters to all environments, but they can be
-#                     # overriden. Basically take global, merge in environment
-#   param_name 'value'
-# }
+
 
 EOF
 rescue Exception => e

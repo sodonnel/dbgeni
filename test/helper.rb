@@ -15,8 +15,8 @@ module TestHelper
   ORA_PASSWORD = 'sodonnel'
   ORA_DB       = 'local11gr2'
 
-  MYSQL_USER     = 'sodonnel'
-  MYSQL_PASSWORD = 'sodonnel'
+  MYSQL_USER     = 'sodonnell'
+  MYSQL_PASSWORD = 'sodonnell'
   MYSQL_DB       = 'sodonnel'
   MYSQL_HOSTNAME = '127.0.0.1'
   MYSQL_PORT     = '3306'
@@ -30,8 +30,8 @@ module TestHelper
 
 
 
-  CLI = 'ruby C:\Users\sodonnel\code\dbgeni\lib\dbgeni\cli.rb'
-#  CLI = 'ruby /home/sodonnel/code/dbgeni/lib/dbgeni/cli.rb'
+#  CLI = 'ruby C:\Users\sodonnel\code\dbgeni\lib\dbgeni\cli.rb'
+  CLI = 'ruby /home/sodonnel/code/dbgeni/lib/dbgeni/cli.rb'
 
   def helper_clean_temp
     FileUtils.rm_rf("#{TEMP_DIR}")
@@ -567,6 +567,16 @@ go", 'trg1.trg')
       end;
       /", 'pkg1.pkb')
   end
+
+  def helper_good_sqlcode_file
+    create_procedure_file("create or replace function func1
+      return varchar2
+      as
+      begin
+         null;
+      end;", 'func1.sql')
+  end
+
 
   def helper_bad_procedure_file
     create_procedure_file("create or replace procedure proc1
