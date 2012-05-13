@@ -1,6 +1,8 @@
 # 0.7.0
 
-Download: [dbgeni-0.6.0.gem](/downloads/dbgeni-0.7.0.gem)
+13th May 2012
+
+Download: [dbgeni-0.7.0.gem](/downloads/dbgeni-0.7.0.gem)
 
  * Allow current schema to be set for Oracle installs
  * Added support for Oracle types and code files with .sql extension
