@@ -59,4 +59,8 @@ module DBGeni
   class UnsupportedRubyPlatform     < Exception; end
   class ConnectionError             < Exception; end
 
+  # Plugins
+  class InvalidHook                 < Exception; end
+  class PluginDoesNotRespondToRun   < Exception; end
+
 end
