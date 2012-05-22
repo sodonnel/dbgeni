@@ -7,6 +7,8 @@ Plugins
 SQL script parameters
 Think - should missing code files be highlighted? Should there be a missing command for code?
 
+MYSQL is totally broken under jruby due to poor ruby-mysql support. Investigate jdbc-mysql - note that tests are comments out using the setup block in cli_ migration_test.rb to stop fails due to this problem and also in test_runner.
+
 Compile command to compile all stored procs
 Fill integration tests for each DB.
 Test generators for different DBs.

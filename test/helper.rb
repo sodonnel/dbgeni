@@ -3,9 +3,9 @@ module TestHelper
   require 'dbgeni/connectors/sqlite'
   require 'dbgeni/connectors/oracle'
   require 'dbgeni/connectors/mysql'
-  if RUBY_PLATFORM == 'java'
-    require 'dbgeni/connectors/sybase'
-  end
+#  if RUBY_PLATFORM == 'java'
+#    require 'dbgeni/connectors/sybase'
+#  end
   require 'fileutils'
 
   TEMP_DIR = File.expand_path(File.join(File.dirname(__FILE__), "temp"))
@@ -13,7 +13,9 @@ module TestHelper
 
   ORA_USER     = 'sodonnel'
   ORA_PASSWORD = 'sodonnel'
-  ORA_DB       = 'local11gr2'
+  ORA_DB       = 'tuned' #'local11gr2' # If running in jruby this is service, not TNS Name
+  ORA_HOST     = '127.0.0.1'
+  ORA_PORT     = '1521'
 
   MYSQL_USER     = 'sodonnell'
   MYSQL_PASSWORD = 'sodonnell'
@@ -50,7 +52,7 @@ module TestHelper
     conn.execute("delete from dbgeni_migrations")
     begin
       conn.execute("drop procedure proc1")
-    rescue
+    rescue Exception => e
     end
     conn.disconnect
   end
@@ -97,7 +99,7 @@ module TestHelper
   end
 
   def helper_oracle_connection
-    connection = DBGeni::Connector::Oracle.connect(ORA_USER, ORA_PASSWORD, ORA_DB)
+    connection = DBGeni::Connector::Oracle.connect(ORA_USER, ORA_PASSWORD, ORA_DB, ORA_HOST, ORA_PORT)
   end
 
   def helper_mysql_connection
@@ -115,6 +117,8 @@ module TestHelper
                                          username '#{ORA_USER}'
                                          password '#{ORA_PASSWORD}'
                                          database '#{ORA_DB}'
+                                         hostname '#{ORA_HOST}'
+                                         port     '#{ORA_PORT}'
                                      }")
     config.base_directory = TEMP_DIR
     config
@@ -203,6 +207,8 @@ module TestHelper
                                          username '#{ORA_USER}'
                                          password '#{ORA_PASSWORD}'
                                          database '#{ORA_DB}'
+                                         hostname '#{ORA_HOST}'
+                                         port     '#{ORA_PORT}'
                                      }"
     end
     filename
@@ -216,11 +222,17 @@ module TestHelper
                                          username '#{ORA_USER}'
                                          password '#{ORA_PASSWORD}'
                                          database '#{ORA_DB}'
+                                         hostname '#{ORA_HOST}'
+                                         port     '#{ORA_PORT}'
+
                                      }
                                       environment('test') {
                                          username '#{ORA_USER}'
                                          password '#{ORA_PASSWORD}'
                                          database '#{ORA_DB}'
+                                         hostname '#{ORA_HOST}'
+                                         port     '#{ORA_PORT}'
+
                                      }"
     end
     filename

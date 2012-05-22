@@ -107,32 +107,41 @@ module DBGeni
       end
 
       def execute_jdbc(sql, *binds)
-        query = @connection.prepare_statement(sql)
-        binds.each_with_index do |b, i|
-          if b.is_a?(String)
-            query.setString(i+1, b)
-          elsif b.is_a?(Fixnum)
-            query.setInt(i+1, b)
-          end
-        end
-        results = Array.new
-        unless sql =~ /^\s*select/i
-          query.execute()
-        else
-          rset = query.execute_query()
-          cols = rset.get_meta_data.get_column_count
-          while(r = rset.next) do
-            a = Array.new
-            1.upto(cols) do |i|
-              a.push rset.get_object(i)
+        begin
+          query = @connection.prepare_statement(sql)
+          binds.each_with_index do |b, i|
+            if b.is_a?(String)
+              query.setString(i+1, b)
+            elsif b.is_a?(Fixnum)
+              query.setInt(i+1, b)
             end
-            results.push a
+          end
+          results = Array.new
+          unless sql =~ /^\s*select/i
+            query.execute()
+          else
+            rset = query.execute_query()
+            cols = rset.get_meta_data.get_column_count
+            while(r = rset.next) do
+              a = Array.new
+              1.upto(cols) do |i|
+                if rset.get_meta_data.get_column_type_name(i) == 'NUMBER'
+                  a.push rset.get_float(i)
+                else
+                  a.push rset.get_object(i)
+                end
+              end
+              results.push a
+            end
+          end
+          results
+        ensure
+          begin
+            query.close()
+          rescue Exception => e
           end
         end
-        query.close
-        results
       end
-
 
     end
   end

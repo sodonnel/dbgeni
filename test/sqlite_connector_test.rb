@@ -17,7 +17,7 @@ class TestSqliteConnector < Test::Unit::TestCase
       # tests work.
       begin
         @conn.execute("drop table dual")
-      rescue
+      rescue Exception => e
       end
       @conn.execute("create table dual (dummy char(1))")
       @conn.execute("insert into dual (dummy) values ('X')")

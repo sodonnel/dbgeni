@@ -34,7 +34,7 @@ class TestDBGeniBaseProcOracle < Test::Unit::TestCase
     @connection.execute("delete from #{@config.db_table}")
     begin
       @connection.execute("drop procedure proc1")
-    rescue
+    rescue Exception => e
     end
   end
 

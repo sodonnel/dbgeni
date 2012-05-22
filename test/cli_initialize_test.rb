@@ -13,7 +13,11 @@ class TestCLIInitialize < Test::Unit::TestCase
     helper_sqlite_single_environment_file
     helper_oracle_single_environment_file
     helper_mysql_single_environment_file
-    @dbs = %w(sqlite oracle mysql)
+    if RUBY_PLATFORM != 'java'
+      @dbs = %w(sqlite oracle mysql)
+    else
+      @dbs = %w(sqlite oracle)
+    end
     @dbs.each do |db|
       begin
         conn = self.send("helper_#{db}_connection".intern)
