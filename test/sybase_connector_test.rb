@@ -11,7 +11,7 @@ class TestSybaseConnector < Test::Unit::TestCase
   include TestHelper
 
   def setup
-    @conn = DBGeni::Connector::Sybase.connect('sa', 'sa1234', 'cfg', '10.152.97.152' ,5000)
+    @conn = DBGeni::Connector::Sybase.connect(SYBASE_USER, SYBASE_PASSWORD, SYBASE_DB, SYBASE_HOSTNAME, SYBASE_PORT)
   end
 
   def teardown
@@ -32,7 +32,7 @@ class TestSybaseConnector < Test::Unit::TestCase
   def test_can_create_table
     begin
       @conn.execute('drop table test_tab')
-    rescue
+    rescue Exception => e
     end
     assert_nothing_raised do
       res = @conn.execute('create table test_tab (c1 varchar(10))')

@@ -3,7 +3,13 @@ module DBGeni
   module Connector
 
     class Mysql
-      require 'mysql'
+      if RUBY_PLATFORM == 'java'
+        require 'java'
+        java_import 'com.mysql.jdbc.Driver'
+        java_import 'java.sql.DriverManager'
+      else
+        require 'mysql'
+      end
 
       attr_reader :connection
       attr_reader :database
@@ -17,39 +23,82 @@ module DBGeni
       end
 
       def execute(sql, *binds)
-        # strange exception handling here. If you issue a select, the fetch works fine.
-        # However, something like create table blows up when fetch is called with noMethodError
-        # so it is being caught and thrown away ... hackish, but the mysql drive seems to be
-        # at fault, is badly documented and seems to be a bit rubbish. Ideall uses DBD::Mysql + DBI.
-
-        results = Array.new
-        if sql =~ /^drop\s+(procedure|function|trigger|table)/i
-          # cannot prepare these statements, need to just execute
-          @connection.query(sql)
-          return results
+        if RUBY_PLATFORM == 'java'
+          execute_jdbc(sql, *binds)
+        else
+          execute_native(sql, *binds)
         end
+      end
 
+      def execute_native(sql, *binds)
+        raise "not implemented"
+      end
+     #   # strange exception handling here. If you issue a select, the fetch works fine.
+     #   # However, something like create table blows up when fetch is called with noMethodError
+     #   # so it is being caught and thrown away ... hackish, but the mysql drive seems to be
+     #   # at fault, is badly documented and seems to be a bit rubbish. Ideall uses DBD::Mysql + DBI.
+     #
+     #  results = Array.new
+     #   if sql =~ /^drop\s+(procedure|function|trigger|table)/i
+     #     # cannot prepare these statements, need to just execute
+     #     @connection.query(sql)
+     #     return results
+     #   end
+     #
+     #   begin
+     #     query = @connection.prepare(sql)
+     #     query.execute(*binds)
+#
+#          results = Array.new
+#          if query.num_rows > 0
+#            while r = query.fetch()
+#              results.push r
+#            end
+#          end
+#          # everthing is auto commit right now ...
+#          @connection.commit
+#        rescue NoMethodError
+#        ensure
+#          begin
+#            query.close()
+#          rescue
+#          end
+#        end
+#
+#        results
+#      end
+
+      def execute_jdbc(sql, *binds)
         begin
-          query = @connection.prepare(sql)
-          query.execute(*binds)
-
-          results = Array.new
-          if query.num_rows > 0
-            while r = query.fetch()
-              results.push r
+          query = @connection.prepare_statement(sql)
+          binds.each_with_index do |b, i|
+            if b.is_a?(String)
+              query.setString(i+1, b)
+            elsif b.is_a?(Fixnum)
+              query.setInt(i+1, b)
             end
           end
-          # everthing is auto commit right now ...
-          @connection.commit
-        rescue NoMethodError
-        ensure
+          results = Array.new
+          unless sql =~ /^\s*(select|show)/i
+            query.execute()
+          else
+            rset = query.execute_query()
+            cols = rset.get_meta_data.get_column_count
+            while(r = rset.next) do
+              a = Array.new
+              1.upto(cols) do |i|
+                a.push rset.get_object(i)
+              end
+              results.push a
+            end
+          end
+          results
+        ensure 
           begin
-            query.close()
-          rescue
+            query.close
+          rescue Exception => e
           end
         end
-
-        results
       end
 
       def ping
@@ -80,10 +129,11 @@ module DBGeni
 
       private
 
-      def initialize(user, password, database, host, port=nil)
+      def initialize(user, password, database, host, port=3306)
         @database = database
         begin
-          @connection = ::Mysql.connect(host, user, password, database, port)
+    #      @connection = ::Mysql.connect(host, user, password, database, port)
+          @connection = DriverManager.get_connection("jdbc:mysql://#{host}:#{port||3306}/#{database}", user, password)
         rescue Exception => e
           raise DBGeni::DBConnectionError, e.to_s
         end

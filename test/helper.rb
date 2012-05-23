@@ -3,9 +3,9 @@ module TestHelper
   require 'dbgeni/connectors/sqlite'
   require 'dbgeni/connectors/oracle'
   require 'dbgeni/connectors/mysql'
-#  if RUBY_PLATFORM == 'java'
-#    require 'dbgeni/connectors/sybase'
-#  end
+  if RUBY_PLATFORM == 'java'
+    require 'dbgeni/connectors/sybase'
+  end
   require 'fileutils'
 
   TEMP_DIR = File.expand_path(File.join(File.dirname(__FILE__), "temp"))
@@ -17,18 +17,18 @@ module TestHelper
   ORA_HOST     = '127.0.0.1'
   ORA_PORT     = '1521'
 
-  MYSQL_USER     = 'sodonnell'
-  MYSQL_PASSWORD = 'sodonnell'
-  MYSQL_DB       = 'sodonnel'
+  MYSQL_USER     = 'sodonnel'
+  MYSQL_PASSWORD = 'sodonnel'
+  MYSQL_DB       = 'dbgenitest'
   MYSQL_HOSTNAME = '127.0.0.1'
   MYSQL_PORT     = '3306'
 
   SYBASE_USER     = 'sa'
   SYBASE_PASSWORD = 'sa1234'
-  SYBASE_DB       = 'cfg'
-  SYBASE_HOSTNAME = '10.152.97.152'
+  SYBASE_DB       = 'test'
+  SYBASE_HOSTNAME = '127.0.0.1'
   SYBASE_PORT     = '5000'
-  SYBASE_SERVICE  = 'localsyb'
+  SYBASE_SERVICE  = 'LOCALHOST'
 
 
 

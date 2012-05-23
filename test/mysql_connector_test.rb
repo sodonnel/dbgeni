@@ -31,7 +31,7 @@ class TestMysqlConnector < Test::Unit::TestCase
   def test_can_create_table
     begin
       @conn.execute('drop table test_tab')
-    rescue
+    rescue Exception => e
     end
     assert_nothing_raised do
       res = @conn.execute('create table test_tab (c1 varchar(10))')
