@@ -38,8 +38,8 @@ module DBGeni
     def load_plugins(path)
       begin
         files = Dir.entries(path).grep(/\.rb$/).sort
-      rescue Exception => e
-        raise e
+      rescue Errno::ENOENT, Errno::EACCES => e
+        raise DBGeni::PluginDirectoryNotAccessible, e.to_s
       end
       files.each do |f|
         load_plugin File.join(path, f)
@@ -47,25 +47,27 @@ module DBGeni
     end
 
     def load_plugin(filename)
+      require filename
     end
 
     def run_plugins(hook, attrs)
-      hooks = self.class.hooks[hook]
-      unless hooks.is_a? Array
+      klasses = self.class.hooks[hook]
+      unless klasses.is_a? Array
         raise DBGeni::InvalidHook, hook
       end
 
-      hooks.each do |h|
-        run_plugin h, attrs
+      klasses.each do |k|
+        run_plugin k, hook, attrs
       end
     end
 
-    def run_plugin(klass, attrs)
+
+    def run_plugin(klass, hook, attrs)
       instance = klass.new
       unless instance.respond_to? :run
         raise DBGeni::PluginDoesNotRespondToRun
       end
-      instance.run(attrs)
+      instance.run(hook, attrs)
     end
 
   end
