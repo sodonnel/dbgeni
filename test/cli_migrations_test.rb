@@ -16,12 +16,8 @@ class TestCLIMigrations < Test::Unit::TestCase
     helper_mysql_single_environment_file
     helper_reinitialize_oracle
     helper_reinitialize_sqlite
-    if RUBY_PLATFORM != 'java'
-      @dbs = %w(sqlite oracle mysql)
-      helper_reinitialize_mysql
-    else
-      @dbs = %w(sqlite oracle)
-    end
+    helper_reinitialize_mysql
+    @dbs = %w(sqlite oracle mysql)
   end
 
   def teardown
