@@ -40,6 +40,7 @@ module DBGeni
     def initialize
       @migration_directory  = 'migrations'
       @code_dir             = 'code'
+      @plugin_dir           =  nil
       @db_type              = 'sqlite'
       @db_table             = 'dbgeni_migrations'
       @base_dir             = '.'
@@ -77,11 +78,10 @@ module DBGeni
       @base_directory = dir
       # If change the base directory, then unless migration dir is
       # an absolute path, it will need to change too.
-      if is_absolute_path?(@migration_dir)
-        # TODO - need to take off the actual migration directory and join to new base_dir
-      else
-        @migration_directory = File.join(@base_directory, @migration_directory)
-        @code_dir = File.join(@base_directory, @code_dir)
+      @migration_directory = File.join(@base_directory, @migration_directory) unless is_absolute_path?(@migration_dir)
+      @code_dir            = File.join(@base_directory, @code_dir)   unless is_absolute_path?(@code_dir)
+      if @plugin_dir
+        @plugin_dir          = File.join(@base_directory, @plugin_dir) unless is_absolute_path?(@plugin_dir)
       end
     end
 
@@ -210,6 +210,25 @@ module DBGeni
         end
       end
     end
+
+    def plugin_directory(*p)
+      if p.length == 0
+        @plugin_dir
+      else
+        if is_absolute_path?(p[0])
+          # it looks like an absolute path
+          @plugin_dir = p[0]
+        else
+          # it looks like a relative path
+          if @base_directory
+            @plugin_dir = File.join(@base_directory, p[0])
+          else
+            @plugin_dir = p[0]
+          end
+        end
+      end
+    end
+
 
     def database_type(*p)
       # TODO - consider putting validation here

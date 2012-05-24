@@ -17,8 +17,8 @@ module TestHelper
   ORA_HOST     = '127.0.0.1'
   ORA_PORT     = '1521'
 
-  MYSQL_USER     = 'sodonnel'
-  MYSQL_PASSWORD = 'sodonnel'
+  MYSQL_USER     = 'sodonnell'
+  MYSQL_PASSWORD = 'sodonnell'
   MYSQL_DB       = 'dbgenitest'
   MYSQL_HOSTNAME = '127.0.0.1'
   MYSQL_PORT     = '3306'

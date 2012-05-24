@@ -122,11 +122,32 @@ module DBGeni
     def apply_migration(migration, force=nil)
       ensure_initialized
       begin
+        run_plugin(:before_migration_up, migration)
         migration.apply!(@config, connection, force)
         @logger.info "Applied #{migration.to_s}"
       rescue DBGeni::MigrationApplyFailed
         @logger.error "Failed #{migration.to_s}. Errors in #{migration.logfile}\n\n#{migration.error_messages}\n\n"
         raise DBGeni::MigrationApplyFailed, migration.to_s
+      ensure
+        run_plugin(:after_migration_up, migration)
+      end
+    end
+
+    def run_plugin(hook, object)
+      pdir = @config.plugin_directory
+      if pdir && pdir != ''
+        unless @plugin_manager
+          @plugin_manager = DBGeni::Plugin.new
+          @plugin_manager.load_plugins(pdir)
+        end
+        @plugin_manager.run_plugins(hook,
+                                    {
+                                      :logger      => @logger,
+                                      :object      => object,
+                                      :environment => @config.env,
+                                      :connection  => connection
+                                    }
+                                    )
       end
     end
 

@@ -19,7 +19,7 @@ files.each do |f|
   next if (no_cli && f =~ /^cli/)
   next if (RUBY_PLATFORM != 'java' && f =~ /sybase/)
 #  next if (f =~ /sybase/)
-  next if (RUBY_PLATFORM != 'java' && f =~ /mysql/)
+#  next if (RUBY_PLATFORM != 'java' && f =~ /mysql/)
   puts f
   require File.join(current_dir, f)
 end

@@ -327,6 +327,64 @@ class TestConfig < Test::Unit::TestCase
   end
 
 
+  ########################
+  # PLUGIN_DIRECTORY #
+  ########################
+
+  def test_plugin_directory_defaults
+    cfg = DBGeni::Config.new
+    cfg.load("environment('foo') { }\n environment('bar') { }")
+    assert_equal(nil, cfg.plugin_directory)
+  end
+
+  def test_plugin_dir_settable_via_config
+    cfg = DBGeni::Config.new
+    cfg.load("plugin_directory 'other_dir'\nenvironment('foo') { }\n environment('bar') { }")
+    assert_equal('other_dir', cfg.plugin_directory)
+  end
+
+  def test_absolution_plugin_dir_not_modified_windows
+    cfg = DBGeni::Config.new
+    cfg.base_directory = "c:\\somedir\\"
+    # !! need to escape backslashes as they are escape character!
+    cfg.load("plugin_directory 'c:\\other_dir'\nenvironment('foo') { }\n environment('bar') { }")
+    assert_equal('c:\other_dir', cfg.plugin_directory)
+  end
+
+  def test_absolute_plugin_dir_not_modified_unix
+    cfg = DBGeni::Config.new
+    cfg.base_directory = "c:\\somedir\\"
+    cfg.load("plugin_directory '/other_dir'\nenvironment('foo') { }\n environment('bar') { }")
+    assert_equal('/other_dir', cfg.plugin_directory)
+  end
+
+  def test_relative_plugin_dir_added_to_base_windows
+    cfg = DBGeni::Config.new
+    cfg.base_directory = "c:\\somedir\\"
+    cfg.load("plugin_directory 'other_dir'\nenvironment('foo') { }\n environment('bar') { }")
+    if Kernel.is_windows?
+      assert_equal("c:\\somedir\\other_dir", cfg.plugin_directory)
+    end
+  end
+
+  def test_relative_plugin_dir_added_to_base_unix
+    cfg = DBGeni::Config.new
+    cfg.base_directory = '/somedir'
+    cfg.load("plugin_directory 'other_dir'\nenvironment('foo') { }\n environment('bar') { }")
+    assert_equal('/somedir/other_dir', cfg.plugin_directory)
+  end
+
+  def test_plugin_dir_changes_when_base_dir_changed
+    cfg = DBGeni::Config.new
+    cfg.plugin_directory 'plugins'
+    cfg.base_directory = '/somedir'
+    assert_equal('/somedir/plugins', cfg.plugin_directory)
+  end
+
+  #################
+  # End DSL tests #
+  #################
+
   def test_config_file_can_load_other_relative_file
     File.open("#{TestHelper::TEMP_DIR}/simple.conf", 'w') do |f|
       f.puts "database_type 'sqlite'
