@@ -61,7 +61,6 @@ module DBGeni
       end
     end
 
-
     def run_plugin(klass, hook, attrs)
       instance = klass.new
       unless instance.respond_to? :run

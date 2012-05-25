@@ -3,6 +3,8 @@ require 'dbgeni/blank_slate'
 require 'dbgeni/config'
 require 'dbgeni/environment'
 require 'dbgeni/file_converter'
+require 'dbgeni/base_migrations'
+require 'dbgeni/base_code'
 require 'dbgeni/migration_list'
 require 'dbgeni/migration'
 require 'dbgeni/code_list'
@@ -21,6 +23,11 @@ module DBGeni
   class Base
     attr_reader :config
    # attr_reader :migrations
+
+    # This pulls in all the migration related methods - listing, applying, rolling back
+    include DBGeni::BaseModules::Migrations
+    # This pulls in all the code related methods - listing, applying, removing
+    include DBGeni::BaseModules::Code
 
     def self.installer_for_environment(config_file, environment_name=nil)
       installer = self.new(config_file)
@@ -54,84 +61,6 @@ module DBGeni
       end
     end
 
-    ######################
-    # Listing Migrations #
-    ######################
-
-    def migrations
-      @migration_list ||= DBGeni::MigrationList.new(@config.migration_directory) unless @migration_list
-      @migration_list.migrations
-    end
-
-    def outstanding_migrations
-      ensure_initialized
-      migrations
-      @migration_list.outstanding(@config, connection)
-    end
-
-    def applied_migrations
-      ensure_initialized
-      migrations
-      @migration_list.applied(@config, connection)
-    end
-
-    def applied_and_broken_migrations
-      ensure_initialized
-      migrations
-      @migration_list.applied_and_broken(@config, connection)
-    end
-
-    #######################
-    # Applying Migrations #
-    #######################
-
-    def apply_all_migrations(force=nil)
-      ensure_initialized
-      migrations = outstanding_migrations
-      if migrations.length == 0
-        raise DBGeni::NoOutstandingMigrations
-      end
-      migrations.each do |m|
-        apply_migration(m, force)
-      end
-    end
-
-    def apply_next_migration(force=nil)
-      ensure_initialized
-      migrations = outstanding_migrations
-      if migrations.length == 0
-        raise DBGeni::NoOutstandingMigrations
-      end
-      apply_migration(migrations.first, force)
-    end
-
-    def apply_until_migration(migration_name, force=nil)
-      ensure_initialized
-      milestone = Migration.initialize_from_internal_name(@config.migration_directory, migration_name)
-      outstanding = outstanding_migrations
-      index = outstanding.index milestone
-      unless index
-        # milestone migration doesn't exist or is already applied.
-        raise MigrationNotOutstanding, milestone.to_s
-      end
-      0.upto(index) do |i|
-        apply_migration(outstanding[i], force)
-      end
-    end
-
-    def apply_migration(migration, force=nil)
-      ensure_initialized
-      begin
-        run_plugin(:before_migration_up, migration)
-        migration.apply!(@config, connection, force)
-        @logger.info "Applied #{migration.to_s}"
-      rescue DBGeni::MigrationApplyFailed
-        @logger.error "Failed #{migration.to_s}. Errors in #{migration.logfile}\n\n#{migration.error_messages}\n\n"
-        raise DBGeni::MigrationApplyFailed, migration.to_s
-      ensure
-        run_plugin(:after_migration_up, migration)
-      end
-    end
 
     def run_plugin(hook, object)
       pdir = @config.plugin_directory
@@ -151,159 +80,6 @@ module DBGeni
       end
     end
 
-    ###########################
-    # Rolling back migrations #
-    ###########################
-
-    def rollback_all_migrations(force=nil)
-      ensure_initialized
-      migrations = applied_and_broken_migrations.reverse
-      if migrations.length == 0
-        raise DBGeni::NoAppliedMigrations
-      end
-      migrations.each do |m|
-        rollback_migration(m, force)
-      end
-    end
-
-    def rollback_last_migration(force=nil)
-      ensure_initialized
-      migrations = applied_and_broken_migrations
-      if migrations.length == 0
-        raise DBGeni::NoAppliedMigrations
-      end
-      # the most recent one is at the end of the array!!
-      rollback_migration(migrations.last, force)
-    end
-
-    def rollback_until_migration(migration_name, force=nil)
-      ensure_initialized
-      milestone = Migration.initialize_from_internal_name(@config.migration_directory, migration_name)
-      applied = applied_and_broken_migrations.reverse
-      index = applied.index milestone
-      unless index
-        # milestone migration doesn't exist or is already applied.
-        raise DBGeni::MigrationNotApplied, milestone.to_s
-      end
-      # The minus 1 is taken off index as we don't want to rollback the specified migration
-      0.upto(index-1) do |i|
-        rollback_migration(applied[i], force)
-      end
-    end
-
-    def rollback_migration(migration, force=nil)
-      ensure_initialized
-      begin
-        migration.rollback!(@config, connection, force)
-        @logger.info  "Rolledback #{migration.to_s}"
-      rescue DBGeni::MigrationApplyFailed
-        @logger.error "Failed #{migration.to_s}. Errors in #{migration.logfile}\n\n#{migration.error_messages}\n\n"
-        raise DBGeni::MigrationApplyFailed, migration.to_s
-      end
-    end
-
-    ########################
-    # Listing Code Modules #
-    ########################
-
-    def code
-      @code_list ||= DBGeni::CodeList.new(@config.code_dir)
-      @code_list.code
-    end
-
-    def current_code
-      ensure_initialized
-      code
-      @code_list.current(@config, connection)
-    end
-
-    def outstanding_code
-      ensure_initialized
-      code
-      @code_list.outstanding(@config, connection)
-    end
-
-    ######################################
-    # Applying and removing code modules #
-    ######################################
-
-    def apply_all_code(force=nil)
-      ensure_initialized
-      code_files = code
-      if code_files.length == 0
-        raise DBGeni::NoOutstandingCode
-      end
-      code_files.each do |c|
-        apply_code(c, true) #force)
-      end
-    end
-
-    def apply_outstanding_code(force=nil)
-      ensure_initialized
-      code_files = outstanding_code
-      if code_files.length == 0
-        raise DBGeni::NoOutstandingCode
-      end
-      code_files.each do |c|
-        apply_code(c, force)
-      end
-    end
-
-    def apply_code(code_obj, force=nil)
-      ensure_initialized
-      begin
-        code_obj.apply!(@config, connection, force)
-        if code_obj.error_messages
-          # Oracle can apply procs that still have errors. This is expected. Other databases
-          # have errors raised for invalid procs, except when force is on, so this logic is
-          # for when they are being forced through.
-          if @config.db_type == 'oracle'
-            @logger.info "Applied #{code_obj.to_s} (with errors)\n\n#{code_obj.error_messages}\nFull errors in #{code_obj.logfile}\n\n"
-          else
-            @logger.error "Failed to apply #{code_obj.filename}. Errors in #{code_obj.logfile}\n\n#{code_obj.error_messages}\n\n"
-          end
-        else
-          @logger.info "Applied #{code_obj.to_s}"
-        end
-      rescue DBGeni::CodeApplyFailed => e
-        # The only real way code can get here is if the user had insufficient privs
-        # to create the proc, or there was other bad stuff in the proc file.
-        # In this case, dbgeni should stop - but also treat the error like a migration error
-        # as the error message will be in the logfile in the format standard SQL errors are.
-        @logger.error "Failed to apply #{code_obj.filename}. Errors in #{code_obj.logfile}\n\n#{code_obj.error_messages}\n\n"
-        raise DBGeni::CodeApplyFailed, e.to_s
-      end
-    end
-
-    def remove_all_code(force=nil)
-      ensure_initialized
-      code_files = code
-      if code_files.length == 0
-        raise DBGeni::NoCodeFilesExist
-      end
-      code_files.each do |c|
-        remove_code(c, force)
-      end
-    end
-
-    def remove_code(code_obj, force=nil)
-      ensure_initialized
-      begin
-        code_obj.remove!(@config, connection, force)
-        @logger.info "Removed #{code_obj.to_s}"
-      rescue DBGeni::CodeRemoveFailed => e
-        # Not sure if the code can even get here. Many if timeout waiting for lock on object?
-        # In this case, dbgeni should stop - but also treat the error like a migration error
-
-        # TODO - not sure this is even correct - dropping code doesn't create a logfile ...
-        @logger.error "Failed to remove #{code_obj.filename}. Errors in #{code_obj.logfile}"
-        raise DBGeni::CodeRemoveFailed
-      end
-    end
-
-    ###########################
-    # Various utility methods #
-    ###########################
 
     def connect
       raise DBGeni::NoEnvironmentSelected unless selected_environment_name
