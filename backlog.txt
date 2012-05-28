@@ -6,6 +6,7 @@ Plugins
   - Add for rollback
   - Add for code up
   - Add for code remove
+  - Tests to ensure migrations are being called when they are supposed to be
 Hashing for DOS vs Unix line endings
 SQL script parameters
 Think - should missing code files be highlighted? Should there be a missing command for code?

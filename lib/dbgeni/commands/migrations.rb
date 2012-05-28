@@ -141,11 +141,7 @@ begin
       # parameter name format
       files = ARGV.select{ |f| f =~ /^(\d{12})::/ }
       files.unshift sub_command
-      migrations = files.map {|f| DBGeni::Migration.initialize_from_internal_name(installer.config.migration_directory, f)}
-      # Now attempt to run each migration ... forwards for apply
-      migrations.sort{|x,y| x.migration_file <=> y.migration_file}.each do |m|
-        installer.apply_migration(m, $force)
-      end
+      installer.apply_list_of_migrations(files, $force)
     else
       logger.error "#{sub_command} is not a valid command"
     end
@@ -192,11 +188,12 @@ begin
       # parameter name format
       files = ARGV.select{ |f| f =~ /^(\d{12})::/ }
       files.unshift sub_command
-      migrations = files.map {|f| DBGeni::Migration.initialize_from_internal_name(installer.config.migration_directory, f)}
-      # Now attempt to run each migration ... backwards for rollback
-      migrations.sort{|x,y| y.migration_file <=> x.migration_file}.each do |m|
-        installer.rollback_migration(m, $force)
-      end
+      installer.rollback_list_of_migrations(files, $force)
+#      migrations = files.map {|f| DBGeni::Migration.initialize_from_internal_name(installer.config.migration_directory, f)}
+#      # Now attempt to run each migration ... backwards for rollback
+#      migrations.sort{|x,y| y.migration_file <=> x.migration_file}.each do |m|
+#        installer.rollback_migration(m, $force)
+#      end
     else
       logger.error "#{sub_command} is not a valid command"
     end

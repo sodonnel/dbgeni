@@ -23,6 +23,12 @@ module DBGeni
         @code_list.outstanding(@config, connection)
       end
 
+      def list_of_code(list)
+        ensure_initialized
+        code
+        @code_list.list(list, @config, connection)
+      end
+
       # Applying
 
       def apply_all_code(force=nil)
@@ -31,9 +37,7 @@ module DBGeni
         if code_files.length == 0
           raise DBGeni::NoOutstandingCode
         end
-        code_files.each do |c|
-          apply_code(c, true) #force)
-        end
+        apply_code_list(code_files, true)
       end
 
       def apply_outstanding_code(force=nil)
@@ -42,9 +46,13 @@ module DBGeni
         if code_files.length == 0
           raise DBGeni::NoOutstandingCode
         end
-        code_files.each do |c|
-          apply_code(c, force)
-        end
+        apply_code_list(code_files, force)
+      end
+
+      def apply_list_of_code(object_names, force=nil)
+        ensure_initialized
+        code_files = list_of_code(object_names)
+        apply_code_list(code_files, force)
       end
 
       def apply_code(code_obj, force=nil)
@@ -79,9 +87,13 @@ module DBGeni
         if code_files.length == 0
           raise DBGeni::NoCodeFilesExist
         end
-        code_files.each do |c|
-          remove_code(c, force)
-        end
+        apply_code_list(code_files, force, false)
+      end
+
+      def remove_list_of_code(object_names, force=nil)
+        ensure_initialized
+        code_files = list_of_code(object_names)
+        apply_code_list(code_files, force, false)
       end
 
       def remove_code(code_obj, force=nil)
@@ -99,6 +111,19 @@ module DBGeni
         end
       end
 
+      private
+
+      def apply_code_list(code_list, force, up=true)
+        run_plugin(:before_modifying_code, code_list)
+        code_list.each do |c|
+          if up
+            apply_code(c, force)
+          else
+            remove_code(c, force)
+          end
+        end
+        run_plugin(:after_modifying_code, code_list)
+      end
 
     end
   end

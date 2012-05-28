@@ -22,6 +22,21 @@ module DBGeni
       }
     end
 
+    def list(list_of_code, config, connection)
+      valid_code = []
+      list_of_code.each do |c|
+        code_obj = Code.new(config.code_dir, c)
+        if i = @code.index(code_obj)
+          valid_code.push @code[i]
+        else
+          raise DBGeni::CodeFileNotExist, c
+        end
+      end
+      valid_code.sort {|x,y|
+        x.filename <=> y.filename
+      }
+    end
+
     private
 
     def file_list

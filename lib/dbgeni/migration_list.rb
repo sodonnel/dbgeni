@@ -31,6 +31,22 @@ module DBGeni
                              DBGeni::Migration::PENDING)
     end
 
+    def list(list_of_migrations, config, connection)
+      valid_migrations = []
+      list_of_migrations.each do |m|
+        mig_obj = Migration.initialize_from_internal_name(config.migration_directory, m)
+        if i = @migrations.index(mig_obj)
+          valid_migrations.push @migrations[i]
+        else
+          raise DBGeni::MigrationFileNotExist, m
+        end
+      end
+      valid_migrations.sort {|x,y|
+        x.migration_file <=> y.migration_file
+      }
+    end
+
+
     def migrations_with_status(config, connection, *args)
       migrations = @migrations.select{|m|
         args.include? m.status(config, connection)

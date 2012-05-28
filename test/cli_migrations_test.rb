@@ -482,13 +482,10 @@ class TestCLIMigrations < Test::Unit::TestCase
     end
   end
 
-  # Would expect this to raise an error indicating the file does not exist,
-  # but it doesn't even get to that point as it doesn't get past the 'not applied'
-  # check.
   def test_apply_specific_rollback_when_not_exist
     @dbs.each do |db|
       response = `#{CLI} migrations rollback 201108190000::not_there -c #{TEMP_DIR}/#{db}.conf`
-      assert_match(/has not been applied so cannot be rolledback/, response)
+      assert_match(/The migration file .+ does not exist/, response)
     end
   end
 

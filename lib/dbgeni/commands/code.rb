@@ -94,11 +94,7 @@ begin
       # parameter name format
       files = ARGV.select{ |f| f =~ /\.(#{DBGeni::Code::EXT_MAP.keys.join('|')})$/ }
       files.unshift sub_command
-      code = files.map {|f| DBGeni::Code.new(installer.config.code_dir, f)}
-      # Now attempt to run each code file in
-      code.each do |c|
-        installer.apply_code(c, $force)
-      end
+      installer.apply_list_of_code(files, $force)
     else
       logger.error "#{sub_command} is not a valid command"
     end
@@ -111,11 +107,7 @@ begin
     when /\.(#{DBGeni::Code::EXT_MAP.keys.join('|')})$/
       files = ARGV.select{ |f| f =~ /\.(#{DBGeni::Code::EXT_MAP.keys.join('|')})$/ }
       files.unshift sub_command
-      code = files.map {|f| DBGeni::Code.new(installer.config.code_dir, f)}
-      # Now attempt to remove each code file
-      code.each do |c|
-        installer.remove_code(c, $force)
-      end
+      installer.remove_list_of_code(files, $force)
     else
       logger.error "#{sub_command} is not a valid command"
     end

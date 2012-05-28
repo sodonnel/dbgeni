@@ -22,6 +22,7 @@ class TestCodeList < Test::Unit::TestCase
     end
     @connection = mock('DBGeni::Connector::Oracle')
     @config     = mock('DBGeni::Config')
+    @config.stubs(:code_dir).returns(@code_directory)
   end
 
   def teardown
@@ -93,6 +94,21 @@ class TestCodeList < Test::Unit::TestCase
     assert_equal(outstanding_code[0].filename, '001_p5.prc')
     assert_equal(outstanding_code[1].filename, 'p1.prc')
   end
+
+  def test_list_of_code_selects_correct_code
+    c = DBGeni::CodeList.new(@code_directory)
+    code = c.list(['p1.prc', 'p4.fnc'], @config, @connection)
+    assert_equal(code[0].filename, 'p1.prc')
+    assert_equal(code[1].filename, 'p4.fnc')
+  end
+
+  def test_list_of_code_throws_when_a_code_file_does_not_exist
+    c = DBGeni::CodeList.new(@code_directory)
+    assert_raises DBGeni::CodeFileNotExist do
+      code = c.list(['p1.prc', 'p4.fnc', 'notexist.prc'], @config, @connection)
+    end
+  end
+
 
 end
 

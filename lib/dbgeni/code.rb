@@ -31,6 +31,14 @@ module DBGeni
       set_name
     end
 
+    def ==(other)
+      if @directory == other.directory && @type == other.type && @name == other.name
+        true
+      else
+        false
+      end
+    end
+
     def db_hash(config, connection)
       results = connection.execute("select sequence_or_hash
                                     from #{config.db_table}

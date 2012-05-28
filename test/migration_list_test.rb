@@ -22,6 +22,7 @@ class TestMigrationList < Test::Unit::TestCase
     end
     @connection = mock('DBGeni::Connector::Sqlite')
     @config     = mock('DBGeni::Config')
+    @config.stubs(:migration_directory).returns(@migration_directory)
   end
 
   def teardown
@@ -118,6 +119,19 @@ class TestMigrationList < Test::Unit::TestCase
     assert_equal(0, migs.length)
   end
 
+  def test_migration_list_returns_correct_migrations
+    ml = DBGeni::MigrationList.new(@migration_directory)
+    list = ml.list(['201101010000::test_migration_one', '201101020000::test_migration_two'], @config, @connection)
+    assert_equal('201101010000_up_test_migration_one.sql', list[0].migration_file)
+    assert_equal('201101020000_up_test_migration_two.sql', list[1].migration_file)
+  end
+
+  def test_migration_list_throws_when_migration_not_exist
+    ml = DBGeni::MigrationList.new(@migration_directory)
+    assert_raises DBGeni::MigrationFileNotExist do
+      list = ml.list(['201101010000::test_migration_not_there', '201101020000::test_migration_two'], @config, @connection)
+    end
+  end
 
 end
 

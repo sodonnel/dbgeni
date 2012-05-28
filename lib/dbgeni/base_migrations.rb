@@ -31,6 +31,12 @@ module DBGeni
         @migration_list.applied_and_broken(@config, connection)
       end
 
+      def list_of_migrations(list)
+        ensure_initialized
+        migrations
+        @migration_list.list(list, @config, connection)
+      end
+
       # Applying
 
       def apply_all_migrations(force=nil)
@@ -39,9 +45,7 @@ module DBGeni
         if migrations.length == 0
           raise DBGeni::NoOutstandingMigrations
         end
-        migrations.each do |m|
-          apply_migration(m, force)
-        end
+        apply_migration_list(migrations, force)
       end
 
       def apply_next_migration(force=nil)
@@ -50,7 +54,7 @@ module DBGeni
         if migrations.length == 0
           raise DBGeni::NoOutstandingMigrations
         end
-        apply_migration(migrations.first, force)
+        apply_migration_list([migrations.first], force)
       end
 
       def apply_until_migration(migration_name, force=nil)
@@ -62,10 +66,15 @@ module DBGeni
           # milestone migration doesn't exist or is already applied.
           raise MigrationNotOutstanding, milestone.to_s
         end
-        0.upto(index) do |i|
-          apply_migration(outstanding[i], force)
-        end
+        apply_migration_list(outstanding[0..index], force)
       end
+
+      def apply_list_of_migrations(migration_list, force=nil)
+        ensure_initialized
+        migration_files = list_of_migrations(migration_list)
+        apply_migration_list(migration_files, force)
+      end
+
 
       def apply_migration(migration, force=nil)
         ensure_initialized
@@ -89,9 +98,7 @@ module DBGeni
         if migrations.length == 0
           raise DBGeni::NoAppliedMigrations
         end
-        migrations.each do |m|
-          rollback_migration(m, force)
-        end
+        apply_migration_list(migrations, force, false)
       end
 
       def rollback_last_migration(force=nil)
@@ -101,7 +108,7 @@ module DBGeni
           raise DBGeni::NoAppliedMigrations
         end
         # the most recent one is at the end of the array!!
-        rollback_migration(migrations.last, force)
+        apply_migration_list([migrations.last], force, false)
       end
 
       def rollback_until_migration(migration_name, force=nil)
@@ -113,10 +120,15 @@ module DBGeni
           # milestone migration doesn't exist or is already applied.
           raise DBGeni::MigrationNotApplied, milestone.to_s
         end
-        # The minus 1 is taken off index as we don't want to rollback the specified migration
-        0.upto(index-1) do |i|
-          rollback_migration(applied[i], force)
-        end
+        # Note the triple ... in the range to exclude the end element
+        # This is because we don't want to rollback the final migration as its upto but not including
+        apply_migration_list(applied[0...index], force, false)
+      end
+
+      def rollback_list_of_migrations(migration_list, force=nil)
+        ensure_initialized
+        migration_files = list_of_migrations(migration_list).reverse
+        apply_migration_list(migration_files, force, false)
       end
 
       def rollback_migration(migration, force=nil)
@@ -128,6 +140,25 @@ module DBGeni
           @logger.error "Failed #{migration.to_s}. Errors in #{migration.logfile}\n\n#{migration.error_messages}\n\n"
           raise DBGeni::MigrationApplyFailed, migration.to_s
         end
+      end
+
+      private
+
+      def apply_migration_list(migration_list, force, up=true)
+        # TODO - conflicted about how to handle exceptions.
+        # If before_running_migrations throws an exception no
+        # migrations will be run.
+        # If a migration throws an exception, then after_running_migrations
+        # will not be run.
+        run_plugin(:before_running_migrations, migration_list)
+        migration_list.each do |m|
+          if up
+            apply_migration(m, force)
+          else
+            rollback_migration(m, force)
+          end
+        end
+        run_plugin(:after_running_migrations, migration_list)
       end
 
     end
