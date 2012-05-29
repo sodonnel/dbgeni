@@ -58,6 +58,7 @@ module DBGeni
       def apply_code(code_obj, force=nil)
         ensure_initialized
         begin
+          run_plugin(:before_code_apply, code_obj)
           code_obj.apply!(@config, connection, force)
           if code_obj.error_messages
             # Oracle can apply procs that still have errors. This is expected. Other databases
@@ -71,6 +72,7 @@ module DBGeni
           else
             @logger.info "Applied #{code_obj.to_s}"
           end
+          run_plugin(:after_code_apply, code_obj)
         rescue DBGeni::CodeApplyFailed => e
           # The only real way code can get here is if the user had insufficient privs
           # to create the proc, or there was other bad stuff in the proc file.
@@ -99,8 +101,10 @@ module DBGeni
       def remove_code(code_obj, force=nil)
         ensure_initialized
         begin
+          run_plugin(:before_code_remove, code_obj)
           code_obj.remove!(@config, connection, force)
           @logger.info "Removed #{code_obj.to_s}"
+          run_plugin(:after_code_remove, code_obj)
         rescue DBGeni::CodeRemoveFailed => e
           # Not sure if the code can even get here. Many if timeout waiting for lock on object?
           # In this case, dbgeni should stop - but also treat the error like a migration error

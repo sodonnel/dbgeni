@@ -82,11 +82,10 @@ module DBGeni
           run_plugin(:before_migration_up, migration)
           migration.apply!(@config, connection, force)
           @logger.info "Applied #{migration.to_s}"
+          run_plugin(:after_migration_up, migration)
         rescue DBGeni::MigrationApplyFailed
           @logger.error "Failed #{migration.to_s}. Errors in #{migration.logfile}\n\n#{migration.error_messages}\n\n"
           raise DBGeni::MigrationApplyFailed, migration.to_s
-        ensure
-          run_plugin(:after_migration_up, migration)
         end
       end
 
@@ -134,8 +133,10 @@ module DBGeni
       def rollback_migration(migration, force=nil)
         ensure_initialized
         begin
+          run_plugin(:before_migration_down, migration)
           migration.rollback!(@config, connection, force)
           @logger.info  "Rolledback #{migration.to_s}"
+          run_plugin(:after_migration_down, migration)
         rescue DBGeni::MigrationApplyFailed
           @logger.error "Failed #{migration.to_s}. Errors in #{migration.logfile}\n\n#{migration.error_messages}\n\n"
           raise DBGeni::MigrationApplyFailed, migration.to_s

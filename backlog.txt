@@ -3,14 +3,8 @@ Better Logging
 ----------------------------------------------
 Plugins
   - Catch Errors with plugin dir in command interface
-  - Add for rollback
-  - Add for code up
-  - Add for code remove
-  - Tests to ensure migrations are being called when they are supposed to be
-    - migrations_start
-    - migrations end
-    - code start
-    - code end
+  - Add params to env
+  - Add steps to run before migration / code eg, think editions
 
 Hashing for DOS vs Unix line endings
 SQL script parameters

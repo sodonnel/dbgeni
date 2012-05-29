@@ -229,8 +229,58 @@ class TestDBGeniBaseProcOracle < Test::Unit::TestCase
     end
   end
 
+  def test_plugins_fired_before_and_after_code_apply
+    pre = Class.new
+    pre.class_eval do
+      before_code_apply
 
+      def run(hook, attrs)
+      end
+    end
 
+    after = Class.new
+    after.class_eval do
+      after_code_apply
+
+      def run(hook, attrs)
+      end
+    end
+
+    pre.any_instance.expects(:run)
+    after.any_instance.expects(:run)
+    # override the load plugins method as the class above is loading them.
+    DBGeni::Plugin.any_instance.stubs(:load_plugins)
+    DBGeni::Config.any_instance.stubs(:plugin_directory).returns('plugins')
+
+    @installer.apply_list_of_code(['p1.prc'])
+  end
+
+  def test_plugins_fired_before_and_after_code_remove
+    pre = Class.new
+    pre.class_eval do
+      before_code_remove
+
+      def run(hook, attrs)
+      end
+    end
+
+    after = Class.new
+    after.class_eval do
+      after_code_remove
+
+      def run(hook, attrs)
+      end
+    end
+
+    pre.any_instance.expects(:run)
+    after.any_instance.expects(:run)
+    # override the load plugins method as the class above is loading them.
+    DBGeni::Plugin.any_instance.stubs(:load_plugins)
+    DBGeni::Config.any_instance.stubs(:plugin_directory).returns('plugins')
+
+    @installer.apply_list_of_code(['p1.prc'])
+    @installer.remove_list_of_code(['p1.prc'])
+  end
 
   private
 

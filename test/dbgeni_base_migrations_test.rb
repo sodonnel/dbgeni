@@ -453,11 +453,71 @@ class TestDBGeniBaseMigrations < Test::Unit::TestCase
     @installer = DBGeni::Base.installer_for_environment(helper_sqlite_single_environment_file, 'development')
     @installer.initialize_database
     migration = helper_good_sqlite_migration
-    @installer.apply_all_migrations(migration)
+    @installer.apply_all_migrations
     assert_nothing_raised do
       @installer.rollback_all_migrations
     end
   end
 
+  def test_plugin_invoked_before_and_after_migration_up
+    pre = Class.new
+    pre.class_eval do
+      before_migration_up
+
+      def run(hook, attrs)
+      end
+    end
+
+    after = Class.new
+    after.class_eval do
+      after_migration_up
+
+      def run(hook, attrs)
+      end
+    end
+
+    pre.any_instance.expects(:run)
+    after.any_instance.expects(:run)
+    # override the load plugins method as the class above is loading them.
+    DBGeni::Plugin.any_instance.stubs(:load_plugins)
+    DBGeni::Config.any_instance.stubs(:plugin_directory).returns('plugins')
+
+
+    @installer = DBGeni::Base.installer_for_environment(helper_sqlite_single_environment_file, 'development')
+    @installer.initialize_database
+    migration = helper_good_sqlite_migration
+    @installer.apply_next_migration
+  end
+
+  def test_plugin_invoked_before_and_after_migration_down
+    pre = Class.new
+    pre.class_eval do
+      before_migration_down
+
+      def run(hook, attrs)
+      end
+    end
+
+    after = Class.new
+    after.class_eval do
+      after_migration_down
+
+      def run(hook, attrs)
+      end
+    end
+
+    pre.any_instance.expects(:run)
+    after.any_instance.expects(:run)
+    # override the load plugins method as the class above is loading them.
+    DBGeni::Plugin.any_instance.stubs(:load_plugins)
+    DBGeni::Config.any_instance.stubs(:plugin_directory).returns('plugins')
+
+
+    @installer = DBGeni::Base.installer_for_environment(helper_sqlite_single_environment_file, 'development')
+    @installer.initialize_database
+    migration = helper_good_sqlite_migration
+    @installer.apply_next_migration
+    @installer.rollback_last_migration
+  end
 
 end

@@ -62,7 +62,7 @@ module DBGeni
     end
 
 
-    def run_plugin(hook, object, params=nil)
+    def run_plugin(hook, object, params={})
       pdir = @config.plugin_directory
       if pdir && pdir != ''
         unless @plugin_manager
