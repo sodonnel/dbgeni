@@ -116,10 +116,11 @@ module DBGeni
               query.setInt(i+1, b)
             end
           end
-          results = Array.new
+          results = nil
           unless sql =~ /^\s*select/i
             query.execute()
           else
+            results = Array.new
             rset = query.execute_query()
             cols = rset.get_meta_data.get_column_count
             while(r = rset.next) do

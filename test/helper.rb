@@ -11,8 +11,8 @@ module TestHelper
   TEMP_DIR = File.expand_path(File.join(File.dirname(__FILE__), "temp"))
   SQLITE_DB_NAME  = 'sqlite.dbb'
 
-  ORA_USER     = 'sodonnel'
-  ORA_PASSWORD = 'sodonnel'
+  ORA_USER     = 'sodonnell'
+  ORA_PASSWORD = 'sodonnell'
   ORA_DB       = 'tuned' #'local11gr2' # If running in jruby this is service, not TNS Name
   ORA_HOST     = '127.0.0.1'
   ORA_PORT     = '1521'

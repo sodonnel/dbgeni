@@ -49,4 +49,9 @@ class TestOracleConnector < Test::Unit::TestCase
     results = @conn.execute(sql)
     assert_equal(0, results.length)
   end
+
+  def test_can_execute_plsql_block
+    results = @conn.execute('begin null; end;')
+    assert_equal(nil, results)
+  end
 end
