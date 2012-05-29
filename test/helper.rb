@@ -17,8 +17,8 @@ module TestHelper
   ORA_HOST     = '127.0.0.1'
   ORA_PORT     = '1521'
 
-  MYSQL_USER     = 'sodonnell'
-  MYSQL_PASSWORD = 'sodonnell'
+  MYSQL_USER     = 'sodonnel'
+  MYSQL_PASSWORD = 'sodonnel'
   MYSQL_DB       = 'dbgenitest'
   MYSQL_HOSTNAME = '127.0.0.1'
   MYSQL_PORT     = '3306'
@@ -165,6 +165,8 @@ module TestHelper
     end
     filename
   end
+
+
 
   def helper_sqlite_single_environment_file_with_errors
     filename = "#{TEMP_DIR}/sqlite.conf"

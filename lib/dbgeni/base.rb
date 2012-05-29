@@ -62,7 +62,7 @@ module DBGeni
     end
 
 
-    def run_plugin(hook, object)
+    def run_plugin(hook, object, params=nil)
       pdir = @config.plugin_directory
       if pdir && pdir != ''
         unless @plugin_manager
@@ -75,7 +75,7 @@ module DBGeni
                                       :object      => object,
                                       :environment => @config.env,
                                       :connection  => connection
-                                    }
+                                    }.merge!(params)
                                     )
       end
     end

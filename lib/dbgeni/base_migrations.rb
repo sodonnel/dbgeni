@@ -150,7 +150,10 @@ module DBGeni
         # migrations will be run.
         # If a migration throws an exception, then after_running_migrations
         # will not be run.
-        run_plugin(:before_running_migrations, migration_list)
+        params = {
+          :operation => up == true ? 'apply' : 'remove'
+        }
+        run_plugin(:before_running_migrations, migration_list, params)
         migration_list.each do |m|
           if up
             apply_migration(m, force)
@@ -158,7 +161,7 @@ module DBGeni
             rollback_migration(m, force)
           end
         end
-        run_plugin(:after_running_migrations, migration_list)
+        run_plugin(:after_running_migrations, migration_list, params)
       end
 
     end

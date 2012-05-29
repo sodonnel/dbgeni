@@ -4,6 +4,7 @@ $:.unshift File.expand_path(File.dirname(__FILE__))
 require 'helper'
 require "dbgeni"
 require 'test/unit'
+require 'mocha'
 
 
 class TestDBGeniBaseProcOracle < Test::Unit::TestCase
@@ -165,6 +166,70 @@ class TestDBGeniBaseProcOracle < Test::Unit::TestCase
     end
     assert_equal(5, @installer.outstanding_code.length)
   end
+
+  ######### PLUGINS ##########
+
+  def test_code_start_and_end_plugins_invoked_applying_code
+    pre = Class.new
+    pre.class_eval do
+      before_modifying_code
+
+      def run(hook, attrs)
+      end
+    end
+
+    after = Class.new
+    after.class_eval do
+      after_modifying_code
+
+      def run(hook, attrs)
+      end
+    end
+
+    pre.any_instance.expects(:run).twice
+    after.any_instance.expects(:run).twice
+    # override the load plugins method as the class above is loading them.
+    DBGeni::Plugin.any_instance.stubs(:load_plugins)
+    DBGeni::Config.any_instance.stubs(:plugin_directory).returns('plugins')
+
+
+    assert_nothing_raised do
+      @installer.apply_all_code
+      @installer.remove_all_code
+    end
+  end
+
+  def test_code_start_and_end_plugins_invoked_applying_and_removing_code
+    pre = Class.new
+    pre.class_eval do
+      before_modifying_code
+
+      def run(hook, attrs)
+      end
+    end
+
+    after = Class.new
+    after.class_eval do
+      after_modifying_code
+
+      def run(hook, attrs)
+      end
+    end
+
+    pre.any_instance.expects(:run).twice
+    after.any_instance.expects(:run).twice
+    # override the load plugins method as the class above is loading them.
+    DBGeni::Plugin.any_instance.stubs(:load_plugins)
+    DBGeni::Config.any_instance.stubs(:plugin_directory).returns('plugins')
+
+
+    assert_nothing_raised do
+      @installer.apply_all_code
+      @installer.remove_all_code
+    end
+  end
+
+
 
 
   private

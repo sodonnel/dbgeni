@@ -4,6 +4,7 @@ $:.unshift File.expand_path(File.dirname(__FILE__))
 require 'helper'
 require "dbgeni"
 require 'test/unit'
+require 'mocha'
 
 class TestDBGeniBaseMigrations < Test::Unit::TestCase
 
@@ -18,6 +19,8 @@ class TestDBGeniBaseMigrations < Test::Unit::TestCase
     if @installer
       @installer.disconnect
     end
+    DBGeni::Plugin.reset
+    Mocha::Mockery.instance.stubba.unstub_all
   end
 
   ###################
@@ -386,6 +389,74 @@ class TestDBGeniBaseMigrations < Test::Unit::TestCase
     assert_equal(2, @installer.applied_migrations.length)
     assert_equal(2, @installer.outstanding_migrations.length)
     assert_equal('201108190000::test_migration', @installer.applied_migrations[0].to_s)
+  end
+
+
+  ###### PLUGIN TESTS #######
+
+  def test_migration_start_and_end_plugin_called_on_apply_migrations
+    # Register a plugin for before running migrations
+    pre = Class.new
+    pre.class_eval do
+      before_running_migrations
+
+      def run(hook, attrs)
+      end
+    end
+
+    after = Class.new
+    after.class_eval do
+      after_running_migrations
+
+      def run(hook, attrs)
+      end
+    end
+
+    pre.any_instance.expects(:run)
+    after.any_instance.expects(:run)
+    # override the load plugins method as the class above is loading them.
+    DBGeni::Plugin.any_instance.stubs(:load_plugins)
+    DBGeni::Config.any_instance.stubs(:plugin_directory).returns('plugins')
+
+    @installer = DBGeni::Base.installer_for_environment(helper_sqlite_single_environment_file, 'development')
+    @installer.initialize_database
+    migration = helper_good_sqlite_migration
+    assert_nothing_raised do
+      @installer.apply_all_migrations
+    end
+  end
+
+
+  def test_migration_start_and_end_plugin_called_on_rollback_migrations
+    pre = Class.new
+    pre.class_eval do
+      before_running_migrations
+
+      def run(hook, attrs)
+      end
+    end
+
+    after = Class.new
+    after.class_eval do
+      after_running_migrations
+
+      def run(hook, attrs)
+      end
+    end
+
+    pre.any_instance.expects(:run).twice
+    after.any_instance.expects(:run).twice
+    # override the load plugins method as the class above is loading them.
+    DBGeni::Plugin.any_instance.stubs(:load_plugins)
+    DBGeni::Config.any_instance.stubs(:plugin_directory).returns('plugins')
+
+    @installer = DBGeni::Base.installer_for_environment(helper_sqlite_single_environment_file, 'development')
+    @installer.initialize_database
+    migration = helper_good_sqlite_migration
+    @installer.apply_all_migrations(migration)
+    assert_nothing_raised do
+      @installer.rollback_all_migrations
+    end
   end
 
 

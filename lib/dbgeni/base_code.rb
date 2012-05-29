@@ -114,7 +114,10 @@ module DBGeni
       private
 
       def apply_code_list(code_list, force, up=true)
-        run_plugin(:before_modifying_code, code_list)
+        params = {
+          :operation => up == true ? 'apply' : 'remove'
+        }
+        run_plugin(:before_modifying_code, code_list, params)
         code_list.each do |c|
           if up
             apply_code(c, force)
@@ -122,7 +125,7 @@ module DBGeni
             remove_code(c, force)
           end
         end
-        run_plugin(:after_modifying_code, code_list)
+        run_plugin(:after_modifying_code, code_list, params)
       end
 
     end
