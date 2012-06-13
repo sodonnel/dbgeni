@@ -12,6 +12,7 @@ class TestCLIMigrations < Test::Unit::TestCase
   def setup
     helper_clean_temp
     helper_sqlite_single_environment_file
+    helper_sqlite_single_environment_file_bad_plugin_directory
     helper_oracle_single_environment_file
     helper_mysql_single_environment_file
     helper_reinitialize_oracle
@@ -695,6 +696,12 @@ class TestCLIMigrations < Test::Unit::TestCase
   def test_invalid_rollback_command
     response = `#{CLI} migrations rollback foobar -c #{TEMP_DIR}/sqlite.conf`
     assert_match(/is not a valid command/, response)
+  end
+
+  def test_invalid_plugin_directory
+    helper_many_good_sqlite_migrations(4)
+    response = `#{CLI} migrations apply next -c #{TEMP_DIR}/sqlite_bad_plugin.conf`
+    assert_match(/The plugin directory specified in config is not accessable/, response)
   end
 
 end

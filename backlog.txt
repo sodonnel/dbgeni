@@ -2,7 +2,6 @@ Maybe more tests for base apply and rollback until
 Better Logging
 ----------------------------------------------
 Plugins
-  - Catch Errors with plugin dir in command interface
   - Add params to env
   - Add steps to run before migration / code eg, think editions
 

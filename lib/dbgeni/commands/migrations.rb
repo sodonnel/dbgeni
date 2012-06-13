@@ -230,7 +230,12 @@ rescue DBGeni::DBCLINotOnPath => e
 rescue DBGeni::MilestoneHasNoMigration => e
   logger.error "The milestone does not contain a valid migration"
   exit(1)
+rescue DBGeni::PluginDirectoryNotAccessible => e
+  logger.error "The plugin directory specified in config is not accessable: #{e.to_s}"
+  exit(1)
+rescue DBGeni::PluginDoesNotRespondToRun
+  logger.error "A pluggin was loaded that does not have a run method: #{e.to_s}"
+  exit(1)
 end
-
 
 exit(0)
