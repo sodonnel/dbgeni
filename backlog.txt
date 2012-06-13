@@ -5,6 +5,9 @@ Plugins
   - Add params to env
   - Add steps to run before migration / code eg, think editions
 
+Plugins - if a plugin raises an exception, this will cause a hard failure as it is not handled? Maybe a plugin error should be raised and include the error from within the plugin.
+Plugins - should the run method be checked for on loading instead of on execution?
+
 Hashing for DOS vs Unix line endings
 SQL script parameters
 Think - should missing code files be highlighted? Should there be a missing command for code?
