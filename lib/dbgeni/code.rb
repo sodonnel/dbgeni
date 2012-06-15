@@ -39,6 +39,13 @@ module DBGeni
       end
     end
 
+    def sort_field
+      # Normally alphabetical sorting is enough, but this means pkg specs sort after
+      # bodies. So need to do something about that. The simplest *hack* is to replace
+      # pks with pka to get it to sort before pkb, just for sorting purposes
+      sortable = @filename.gsub(/\.pks$/, '.pka')
+    end
+
     def db_hash(config, connection)
       results = connection.execute("select sequence_or_hash
                                     from #{config.db_table}

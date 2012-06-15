@@ -1,3 +1,11 @@
+# 0.8.0
+
+Download: [dbgeni-0.8.0.gem](/downloads/dbgeni-0.8.0.gem)
+
+ * Fixed bug causing package bodies to install before their specification
+ * Added support for plugin hooks
+
+
 # 0.7.0
 
 13th May 2012

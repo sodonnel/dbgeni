@@ -15,7 +15,7 @@ class TestCodeList < Test::Unit::TestCase
     @code_directory = File.expand_path(File.join(File.dirname(__FILE__), "temp", "code"))
     FileUtils.rm_rf(File.join(TestHelper::TEMP_DIR, 'code'))
     FileUtils.mkdir_p(@code_directory)
-    %w(p1.prc p2.pks p3.pkb p4.fnc p5.trg p6.typ p7.sql p8.abc).each do |f|
+    %w(p1.prc p2.pks p2.pkb p4.fnc p5.trg p6.typ p7.sql p8.abc).each do |f|
       File.open(File.join(@code_directory, f), 'w') do |fh|
         fh.puts "create or replace procedure proc1\nas\nbegin\n  null;\nend;"
       end
@@ -108,6 +108,47 @@ class TestCodeList < Test::Unit::TestCase
       code = c.list(['p1.prc', 'p4.fnc', 'notexist.prc'], @config, @connection)
     end
   end
+
+  def test_package_specs_sort_before_package_bodies
+    c = DBGeni::CodeList.new(@code_directory)
+    filenames = c.code.map{|o| o.filename}
+    pks = filenames.index('p2.pks')
+    pkb = filenames.index('p2.pkb')
+    if pks < pkb
+      assert(true)
+    else
+      assert(false, 'Package spec is not sorting before body')
+    end
+  end
+
+  def test_current_package_specs_sort_before_package_bodies
+    c = DBGeni::CodeList.new(@code_directory)
+    c.code.each {|c| c.stubs(:current?).with(@config, @connection).returns(true) }
+    current_code = c.current(@config, @connection)
+    filenames = current_code.map{|o| o.filename}
+    pks = filenames.index('p2.pks')
+    pkb = filenames.index('p2.pkb')
+    if pks < pkb
+      assert(true)
+    else
+      assert(false, 'Package spec is not sorting before body')
+    end
+  end
+
+  def test_outstanding_package_specs_sort_before_package_bodies
+    c = DBGeni::CodeList.new(@code_directory)
+    c.code.each {|c| c.stubs(:current?).with(@config, @connection).returns(false) }
+    outstanding_code = c.outstanding(@config, @connection)
+    filenames = outstanding_code.map{|o| o.filename}
+    pks = filenames.index('p2.pks')
+    pkb = filenames.index('p2.pkb')
+    if pks < pkb
+      assert(true)
+    else
+      assert(false, 'Package spec is not sorting before body')
+    end
+  end
+
 
 
 end

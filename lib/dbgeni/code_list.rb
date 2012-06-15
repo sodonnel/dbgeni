@@ -11,15 +11,11 @@ module DBGeni
     end
 
     def current(config, connection)
-      @code.select{ |c| c.current?(config, connection) }.sort {|x,y|
-        x.filename <=> y.filename
-      }
+      @code.select{ |c| c.current?(config, connection) }
     end
 
     def outstanding(config, connection)
-      @code.select{ |c| ! c.current?(config, connection) }.sort {|x,y|
-        x.filename <=> y.filename
-      }
+      @code.select{ |c| ! c.current?(config, connection) }
     end
 
     def list(list_of_code, config, connection)
@@ -33,7 +29,7 @@ module DBGeni
         end
       end
       valid_code.sort {|x,y|
-        x.filename <=> y.filename
+        x.sort_field <=> y.sort_field
       }
     end
 
@@ -51,6 +47,9 @@ module DBGeni
       @code = Array.new
       files.each do |f|
         @code.push DBGeni::Code.new(@code_directory, f)
+        @code.sort! {|x,y|
+          x.sort_field <=> y.sort_field
+        }
       end
     end
 
