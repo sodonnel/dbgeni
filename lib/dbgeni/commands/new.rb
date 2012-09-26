@@ -69,6 +69,10 @@ migrations_directory "./migrations"
 # This directory specifies the location of any code modules
 code_directory "./code"
 
+# This specifes the location of the plugin directory. Specifying this parameter
+# enables plugins and the directory must exist
+# plugin_directory "./dbgeni_plugins"
+
 # This specifies the type of database this installer is applied against
 # Valid values are oracle, mysql, sqlite, sybase however this is not validated
 # to enable different database plugins to easily be added.

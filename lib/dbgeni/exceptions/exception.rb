@@ -63,5 +63,6 @@ module DBGeni
   class InvalidHook                  < Exception; end
   class PluginDoesNotRespondToRun    < Exception; end
   class PluginDirectoryNotAccessible < Exception; end
+  class PluginException              < Exception; end
 
 end

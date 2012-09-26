@@ -1,9 +1,11 @@
 # 0.8.0
 
+26th September 2012
+
 Download: [dbgeni-0.8.0.gem](/downloads/dbgeni-0.8.0.gem)
 
  * Fixed bug causing package bodies to install before their specification
- * Added support for plugin hooks
+ * Added basic support for plugin hooks
 
 
 # 0.7.0
@@ -95,6 +97,5 @@ These are some of the features I have planned. If you have an idea for a feature
  * Parameters in SQL files
  * DAT files to load data
  * Support for other databases (SQL Server, Postgres, ...)
- * Validation scripts
- * Pre and post migration hooks
+
 
