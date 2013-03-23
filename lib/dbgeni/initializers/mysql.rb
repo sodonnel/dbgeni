@@ -13,7 +13,7 @@ module DBGeni
                                   start_dtm        datetime,
                                   completed_dtm    datetime
                                )")
-        db_connection.execute("create unique index #{config.db_table}_uk1 on #{config.db_table} (sequence_or_hash, migration_name(500))")
+        db_connection.execute("create unique index #{config.db_table}_uk1 on #{config.db_table} (sequence_or_hash, migration_name(500), migration_type)")
         db_connection.execute("create index #{config.db_table}_idx2 on #{config.db_table} (migration_name)")
       end
 

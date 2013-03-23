@@ -21,6 +21,7 @@ class TestCLINew < Test::Unit::TestCase
     assert_equal(true, File.directory?("#{TEMP_DIR}/test_structure"))
     assert_equal(true, File.directory?("#{TEMP_DIR}/test_structure"))
     assert_equal(true, File.directory?("#{TEMP_DIR}/test_structure/migrations"))
+    assert_equal(true, File.directory?("#{TEMP_DIR}/test_structure/dml"))
     assert_equal(true, File.exists?("#{TEMP_DIR}/test_structure/.dbgeni"))
   end
 

@@ -19,6 +19,7 @@ module DBGeni
     # TODO - add verified state?
 
     attr_reader :directory, :migration_file, :rollback_file, :name, :sequence, :logfile, :error_messages
+    attr_accessor :migration_type
 
     def self.internal_name_from_filename(filename)
       filename =~ /^(\d{12})_(up|down)_(.+)\.sql$/
@@ -50,6 +51,7 @@ module DBGeni
     end
 
     def initialize(directory, migration)
+      @migration_type = 'Migration'
       @directory      = directory
       @migration_file = migration
       parse_file
@@ -80,7 +82,8 @@ module DBGeni
       results = connection.execute("select migration_state
                                     from #{@config.db_table}
                                     where sequence_or_hash = ?
-                                    and migration_name = ?", @sequence, @name)
+                                    and migration_name = ?
+                                    and migration_type = ?", @sequence, @name, @migration_type)
       results.length == 1 ? results[0][0] : NEW
     end
     #"
@@ -215,7 +218,8 @@ module DBGeni
       results = @connection.execute("select sequence_or_hash, migration_name, migration_type, migration_state, start_dtm, completed_dtm
                                     from #{@config.db_table}
                                     where sequence_or_hash = ?
-                                    and migration_name = ?", @sequence, @name)
+                                    and migration_name = ?
+                                    and migration_type = ?", @sequence, @name, @migration_type)
     end
 #"
 
@@ -232,10 +236,10 @@ module DBGeni
                                     (
                                        ?,
                                        ?,
-                                       'Migration',
+                                       ?,
                                        ?,
                                        #{@connection.date_placeholder('sdtm')}
-                                    )", @sequence, @name, state, @connection.date_as_string(Time.now))
+                                    )", @sequence, @name, @migration_type, state, @connection.date_as_string(Time.now))
     end
 
 
@@ -250,13 +254,15 @@ module DBGeni
                                            completed_dtm   = null,
                                            start_dtm       = #{@connection.date_placeholder('sdtm')}
                                        where sequence_or_hash = ?
-                                    and   migration_name   = ?", state, @connection.date_as_string(Time.now), @sequence, @name)
+                                    and   migration_name   = ?
+                                    and   migration_type   = ?", state, @connection.date_as_string(Time.now), @sequence, @name, @migration_type)
       else
         results = @connection.execute("update #{@config.db_table}
                                     set migration_state = ?,
                                         completed_dtm   = #{@connection.date_placeholder('sdtm')}
                                     where sequence_or_hash = ?
-                                    and   migration_name   = ?", state, @connection.date_as_string(Time.now), @sequence, @name)
+                                    and   migration_name   = ?
+                                    and   migration_type   = ?", state, @connection.date_as_string(Time.now), @sequence, @name, @migration_type)
       end
     end
 

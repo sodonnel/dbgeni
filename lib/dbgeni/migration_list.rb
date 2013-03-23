@@ -5,6 +5,17 @@ module DBGeni
     attr_reader :migrations
     attr_reader :migration_directory
 
+    # This is a bit of a hack. DML migrations reuse all of migrations, infact they were forced in
+    # later as an afterthought, so each migration will initially have a type of 'Migration'. This
+    # changes it to DML.
+    def self.new_dml_migrations(migration_directory)
+      obj = self.new(migration_directory)
+      obj.migrations.each do |m|
+        m.migration_type = 'DML'
+      end
+      obj
+    end
+
     def initialize(migration_directory)
       @migration_directory = migration_directory
       file_list

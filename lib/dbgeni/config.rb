@@ -23,6 +23,7 @@ module DBGeni
     attr_reader   :environments
     attr_reader   :current_environment
     attr_reader   :migration_directory
+    attr_reader   :dml_directory
     # ideally wnat code_dir to be code_directory, but then it clashes with the
     # setter used in the config file, so need to change it. Probably more sensible
     # like this than the migrations_directory vs migration_directory
@@ -39,6 +40,7 @@ module DBGeni
 
     def initialize
       @migration_directory  = 'migrations'
+      @dml_directory        = 'dml'
       @code_dir             = 'code'
       @plugin_dir           =  nil
       @db_type              = 'sqlite'
@@ -78,7 +80,8 @@ module DBGeni
       @base_directory = dir
       # If change the base directory, then unless migration dir is
       # an absolute path, it will need to change too.
-      @migration_directory = File.join(@base_directory, @migration_directory) unless is_absolute_path?(@migration_dir)
+      @migration_directory = File.join(@base_directory, @migration_directory) unless is_absolute_path?(@migration_directory)
+      @dml_directory       = File.join(@base_directory, @dml_directory) unless is_absolute_path?(@dml_directory)
       @code_dir            = File.join(@base_directory, @code_dir)   unless is_absolute_path?(@code_dir)
       if @plugin_dir
         @plugin_dir          = File.join(@base_directory, @plugin_dir) unless is_absolute_path?(@plugin_dir)
@@ -188,6 +191,24 @@ module DBGeni
             @migration_directory = File.join(@base_directory, p[0])
           else
             @migration_directory = p[0]
+          end
+        end
+      end
+    end
+
+    def dml_directory(*p)
+      if p.length == 0
+        @dml_directory
+      else
+        if is_absolute_path?(p[0])
+          # it looks like an absolute path
+          @dml_directory = p[0]
+        else
+          # it looks like a relative path
+          if @base_directory
+            @dml_directory = File.join(@base_directory, p[0])
+          else
+            @dml_directory = p[0]
           end
         end
       end

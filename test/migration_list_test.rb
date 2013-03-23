@@ -46,6 +46,7 @@ class TestMigrationList < Test::Unit::TestCase
     assert_equal(2, ml.migrations.length)
   end
 
+
   def test_applied_migrations_only_selected
     ml = DBGeni::MigrationList.new(@migration_directory)
     ml.migrations.each do |obj|
@@ -131,6 +132,12 @@ class TestMigrationList < Test::Unit::TestCase
     assert_raises DBGeni::MigrationFileNotExist do
       list = ml.list(['201101010000::test_migration_not_there', '201101020000::test_migration_two'], @config, @connection)
     end
+  end
+
+  def test_migrations_set_to_type_DML_when_loaded_as_DML
+    ml = DBGeni::MigrationList.new_dml_migrations(@migration_directory)
+    assert_equal(2, ml.migrations.length)
+    assert_equal('DML', ml.migrations.first.migration_type)
   end
 
 end

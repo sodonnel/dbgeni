@@ -49,6 +49,15 @@ if %w(n new).include? $initial_command
     exit(1)
   end
 
+  # create the directory to hold dml
+  begin
+    puts "creating directory: #{directory}/dml"
+    FileUtils.mkdir_p(directory+'/dml')
+  rescue Exception => e
+    puts "error: failed to create #{directory}/dml - #{e.to_s}"
+    exit(1)
+  end
+
 else
   unless File.directory?(directory)
     puts "Error: The directory #{directory} does not exist"
@@ -65,6 +74,9 @@ begin
 
 # This directory specifies the location of the migrations directory
 migrations_directory "./migrations"
+
+# This directory specifies the location of the DML files directory
+dml_directory "./dml"
 
 # This directory specifies the location of any code modules
 code_directory "./code"

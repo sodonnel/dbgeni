@@ -381,6 +381,60 @@ class TestConfig < Test::Unit::TestCase
     assert_equal('/somedir/plugins', cfg.plugin_directory)
   end
 
+  ########################
+  # DML_DIRECTORY #
+  ########################
+
+  def test_dml_directory_defaults
+    cfg = DBGeni::Config.new
+    cfg.load("environment('foo') { }\n environment('bar') { }")
+    assert_equal('dml', cfg.dml_directory)
+  end
+
+  def test_dml_dir_settable_via_config
+    cfg = DBGeni::Config.new
+    cfg.load("dml_directory 'other_dir'\nenvironment('foo') { }\n environment('bar') { }")
+    assert_equal('other_dir', cfg.dml_directory)
+  end
+
+  def test_absolution_dml_dir_not_modified_windows
+    cfg = DBGeni::Config.new
+    cfg.base_directory = "c:\\somedir\\"
+    # !! need to escape backslashes as they are escape character!
+    cfg.load("dml_directory 'c:\\other_dir'\nenvironment('foo') { }\n environment('bar') { }")
+    assert_equal('c:\other_dir', cfg.dml_directory)
+  end
+
+  def test_absolute_dml_dir_not_modified_unix
+    cfg = DBGeni::Config.new
+    cfg.base_directory = "/somedir"
+    cfg.load("dml_directory '/other_dir'\nenvironment('foo') { }\n environment('bar') { }")
+    assert_equal('/other_dir', cfg.dml_directory)
+  end
+
+  def test_relative_dml_dir_added_to_base_windows
+    cfg = DBGeni::Config.new
+    cfg.base_directory = "c:\\somedir\\"
+    cfg.load("dml_directory 'other_dir'\nenvironment('foo') { }\n environment('bar') { }")
+    if Kernel.is_windows?
+      assert_equal("c:\\somedir\\other_dir", cfg.dml_directory)
+    end
+  end
+
+  def test_relative_dml_dir_added_to_base_unix
+    cfg = DBGeni::Config.new
+    cfg.base_directory = '/somedir'
+    cfg.load("dml_directory 'other_dir'\nenvironment('foo') { }\n environment('bar') { }")
+    assert_equal('/somedir/other_dir', cfg.dml_directory)
+  end
+
+  def test_dml_dir_changes_when_base_dir_changed
+    cfg = DBGeni::Config.new
+    cfg.dml_directory 'dml'
+    cfg.base_directory = '/somedir'
+    assert_equal('/somedir/dml', cfg.dml_directory)
+  end
+
   #################
   # End DSL tests #
   #################
