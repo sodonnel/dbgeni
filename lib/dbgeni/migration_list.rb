@@ -45,7 +45,7 @@ module DBGeni
     def list(list_of_migrations, config, connection)
       valid_migrations = []
       list_of_migrations.each do |m|
-        mig_obj = Migration.initialize_from_internal_name(config.migration_directory, m)
+        mig_obj = Migration.initialize_from_internal_name(@migration_directory, m)
         if i = @migrations.index(mig_obj)
           valid_migrations.push @migrations[i]
         else

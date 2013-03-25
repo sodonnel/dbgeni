@@ -305,9 +305,22 @@ module TestHelper
     create_migration_files("select * from sqlite_master;")
   end
 
-  def helper_good_sqlite_dml
-    create_dml_files("select * from sqlite_master;")
+  def helper_good_mysql_migration
+    create_migration_files("select 1 from dual;")
   end
+
+  def helper_good_oracle_dml
+    create_dml_files("select * from dual;")
+  end
+
+  def helper_good_sqlite_dml
+      create_dml_files("select * from sqlite_master;")
+  end
+
+  def helper_good_mysql_dml
+    create_dml_files("select 1 from dual;")
+  end
+
 
   def helper_good_sybase_migration
     create_migration_files("select 1\ngo")
@@ -319,31 +332,12 @@ module TestHelper
 
 
 
-  def helper_good_mysql_migration
-    create_migration_files("select 1 from dual;")
-  end
 
   def helper_many_good_sqlite_migrations(number)
     datestamp = 201108190000 - 1
     1.upto(number) do
       datestamp += 1
       create_migration_files("select * from sqlite_master;", datestamp.to_s)
-    end
-  end
-
-  def helper_many_good_sqlite_dmls(number)
-    datestamp = 201108190000 - 1
-    1.upto(number) do
-      datestamp += 1
-      create_dml_files("select * from sqlite_master;", datestamp.to_s)
-    end
-  end
-
-  def helper_many_bad_sqlite_migrations(number)
-    datestamp = 201108190000 - 1
-    1.upto(number) do
-      datestamp += 1
-      create_migration_files("select * from tab_not_exist;\ncreate table foo (c1 integer);", datestamp.to_s)
     end
   end
 
@@ -355,18 +349,64 @@ module TestHelper
     end
   end
 
+  def helper_many_good_mysql_migrations(number)
+    helper_many_good_oracle_migrations(number)
+  end
+
+  def helper_many_good_sqlite_dmls(number)
+    datestamp = 201108190000 - 1
+    1.upto(number) do
+      datestamp += 1
+      create_dml_files("select * from sqlite_master;", datestamp.to_s)
+    end
+  end
+
+  def helper_many_good_oracle_dmls(number)
+    datestamp = 201108190000 - 1
+    1.upto(number) do
+      datestamp += 1
+      create_dml_files("select 1 from dual;", datestamp.to_s)
+    end
+  end
+
+  def helper_many_good_mysql_dmls(number)
+    helper_many_good_oracle_dmls(number)
+  end
+
+
+  def helper_many_bad_sqlite_migrations(number)
+    datestamp = 201108190000 - 1
+    1.upto(number) do
+      datestamp += 1
+      create_migration_files("select * from tab_not_exist;\ncreate table foo (c1 integer);", datestamp.to_s)
+    end
+  end
+
   def helper_many_bad_oracle_migrations(number)
     helper_many_bad_sqlite_migrations(number)
   end
 
-  def helper_many_good_mysql_migrations(number)
-    helper_many_good_oracle_migrations(number)
-  end
 
   def helper_many_bad_mysql_migrations(number)
     helper_many_bad_sqlite_migrations(number)
   end
 
+  def helper_many_bad_sqlite_dmls(number)
+    datestamp = 201108190000 - 1
+    1.upto(number) do
+      datestamp += 1
+      create_dml_files("select * from tab_not_exist;\ncreate table foo (c1 integer);", datestamp.to_s)
+    end
+  end
+
+  def helper_many_bad_oracle_dmls(number)
+    helper_many_bad_sqlite_dmls(number)
+  end
+
+
+  def helper_many_bad_mysql_dmls(number)
+    helper_many_bad_sqlite_dmls(number)
+  end
 
   def helper_good_mysql_migration
     create_migration_files("select 1 + 1 from dual;")
@@ -376,7 +416,6 @@ module TestHelper
     create_migration_files("gfgfgdsgsdg;")
   end
 
-
   def helper_bad_oracle_migration
     create_migration_files("select * from dua;\ncreate table foo (c1 integer);")
   end
@@ -385,10 +424,18 @@ module TestHelper
     create_migration_files("select * from tab_not_exist;\ncreate table foo (c1 integer);")
   end
 
+
+  def helper_bad_mysql_dml
+    create_dml_files("gfgfgdsgsdg;")
+  end
+
+  def helper_bad_oracle_dml
+    create_dml_files("select * from dua;\ncreate table foo (c1 integer);")
+  end
+
   def helper_bad_sqlite_dml
     create_dml_files("select * from tab_not_exist;\ncreate table foo (c1 integer);")
   end
-
 
   def helper_empty_oracle_migration
     create_migration_files('')
