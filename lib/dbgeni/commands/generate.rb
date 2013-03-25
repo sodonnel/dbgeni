@@ -65,6 +65,13 @@ when 'migration', 'mig'
     puts "creating: #{filename}"
     FileUtils.touch(filename)
   end
+when 'dml'
+  datestamp = Time.now.strftime('%Y%m%d%H%M')
+  %w(up down).each do |f|
+    filename = File.join(config.dml_directory, "#{datestamp}_#{f}_#{name}.sql")
+    puts "creating: #{filename}"
+    FileUtils.touch(filename)
+  end
 when 'package', 'pkg'
   filename = File.join(config.code_dir, "#{name}.pks")
   if File.exists?(filename)

@@ -6,7 +6,7 @@ require "dbgeni"
 require 'test/unit'
 require 'mocha'
 
-class TestDBGeniBaseMigrations < Test::Unit::TestCase
+class TestDBGeniBaseDMLs < Test::Unit::TestCase
 
   include TestHelper
 
@@ -29,30 +29,22 @@ class TestDBGeniBaseMigrations < Test::Unit::TestCase
 
   def test_can_list_migrations_when_none_exist
     @installer = DBGeni::Base.installer_for_environment(helper_sqlite_single_environment_file, 'development')
-    assert_equal(0, @installer.migrations.length)
+    assert_equal(0, @installer.dmls.length)
   end
 
   def test_can_list_migrations_when_some_exist
     @installer = DBGeni::Base.installer_for_environment(helper_sqlite_single_environment_file, 'development')
-    helper_good_sqlite_migration
-    assert_equal(1, @installer.migrations.length)
+    helper_good_sqlite_dml
+    assert_equal(1, @installer.dmls.length)
   end
 
   def test_correct_error_raised_when_migration_directory_not_exist
     @installer = DBGeni::Base.installer_for_environment(helper_sqlite_single_environment_file, 'development')
-    @installer.config.migrations_directory 'not_there'
+    @installer.config.dml_directory 'not_there'
     assert_raises DBGeni::MigrationDirectoryNotExist do
-      @installer.migrations
+      @installer.dmls
     end
   end
-
-  # DML
-  def test_can_list_dmls_when_none_exist
-    @installer = DBGeni::Base.installer_for_environment(helper_sqlite_single_environment_file, 'development')
-    assert_equal(0, @installer.dmls.length)
-  end
-
-
 
   ##########################
   # Outstanding Migrations #
@@ -61,29 +53,29 @@ class TestDBGeniBaseMigrations < Test::Unit::TestCase
   def test_can_list_outstanding_migrations_when_none_exist
     @installer = DBGeni::Base.installer_for_environment(helper_sqlite_single_environment_file, 'development')
     @installer.initialize_database
-    assert_equal(0, @installer.outstanding_migrations.length)
+    assert_equal(0, @installer.outstanding_dmls.length)
   end
 
   def test_can_list_outstanding_migrations_when_some_exist
     @installer = DBGeni::Base.installer_for_environment(helper_sqlite_single_environment_file, 'development')
     @installer.initialize_database
-    helper_good_sqlite_migration
-    assert_equal(1, @installer.outstanding_migrations.length)
+    helper_good_sqlite_dml
+    assert_equal(1, @installer.outstanding_dmls.length)
   end
 
   def test_can_list_outstanding_migrations_when_all_applied
     @installer = DBGeni::Base.installer_for_environment(helper_sqlite_single_environment_file, 'development')
     @installer.initialize_database
-    helper_good_sqlite_migration
-    @installer.apply_all_migrations
-    assert_equal(0, @installer.outstanding_migrations.length)
+    helper_good_sqlite_dml
+    @installer.apply_all_dmls
+    assert_equal(0, @installer.outstanding_dmls.length)
   end
 
   def test_correct_error_raised_when_outstanding_migrations_on_not_initialized_db
     @installer = DBGeni::Base.installer_for_environment(helper_sqlite_single_environment_file, 'development')
-    helper_good_sqlite_migration
+    helper_good_sqlite_dml
     assert_raises DBGeni::DatabaseNotInitialized do
-      @installer.outstanding_migrations
+      @installer.outstanding_dmls
     end
   end
 
@@ -94,29 +86,29 @@ class TestDBGeniBaseMigrations < Test::Unit::TestCase
   def test_can_list_applied_migrations_when_none_exist
     @installer = DBGeni::Base.installer_for_environment(helper_sqlite_single_environment_file, 'development')
     @installer.initialize_database
-    assert_equal(0, @installer.applied_migrations.length)
+    assert_equal(0, @installer.applied_dmls.length)
   end
 
   def test_can_list_applied_migrations_when_some_exist
     @installer = DBGeni::Base.installer_for_environment(helper_sqlite_single_environment_file, 'development')
     @installer.initialize_database
-    helper_good_sqlite_migration
-    @installer.apply_next_migration
-    assert_equal(1, @installer.applied_migrations.length)
+    helper_good_sqlite_dml
+    @installer.apply_next_dml
+    assert_equal(1, @installer.applied_dmls.length)
   end
 
   def test_can_list_applied_migrations_when_none_applied
     @installer = DBGeni::Base.installer_for_environment(helper_sqlite_single_environment_file, 'development')
     @installer.initialize_database
-    helper_good_sqlite_migration
-    assert_equal(0, @installer.applied_migrations.length)
+    helper_good_sqlite_dml
+    assert_equal(0, @installer.applied_dmls.length)
   end
 
   def test_correct_error_raised_when_applied_migrations_on_not_initialized_db
     @installer = DBGeni::Base.installer_for_environment(helper_sqlite_single_environment_file, 'development')
-    helper_good_sqlite_migration
+    helper_good_sqlite_dml
     assert_raises DBGeni::DatabaseNotInitialized do
-      @installer.applied_migrations
+      @installer.applied_dmls
     end
   end
 
@@ -127,31 +119,31 @@ class TestDBGeniBaseMigrations < Test::Unit::TestCase
   def test_good_named_migration_applies_successfully
     @installer = DBGeni::Base.installer_for_environment(helper_sqlite_single_environment_file, 'development')
     @installer.initialize_database
-    migration = helper_good_sqlite_migration
+    migration = helper_good_sqlite_dml
     assert_nothing_raised do
-      @installer.apply_migration(migration)
+      @installer.apply_dml(migration)
     end
-    assert_equal(1, @installer.applied_migrations.length)
+    assert_equal(1, @installer.applied_dmls.length)
   end
 
   def test_bad_named_migration_does_not_apply_successfully
     @installer = DBGeni::Base.installer_for_environment(helper_sqlite_single_environment_file, 'development')
     @installer.initialize_database
-    migration = helper_bad_sqlite_migration
+    migration = helper_bad_sqlite_dml
     assert_raises DBGeni::MigrationApplyFailed do
-      @installer.apply_migration(migration)
+      @installer.apply_dml(migration)
     end
-    assert_equal(0, @installer.applied_migrations.length)
+    assert_equal(0, @installer.applied_dmls.length)
   end
 
   def test_bad_named_migration_does_apply_successfully_force_on
     @installer = DBGeni::Base.installer_for_environment(helper_sqlite_single_environment_file, 'development')
     @installer.initialize_database
-    migration = helper_bad_sqlite_migration
+    migration = helper_bad_sqlite_dml
     assert_nothing_raised do
-      @installer.apply_migration(migration, true)
+      @installer.apply_dml(migration, true)
     end
-    assert_equal(1, @installer.applied_migrations.length)
+    assert_equal(1, @installer.applied_dmls.length)
   end
 
 
@@ -160,70 +152,70 @@ class TestDBGeniBaseMigrations < Test::Unit::TestCase
     @installer.initialize_database
     migration = DBGeni::Migration.new('/dirnotexit', '201108190000_up_tst_migration.sql')
     assert_raises DBGeni::MigrationFileNotExist do
-      @installer.apply_migration(migration)
+      @installer.apply_dml(migration)
     end
-    assert_equal(0, @installer.applied_migrations.length)
+    assert_equal(0, @installer.applied_dmls.length)
   end
 
   def test_apply_next_good_migration
     @installer = DBGeni::Base.installer_for_environment(helper_sqlite_single_environment_file, 'development')
     @installer.initialize_database
-    migration = helper_good_sqlite_migration
+    migration = helper_good_sqlite_dml
     assert_nothing_raised do
-      @installer.apply_next_migration
+      @installer.apply_next_dml
     end
-    assert_equal(1, @installer.applied_migrations.length)
+    assert_equal(1, @installer.applied_dmls.length)
   end
 
   def test_apply_next_bad_migration_errors
     @installer = DBGeni::Base.installer_for_environment(helper_sqlite_single_environment_file, 'development')
     @installer.initialize_database
-    migration = helper_bad_sqlite_migration
+    migration = helper_bad_sqlite_dml
     assert_raises DBGeni::MigrationApplyFailed do
-      @installer.apply_next_migration
+      @installer.apply_next_dml
     end
-    assert_equal(0, @installer.applied_migrations.length)
+    assert_equal(0, @installer.applied_dmls.length)
   end
 
   def test_apply_next_bad_migration_force_on_no_errors
     @installer = DBGeni::Base.installer_for_environment(helper_sqlite_single_environment_file, 'development')
     @installer.initialize_database
-    migration = helper_bad_sqlite_migration
+    migration = helper_bad_sqlite_dml
     assert_nothing_raised do
-      @installer.apply_next_migration(true)
+      @installer.apply_next_dml(true)
     end
-    assert_equal(1, @installer.applied_migrations.length)
+    assert_equal(1, @installer.applied_dmls.length)
   end
 
   def test_apply_next_good_migration_when_none_exist
     @installer = DBGeni::Base.installer_for_environment(helper_sqlite_single_environment_file, 'development')
     @installer.initialize_database
     assert_raises DBGeni::NoOutstandingMigrations do
-      @installer.apply_next_migration
+      @installer.apply_next_dml
     end
-    assert_equal(0, @installer.applied_migrations.length)
+    assert_equal(0, @installer.applied_dmls.length)
   end
 
   # TODO - ideally want a couple more migrations here so that more than 1 is applied
   def test_apply_all_migrations
     @installer = DBGeni::Base.installer_for_environment(helper_sqlite_single_environment_file, 'development')
     @installer.initialize_database
-    migration = helper_good_sqlite_migration
+    migration = helper_good_sqlite_dml
     assert_nothing_raised do
-      @installer.apply_all_migrations
+      @installer.apply_all_dmls
     end
-    assert_equal(1, @installer.applied_migrations.length)
+    assert_equal(1, @installer.applied_dmls.length)
   end
 
   # TODO - ideally want a couple more migrations here so that more than 1 is applied
   def test_apply_all_bad_migrations_force_on_no_errors
     @installer = DBGeni::Base.installer_for_environment(helper_sqlite_single_environment_file, 'development')
     @installer.initialize_database
-    migration = helper_bad_sqlite_migration
+    migration = helper_bad_sqlite_dml
     assert_nothing_raised do
-      @installer.apply_all_migrations(true)
+      @installer.apply_all_dmls(true)
     end
-    assert_equal(1, @installer.applied_migrations.length)
+    assert_equal(1, @installer.applied_dmls.length)
   end
 
 
@@ -231,25 +223,25 @@ class TestDBGeniBaseMigrations < Test::Unit::TestCase
     @installer = DBGeni::Base.installer_for_environment(helper_sqlite_single_environment_file, 'development')
     @installer.initialize_database
     assert_raises DBGeni::NoOutstandingMigrations do
-      @installer.apply_all_migrations
+      @installer.apply_all_dmls
     end
-    assert_equal(0, @installer.applied_migrations.length)
+    assert_equal(0, @installer.applied_dmls.length)
   end
 
   def test_apply_until_migration_when_migration_not_outstanding
     @installer = DBGeni::Base.installer_for_environment(helper_sqlite_single_environment_file, 'development')
     @installer.initialize_database
     assert_raises DBGeni::MigrationNotOutstanding do
-      @installer.apply_until_migration('201201010000::test')
+      @installer.apply_until_dml('201201010000::test')
     end
   end
 
   def test_apply_until_migration_when_one_migration
     @installer = DBGeni::Base.installer_for_environment(helper_sqlite_single_environment_file, 'development')
     @installer.initialize_database
-    migration = helper_good_sqlite_migration
+    migration = helper_good_sqlite_dml
     assert_nothing_raised do
-      @installer.apply_until_migration(migration.to_s)
+      @installer.apply_until_dml(migration.to_s)
     end
     assert_equal('Completed', migration.status(@installer.config, @installer.connection))
   end
@@ -258,13 +250,13 @@ class TestDBGeniBaseMigrations < Test::Unit::TestCase
     @installer = DBGeni::Base.installer_for_environment(helper_sqlite_single_environment_file, 'development')
     @installer.initialize_database
     # will create 4 migrations called 201108190000::test_migration upto 201108190003::test_migration
-    migrations = helper_many_good_sqlite_migrations(4)
+    migrations = helper_many_good_sqlite_dmls(4)
     assert_nothing_raised do
-      @installer.apply_until_migration('201108190002::test_migration')
+      @installer.apply_until_dml('201108190002::test_migration')
     end
-    assert_equal(3, @installer.applied_migrations.length)
-    assert_equal(1, @installer.outstanding_migrations.length)
-    assert_equal('201108190003::test_migration', @installer.outstanding_migrations[0].to_s)
+    assert_equal(3, @installer.applied_dmls.length)
+    assert_equal(1, @installer.outstanding_dmls.length)
+    assert_equal('201108190003::test_migration', @installer.outstanding_dmls[0].to_s)
   end
 
 
@@ -284,90 +276,90 @@ class TestDBGeniBaseMigrations < Test::Unit::TestCase
   def test_rollback_succeeds_for_good_rollback
     @installer = DBGeni::Base.installer_for_environment(helper_sqlite_single_environment_file, 'development')
     @installer.initialize_database
-    migration = helper_good_sqlite_migration
-    @installer.apply_migration(migration)
+    migration = helper_good_sqlite_dml
+    @installer.apply_dml(migration)
     assert_nothing_raised do
-      @installer.rollback_migration(migration)
+      @installer.rollback_dml(migration)
     end
-    assert_equal(0, @installer.applied_migrations.length)
+    assert_equal(0, @installer.applied_dmls.length)
   end
 
   def test_rollback_errors_for_bad_rollback
     @installer = DBGeni::Base.installer_for_environment(helper_sqlite_single_environment_file, 'development')
     @installer.initialize_database
-    migration = helper_good_sqlite_migration
-    @installer.apply_migration(migration)
-    migration = helper_bad_sqlite_migration
+    migration = helper_good_sqlite_dml
+    @installer.apply_dml(migration)
+    migration = helper_bad_sqlite_dml
     assert_raises DBGeni::MigrationApplyFailed do
-      @installer.rollback_migration(migration)
+      @installer.rollback_dml(migration)
     end
-    assert_equal(0, @installer.applied_migrations.length)
+    assert_equal(0, @installer.applied_dmls.length)
   end
 
   def test_rollback_no_errors_for_bad_rollback_with_force_on
     @installer = DBGeni::Base.installer_for_environment(helper_sqlite_single_environment_file, 'development')
     @installer.initialize_database
-    migration = helper_good_sqlite_migration
-    @installer.apply_migration(migration)
-    migration = helper_bad_sqlite_migration
+    migration = helper_good_sqlite_dml
+    @installer.apply_dml(migration)
+    migration = helper_bad_sqlite_dml
     assert_nothing_raised do
-      @installer.rollback_migration(migration, true)
+      @installer.rollback_dml(migration, true)
     end
-    assert_equal(0, @installer.applied_migrations.length)
+    assert_equal(0, @installer.applied_dmls.length)
   end
 
 
   def test_rollback_last_migration_succeeds
     @installer = DBGeni::Base.installer_for_environment(helper_sqlite_single_environment_file, 'development')
     @installer.initialize_database
-    migration = helper_good_sqlite_migration
-    @installer.apply_migration(migration)
+    migration = helper_good_sqlite_dml
+    @installer.apply_dml(migration)
     assert_nothing_raised do
-      @installer.rollback_last_migration
+      @installer.rollback_last_dml
     end
-    assert_equal(0, @installer.applied_migrations.length)
+    assert_equal(0, @installer.applied_dmls.length)
   end
 
   def test_rollback_last_bad_migration_succeeds_force_on
     @installer = DBGeni::Base.installer_for_environment(helper_sqlite_single_environment_file, 'development')
     @installer.initialize_database
-    migration = helper_good_sqlite_migration
-    @installer.apply_migration(migration)
-    migration = helper_bad_sqlite_migration
+    migration = helper_good_sqlite_dml
+    @installer.apply_dml(migration)
+    migration = helper_bad_sqlite_dml
     assert_nothing_raised do
-      @installer.rollback_last_migration(true)
+      @installer.rollback_last_dml(true)
     end
-    assert_equal(0, @installer.applied_migrations.length)
+    assert_equal(0, @installer.applied_dmls.length)
   end
 
   def test_rollback_all_migrations_succeeds
     @installer = DBGeni::Base.installer_for_environment(helper_sqlite_single_environment_file, 'development')
     @installer.initialize_database
-    migration = helper_good_sqlite_migration
-    @installer.apply_migration(migration)
+    migration = helper_good_sqlite_dml
+    @installer.apply_dml(migration)
     assert_nothing_raised do
-      @installer.rollback_all_migrations
+      @installer.rollback_all_dmls
     end
-    assert_equal(0, @installer.applied_migrations.length)
+    assert_equal(0, @installer.applied_dmls.length)
   end
 
   def test_rollback_all_bad_migrations_succeeds_force_on
     @installer = DBGeni::Base.installer_for_environment(helper_sqlite_single_environment_file, 'development')
     @installer.initialize_database
-    migration = helper_good_sqlite_migration
-    @installer.apply_migration(migration)
-    migration = helper_bad_sqlite_migration
+    migration = helper_good_sqlite_dml
+    @installer.apply_dml(migration)
+    migration = helper_bad_sqlite_dml
     assert_nothing_raised do
-      @installer.rollback_all_migrations(true)
+      @installer.rollback_all_dmls(true)
     end
-    assert_equal(0, @installer.applied_migrations.length)
+    assert_equal(0, @installer.applied_dmls.length)
   end
 
   def test_rollback_until_migration_when_migration_not_applied
     @installer = DBGeni::Base.installer_for_environment(helper_sqlite_single_environment_file, 'development')
     @installer.initialize_database
     assert_raises DBGeni::MigrationNotApplied do
-      @installer.rollback_until_migration('201201010000::test')
+      @installer.rollback_until_dml('201201010000::test')
     end
   end
 
@@ -375,10 +367,10 @@ class TestDBGeniBaseMigrations < Test::Unit::TestCase
     # Will not actually roll anything back, so it only goes UNTIL but not including
     @installer = DBGeni::Base.installer_for_environment(helper_sqlite_single_environment_file, 'development')
     @installer.initialize_database
-    migration = helper_good_sqlite_migration
-    @installer.apply_all_migrations
+    migration = helper_good_sqlite_dml
+    @installer.apply_all_dmls
     assert_nothing_raised do
-      @installer.rollback_until_migration(migration.to_s)
+      @installer.rollback_until_dml(migration.to_s)
     end
     assert_equal('Completed', migration.status(@installer.config, @installer.connection))
   end
@@ -387,14 +379,14 @@ class TestDBGeniBaseMigrations < Test::Unit::TestCase
     @installer = DBGeni::Base.installer_for_environment(helper_sqlite_single_environment_file, 'development')
     @installer.initialize_database
     # will create 4 migrations called 201108190000::test_migration upto 201108190003::test_migration
-    migrations = helper_many_good_sqlite_migrations(4)
-    @installer.apply_all_migrations
+    migrations = helper_many_good_sqlite_dmls(4)
+    @installer.apply_all_dmls
     assert_nothing_raised do
-      @installer.rollback_until_migration('201108190001::test_migration')
+      @installer.rollback_until_dml('201108190001::test_migration')
     end
-    assert_equal(2, @installer.applied_migrations.length)
-    assert_equal(2, @installer.outstanding_migrations.length)
-    assert_equal('201108190000::test_migration', @installer.applied_migrations[0].to_s)
+    assert_equal(2, @installer.applied_dmls.length)
+    assert_equal(2, @installer.outstanding_dmls.length)
+    assert_equal('201108190000::test_migration', @installer.applied_dmls[0].to_s)
   end
 
 
@@ -404,7 +396,7 @@ class TestDBGeniBaseMigrations < Test::Unit::TestCase
     # Register a plugin for before running migrations
     pre = Class.new
     pre.class_eval do
-      before_running_migrations
+      before_running_dmls
 
       def run(hook, attrs)
       end
@@ -412,7 +404,7 @@ class TestDBGeniBaseMigrations < Test::Unit::TestCase
 
     after = Class.new
     after.class_eval do
-      after_running_migrations
+      after_running_dmls
 
       def run(hook, attrs)
       end
@@ -426,9 +418,9 @@ class TestDBGeniBaseMigrations < Test::Unit::TestCase
 
     @installer = DBGeni::Base.installer_for_environment(helper_sqlite_single_environment_file, 'development')
     @installer.initialize_database
-    migration = helper_good_sqlite_migration
+    migration = helper_good_sqlite_dml
     assert_nothing_raised do
-      @installer.apply_all_migrations
+      @installer.apply_all_dmls
     end
   end
 
@@ -436,7 +428,7 @@ class TestDBGeniBaseMigrations < Test::Unit::TestCase
   def test_migration_start_and_end_plugin_called_on_rollback_migrations
     pre = Class.new
     pre.class_eval do
-      before_running_migrations
+      before_running_dmls
 
       def run(hook, attrs)
       end
@@ -444,7 +436,7 @@ class TestDBGeniBaseMigrations < Test::Unit::TestCase
 
     after = Class.new
     after.class_eval do
-      after_running_migrations
+      after_running_dmls
 
       def run(hook, attrs)
       end
@@ -458,17 +450,17 @@ class TestDBGeniBaseMigrations < Test::Unit::TestCase
 
     @installer = DBGeni::Base.installer_for_environment(helper_sqlite_single_environment_file, 'development')
     @installer.initialize_database
-    migration = helper_good_sqlite_migration
-    @installer.apply_all_migrations
+    migration = helper_good_sqlite_dml
+    @installer.apply_all_dmls
     assert_nothing_raised do
-      @installer.rollback_all_migrations
+      @installer.rollback_all_dmls
     end
   end
 
   def test_plugin_invoked_before_and_after_migration_up
     pre = Class.new
     pre.class_eval do
-      before_migration_up
+      before_dml_up
 
       def run(hook, attrs)
       end
@@ -476,7 +468,7 @@ class TestDBGeniBaseMigrations < Test::Unit::TestCase
 
     after = Class.new
     after.class_eval do
-      after_migration_up
+      after_dml_up
 
       def run(hook, attrs)
       end
@@ -491,14 +483,14 @@ class TestDBGeniBaseMigrations < Test::Unit::TestCase
 
     @installer = DBGeni::Base.installer_for_environment(helper_sqlite_single_environment_file, 'development')
     @installer.initialize_database
-    migration = helper_good_sqlite_migration
-    @installer.apply_next_migration
+    migration = helper_good_sqlite_dml
+    @installer.apply_next_dml
   end
 
   def test_plugin_invoked_before_and_after_migration_down
     pre = Class.new
     pre.class_eval do
-      before_migration_down
+      before_dml_down
 
       def run(hook, attrs)
       end
@@ -506,7 +498,7 @@ class TestDBGeniBaseMigrations < Test::Unit::TestCase
 
     after = Class.new
     after.class_eval do
-      after_migration_down
+      after_dml_down
 
       def run(hook, attrs)
       end
@@ -521,9 +513,9 @@ class TestDBGeniBaseMigrations < Test::Unit::TestCase
 
     @installer = DBGeni::Base.installer_for_environment(helper_sqlite_single_environment_file, 'development')
     @installer.initialize_database
-    migration = helper_good_sqlite_migration
-    @installer.apply_next_migration
-    @installer.rollback_last_migration
+    migration = helper_good_sqlite_dml
+    @installer.apply_next_dml
+    @installer.rollback_last_dml
   end
 
 end

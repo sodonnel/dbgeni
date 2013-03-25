@@ -13,6 +13,23 @@ module DBGeni
       @migration_list ||= DBGeni::MigrationList.new_dml_migrations(@config.dml_directory) unless @migration_list
       @migration_list.migrations
     end
+
+    private
+
+    def find_migration(migration_name)
+      m = Migration.initialize_from_internal_name(@config.dml_directory, migration_name)
+    end
+
+    def set_plugin_hooks
+      @before_up_run_plugin   = :before_dml_up
+      @after_up_run_plugin    = :after_dml_up
+      @before_down_run_plugin = :before_dml_down
+      @after_down_run_plugin  = :after_dml_down
+      @before_running_plugin  = :before_running_dmls
+      @after_running_plugin   = :after_running_dmls
+    end
+
+
   end
 
 end

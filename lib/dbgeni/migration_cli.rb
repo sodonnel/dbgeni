@@ -1,17 +1,11 @@
 module DBGeni
   class MigrationCLI
-
-    BEFORE_UP_RUN_PLUGIN   = :before_migration_up
-    AFTER_UP_RUN_PLUGIN    = :after_migration_up
-    BEFORE_DOWN_RUN_PLUGIN = :before_migration_down
-    AFTER_DOWN_RUN_PLUGIN  = :after_migration_down
-    BEFORE_RUNNING_PLUGIN  = :before_running_migrations
-    AFTER_RUNNING_PLUGIN   = :after_running_migrations
     
     def initialize(base_installer, config, logger)
       @base       = base_installer
       @config     = config
       @logger     = logger
+      set_plugin_hooks
     end
     
     def migrations
@@ -65,7 +59,7 @@ module DBGeni
 
     def apply_until_migration(migration_name, force=nil)
       ensure_initialized
-      milestone = Migration.initialize_from_internal_name(@config.migration_directory, migration_name)
+      milestone = find_migration(migration_name)
       outstanding = outstanding_migrations
       index = outstanding.index milestone
       unless index
@@ -85,10 +79,10 @@ module DBGeni
     def apply_migration(migration, force=nil)
       ensure_initialized
       begin
-        run_plugin(BEFORE_UP_RUN_PLUGIN, migration)
+        run_plugin(@before_up_run_plugin, migration)
         migration.apply!(@config, connection, force)
         @logger.info "Applied #{migration.to_s}"
-        run_plugin(AFTER_UP_RUN_PLUGIN, migration)
+        run_plugin(@after_up_run_plugin, migration)
       rescue DBGeni::MigrationApplyFailed
         @logger.error "Failed #{migration.to_s}. Errors in #{migration.logfile}\n\n#{migration.error_messages}\n\n"
         raise DBGeni::MigrationApplyFailed, migration.to_s
@@ -118,7 +112,7 @@ module DBGeni
     
     def rollback_until_migration(migration_name, force=nil)
       ensure_initialized
-      milestone = Migration.initialize_from_internal_name(@config.migration_directory, migration_name)
+      milestone = find_migration(migration_name)
       applied = applied_and_broken_migrations.reverse
       index = applied.index milestone
       unless index
@@ -139,10 +133,10 @@ module DBGeni
     def rollback_migration(migration, force=nil)
       ensure_initialized
       begin
-        run_plugin(BEFORE_DOWN_RUN_PLUGIN, migration)
+        run_plugin(@before_down_run_plugin, migration)
         migration.rollback!(@config, connection, force)
         @logger.info  "Rolledback #{migration.to_s}"
-        run_plugin(AFTER_DOWN_RUN_PLUGIN, migration)
+        run_plugin(@after_down_run_plugin, migration)
       rescue DBGeni::MigrationApplyFailed
         @logger.error "Failed #{migration.to_s}. Errors in #{migration.logfile}\n\n#{migration.error_messages}\n\n"
         raise DBGeni::MigrationApplyFailed, migration.to_s
@@ -160,7 +154,7 @@ module DBGeni
       params = {
         :operation => up == true ? 'apply' : 'remove'
       }
-      run_plugin(BEFORE_RUNNING_PLUGIN, migration_list, params)
+      run_plugin(@before_running_plugin, migration_list, params)
       migration_list.each do |m|
         if up
           apply_migration(m, force)
@@ -168,28 +162,28 @@ module DBGeni
           rollback_migration(m, force)
         end
       end
-      run_plugin(AFTER_RUNNING_PLUGIN, migration_list, params)
+      run_plugin(@after_running_plugin, migration_list, params)
     end
 
     def run_plugin(hook, object, params={})
-      pdir = @config.plugin_directory
-      if pdir && pdir != ''
-        unless @plugin_manager
-          @plugin_manager = DBGeni::Plugin.new
-          @plugin_manager.load_plugins(pdir)
-        end
-        @plugin_manager.run_plugins(hook,
-                                    {
-                                      :logger      => @logger,
-                                      :object      => object,
-                                      :environment => @config.env,
-                                      :connection  => connection
-                                    }.merge!(params)
-                                    )
-      end
+      @base.run_plugin(hook, object, params)
     end
 
     private
+
+    def find_migration(migration_name)
+      m = Migration.initialize_from_internal_name(@config.migration_directory, migration_name)
+    end
+
+    def set_plugin_hooks
+      @before_up_run_plugin   = :before_migration_up
+      @after_up_run_plugin    = :after_migration_up
+      @before_down_run_plugin = :before_migration_down
+      @after_down_run_plugin  = :after_migration_down
+      @before_running_plugin  = :before_running_migrations
+      @after_running_plugin   = :after_running_migrations
+    end
+
     
     def ensure_initialized
       @base.ensure_initialized

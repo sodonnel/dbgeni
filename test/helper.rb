@@ -38,6 +38,7 @@ module TestHelper
   def helper_clean_temp
     FileUtils.rm_rf("#{TEMP_DIR}")
     FileUtils.mkdir_p(File.join(TEMP_DIR, 'migrations'))
+    FileUtils.mkdir_p(File.join(TEMP_DIR, 'dml'))
     FileUtils.mkdir_p(File.join(TEMP_DIR, 'code'))
   end
 
@@ -304,6 +305,10 @@ module TestHelper
     create_migration_files("select * from sqlite_master;")
   end
 
+  def helper_good_sqlite_dml
+    create_dml_files("select * from sqlite_master;")
+  end
+
   def helper_good_sybase_migration
     create_migration_files("select 1\ngo")
   end
@@ -323,6 +328,14 @@ module TestHelper
     1.upto(number) do
       datestamp += 1
       create_migration_files("select * from sqlite_master;", datestamp.to_s)
+    end
+  end
+
+  def helper_many_good_sqlite_dmls(number)
+    datestamp = 201108190000 - 1
+    1.upto(number) do
+      datestamp += 1
+      create_dml_files("select * from sqlite_master;", datestamp.to_s)
     end
   end
 
@@ -371,6 +384,11 @@ module TestHelper
   def helper_bad_sqlite_migration
     create_migration_files("select * from tab_not_exist;\ncreate table foo (c1 integer);")
   end
+
+  def helper_bad_sqlite_dml
+    create_dml_files("select * from tab_not_exist;\ncreate table foo (c1 integer);")
+  end
+
 
   def helper_empty_oracle_migration
     create_migration_files('')
@@ -629,15 +647,26 @@ go", 'trg1.trg')
   end
 
   def create_migration_files(content, datestamp='201108190000')
-    FileUtils.rm_rf(File.join(TEMP_DIR, 'migrations', "*.sql"))
-    FileUtils.mkdir_p(File.join(TEMP_DIR, 'migrations'))
+    create_files('migrations', content, datestamp)
+  end
+
+  def create_dml_files(content, datestamp='201108190000')
+    m = create_files('dml', content, datestamp)
+    m.migration_type = 'DML'
+    m
+  end
+
+  def create_files(where, content, datestamp='201108190000')
+    FileUtils.rm_rf(File.join(TEMP_DIR, where, "*.sql"))
+    FileUtils.mkdir_p(File.join(TEMP_DIR, where))
     filenames = ["#{datestamp}_up_test_migration.sql", "#{datestamp}_down_test_migration.sql"]
     filenames.each do |fn|
-      File.open(File.join(TEMP_DIR, 'migrations', fn), 'w') do |f|
+      File.open(File.join(TEMP_DIR, where, fn), 'w') do |f|
         f.puts content
       end
     end
-    DBGeni::Migration.new(File.join(TEMP_DIR, 'migrations'), filenames[0])
+    DBGeni::Migration.new(File.join(TEMP_DIR, where), filenames[0])
   end
+
 
 end

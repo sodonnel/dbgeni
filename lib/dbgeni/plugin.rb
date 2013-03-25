@@ -23,12 +23,18 @@ module DBGeni
       :after_migration_up        => [],
       :before_migration_down     => [],
       :after_migration_down      => [],
+      :before_dml_up             => [],
+      :after_dml_up              => [],
+      :before_dml_down           => [],
+      :after_dml_down            => [],
       :before_code_apply         => [],
       :after_code_apply          => [],
       :before_code_remove        => [],
       :after_code_remove         => [],
       :before_running_migrations => [],
       :after_running_migrations  => [],
+      :before_running_dmls       => [],
+      :after_running_dmls        => [],
       :before_modifying_code     => [],
       :after_modifying_code      => []
     }

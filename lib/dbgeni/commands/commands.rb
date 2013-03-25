@@ -13,6 +13,8 @@ case $initial_command
   require 'dbgeni/commands/generate'
   when 'migrations'                    ,'m'
   require 'dbgeni/commands/migrations'
+  when 'dmls', 'dml'                   ,'d'
+  require 'dbgeni/commands/dmls'
   when 'code'                          ,'c'
   require 'dbgeni/commands/code'
   when 'milestones'
@@ -28,7 +30,8 @@ The available dbgeni commands are:
   new-config Generate a templated config file in an existing directory
   initialize Create the dbgeni_migrations table in the database
   config     List the current config for a given environment
-  migrations List and Apply Migrations
+  migrations List and Apply Migations
+  dmls       List and Apply DML Migrations
   code       List, compile and remove stored procedures
   generate   Generate migrations and code files
 
