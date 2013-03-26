@@ -4,33 +4,34 @@ module DBGeni
 
     def self.initialize(config)
       required_class = setup(config.db_type)
+      conn = nil
       begin
         required_method = required_class.method("connect")
       rescue NameError
         raise DBGeni::InvalidConnectorForDBType, config.db_type
       end
-      if %w(oracle sqlite).include? config.db_type
+      if config.db_type == 'sqlite' or (config.db_type == 'oracle' and RUBY_PLATFORM != 'java')
         # don't need a host or port here, so make this a seperate call block
         conn = required_method.call(config.env.username,
                                # SQLITE doesn't need a password, so prevent asking for it
                                # or it may be promoted for
                                config.db_type == 'sqlite' ? '' : config.env.password,
                                config.env.database)
-        if config.db_type == 'oracle'
-          if config.env.install_schema
-            if config.env.username != config.env.install_schema
-              conn.execute("alter session set current_schema=#{config.env.install_schema}")
-            end
+      else
+        conn = required_method.call(config.env.username,
+                                    config.env.password,
+                                    config.env.database,
+                                    config.env.hostname,
+                                    config.env.port)
+      end
+      if config.db_type == 'oracle'
+        if config.env.install_schema
+          if config.env.username != config.env.install_schema
+            conn.execute("alter session set current_schema=#{config.env.install_schema}")
           end
         end
-        conn
-      else
-        required_method.call(config.env.username,
-                             config.env.password,
-                             config.env.database,
-                             config.env.hostname,
-                             config.env.port)
       end
+      conn
     end
 
     private

@@ -16,7 +16,7 @@ module DBGeni
       attr_reader :database
 
       def self.connect(user, password, database, host=nil, port=nil)
-        self.new(user, password, database)
+        self.new(user, password, database, host, port)
       end
 
       def disconnect
