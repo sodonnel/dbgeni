@@ -1,3 +1,12 @@
+# 0.9.0
+
+26th March 2013
+
+Download: [dbgeni-0.9.0.gem](/downloads/dbgeni-0.9.0.gem)
+
+ * Added support for DML migrations
+ * Fixed bug connecting to Oracle using JRuby
+
 # 0.8.0
 
 26th September 2012

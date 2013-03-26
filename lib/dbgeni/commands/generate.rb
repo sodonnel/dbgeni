@@ -18,6 +18,11 @@ migration  Generates a set of files for a new database migration. The only param
            is a name for the migration:
              dbgeni generate migration name_for_this_migration
 
+dml_migration  Generates a set of files for a new dml database migration. The only parameter
+               is a name for the migration:
+                dbgeni generate dml_migration name_for_this_migration
+
+
 milestone  Generates a milestone, which is like a tag on a particular migration indicating
            that a migration completes a release of the application
              dbgenu generate milestone name_for_milestone existing_migration_for_milestone
@@ -65,7 +70,7 @@ when 'migration', 'mig'
     puts "creating: #{filename}"
     FileUtils.touch(filename)
   end
-when 'dml'
+when 'dml_migration', 'dml'
   datestamp = Time.now.strftime('%Y%m%d%H%M')
   %w(up down).each do |f|
     filename = File.join(config.dml_directory, "#{datestamp}_#{f}_#{name}.sql")
