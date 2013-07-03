@@ -42,6 +42,17 @@ module DBGeni
           return execute_jdbc(sql, *binds)
         end
         begin
+          # Why am I re-establishing the database connection? Well, something has changed
+          # somewhere in the sqlite3 application or ruby drivers, and without this line
+          # I get lots of errors in the test suite:
+          #
+          # sqlite 3.7.8 QLite3::SQLException: SQL logic error or missing database
+          #
+          # This line fixes it be reconnecting. I am not sure if this is a non-reentrant
+          # issue, but it used to work just fine :-/
+          # SQLITE + DBGeni is not really intended as a production combo, so this is probably
+          # ok.
+          @connection = SQLite3::Database.new(@database)
           query = @connection.prepare(sql)
           binds.each_with_index do |b, i|
             query.bind_param(i+1, b)
