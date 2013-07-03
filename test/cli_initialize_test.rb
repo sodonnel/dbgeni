@@ -85,4 +85,11 @@ class TestCLIInitialize < Test::Unit::TestCase
     assert_match(/Usage/, response)
   end
 
+  def test_user_and_password_can_be_passed_on_command_line
+    helper_oracle_single_environment_file_no_user_pass
+    response = Kernel.system("#{CLI} initialize -c  #{TEMP_DIR}/oracle.conf -u #{ORA_USER} -p #{ORA_PASSWORD}")
+    assert_equal(true, response)
+  end
+
+
 end

@@ -1,6 +1,6 @@
 if %w(-h --help).include? ARGV[0]
   puts <<-EOF
-Usage: dbgeni migrations command <--environment-name env_name> <--config-file path/to/config> <--force>
+Usage: dbgeni migrations command <--environment-name env_name> <--config-file path/to/config> <--force> <--username user> <--password password>
 
 If config-file is not specified, then a file called .dbgeni in the current directory will be
 used if it exists, otherwise an error will occurr
@@ -14,6 +14,8 @@ if errors occur.
 -e can be used as an abbreviation for --environment-name
 -c can be used as an abbreviation for --config-file
 -f can be used as an abbreviation for --force
+-u can be used as an abbreviation for --username
+-p can be used as an abbreviation for --password
 
 
 Avaliable commands are:
@@ -68,7 +70,7 @@ end
 command = ARGV.shift
 
 installer = nil
-installer = DBGeni::Base.installer_for_environment($config_file, $environment_name)
+installer = $build_installer.call
 
 logger    = DBGeni::Logger.instance
 

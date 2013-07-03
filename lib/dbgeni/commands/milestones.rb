@@ -31,7 +31,7 @@ end
 command = ARGV.shift
 
 installer = nil
-installer = DBGeni::Base.installer_for_environment($config_file, $environment_name)
+installer = $build_installer.call
 
 begin
   case command

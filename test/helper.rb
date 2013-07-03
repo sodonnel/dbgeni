@@ -232,6 +232,20 @@ module TestHelper
     filename
   end
 
+  def helper_oracle_single_environment_file_no_user_pass
+    filename = "#{TEMP_DIR}/oracle.conf"
+    File.open(filename, 'w') do |f|
+      f.puts "database_type 'oracle'
+                                      environment('development') {
+                                         database '#{ORA_DB}'
+                                         hostname '#{ORA_HOST}'
+                                         port     '#{ORA_PORT}'
+                                     }"
+    end
+    filename
+  end
+
+
   def helper_oracle_multiple_environment_file
     filename = "#{TEMP_DIR}/oracle.conf"
     File.open(filename, 'w') do |f|

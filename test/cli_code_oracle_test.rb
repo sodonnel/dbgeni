@@ -215,5 +215,11 @@ class TestCLICodeOracleTest < Test::Unit::TestCase
      assert_match(/is not a valid command/, response)
    end
 
+   def test_username_and_password_can_be_passed_on_command_line
+     helper_good_procedure_file
+     helper_oracle_single_environment_file_no_user_pass
+     response = Kernel.system("#{CLI} code apply all -c #{TEMP_DIR}/oracle.conf -u #{ORA_USER} -p #{ORA_PASSWORD}")
+     assert_equal(true, response)
+   end
 
 end

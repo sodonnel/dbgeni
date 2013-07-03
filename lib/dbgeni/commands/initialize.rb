@@ -1,6 +1,6 @@
 if %w(-h --help).include? ARGV[0]
   puts <<-EOF
-Usage: dbgeni initialize <--environment-name env_name> <--config-file path/to/config>
+Usage: dbgeni initialize <--environment-name env_name> <--config-file path/to/config> <--username user> <--password password>
 
 If config-file is not specified, then a file called .dbgeni in the current directory will be
 used if it exists, otherwise an error will occurr
@@ -10,12 +10,15 @@ be specified.
 
 -e can be used as an abbreviation for --environment-name
 -c can be used as an abbreviation for --config-file
+-u can be used as an abbreviation for --username
+-p can be used as an abbreviation for --password
+
 
 EOF
   exit(0)
 end
 
-installer = DBGeni::Base.installer_for_environment($config_file, $environment_name)
+installer = $build_installer.call
 
 begin
   logger = DBGeni::Logger.instance

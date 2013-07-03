@@ -706,4 +706,12 @@ class TestCLIDMLMigrations < Test::Unit::TestCase
     assert_match(/The plugin directory specified in config is not accessable/, response)
   end
 
+  def test_username_and_password_can_be_passed_on_command_line
+    helper_oracle_single_environment_file_no_user_pass
+    self.send("helper_good_oracle_dml".intern)
+    response = Kernel.system("#{CLI} dmls outstanding -c #{TEMP_DIR}/oracle.conf -u #{ORA_USER} -p #{ORA_PASSWORD}")
+    assert_equal(true, response)
+   end
+
+
 end
