@@ -102,7 +102,11 @@ module DBGeni
         set_completed!
       rescue Exception => e
         set_failed!
-        raise DBGeni::MigrationApplyFailed, self.to_s
+        if e.class == DBGeni::MigratorCouldNotConnect
+          raise e
+        else
+          raise DBGeni::MigrationApplyFailed, self.to_s
+        end
       ensure
         @logfile        = migrator.logfile
         @error_messages = migrator.migration_errors
@@ -121,9 +125,14 @@ module DBGeni
       begin
         migrator.rollback(self, force)
         set_rolledback!()
+
       rescue Exception => e
         set_failed!
-        raise DBGeni::MigrationApplyFailed, self.to_s
+        if e.class == DBGeni::MigratorCouldNotConnect
+          raise e
+        else
+          raise DBGeni::MigrationApplyFailed, self.to_s
+        end
       ensure
         @logfile        = migrator.logfile
         @error_messages = migrator.migration_errors

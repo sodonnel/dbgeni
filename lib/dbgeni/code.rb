@@ -96,6 +96,9 @@ module DBGeni
       begin
         migrator.compile(self)
         set_applied(config,connection)
+      rescue DBGeni::MigratorCouldNotConnect
+        @error_messages = ""
+        raise DBGeni::MigratorCouldNotConnect
       rescue DBGeni::MigrationContainsErrors
         # MYSQL (and sybase is like mysql) and Oracle procedures are handled different.
         # In Oracle if the code fails to

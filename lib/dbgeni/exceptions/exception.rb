@@ -40,6 +40,7 @@ module DBGeni
   class DBGeni::DatabaseNotSpecified < Exception; end
   class NoOutstandingMigrations     < Exception; end
   class NoAppliedMigrations         < Exception; end
+  class MigratorCouldNotConnect     < Exception; end
 
   ## code
   class UnknownCodeType             < Exception; end

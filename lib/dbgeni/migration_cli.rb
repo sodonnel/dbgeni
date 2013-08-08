@@ -1,13 +1,13 @@
 module DBGeni
   class MigrationCLI
-    
+
     def initialize(base_installer, config, logger)
       @base       = base_installer
       @config     = config
       @logger     = logger
       set_plugin_hooks
     end
-    
+
     def migrations
       @migration_list ||= DBGeni::MigrationList.new(@config.migration_directory) unless @migration_list
       @migration_list.migrations
@@ -24,7 +24,7 @@ module DBGeni
       migrations
       @migration_list.applied(@config, connection)
     end
-    
+
     def applied_and_broken_migrations
       ensure_initialized
       migrations
@@ -36,9 +36,9 @@ module DBGeni
       migrations
       @migration_list.list(list, @config, connection)
     end
-    
+
     # Applying
-    
+
     def apply_all_migrations(force=nil)
       ensure_initialized
       migrations = outstanding_migrations
@@ -47,7 +47,7 @@ module DBGeni
       end
       apply_migration_list(migrations, force)
     end
-    
+
     def apply_next_migration(force=nil)
       ensure_initialized
       migrations = outstanding_migrations
@@ -68,14 +68,14 @@ module DBGeni
       end
       apply_migration_list(outstanding[0..index], force)
     end
-    
+
     def apply_list_of_migrations(migration_list, force=nil)
       ensure_initialized
       migration_files = list_of_migrations(migration_list)
       apply_migration_list(migration_files, force)
     end
-    
-    
+
+
     def apply_migration(migration, force=nil)
       ensure_initialized
       begin
@@ -83,14 +83,17 @@ module DBGeni
         migration.apply!(@config, connection, force)
         @logger.info "Applied #{migration.to_s}"
         run_plugin(@after_up_run_plugin, migration)
+      rescue DBGeni::MigratorCouldNotConnect
+        @logger.error "Failed to connect to the database CLI"
+        raise DBGeni::MigrationApplyFailed, migration.to_s
       rescue DBGeni::MigrationApplyFailed
         @logger.error "Failed #{migration.to_s}. Errors in #{migration.logfile}\n\n#{migration.error_messages}\n\n"
         raise DBGeni::MigrationApplyFailed, migration.to_s
       end
     end
-    
+
     # rolling back
-    
+
     def rollback_all_migrations(force=nil)
       ensure_initialized
       migrations = applied_and_broken_migrations.reverse
@@ -99,7 +102,7 @@ module DBGeni
       end
       apply_migration_list(migrations, force, false)
     end
-    
+
     def rollback_last_migration(force=nil)
       ensure_initialized
       migrations = applied_and_broken_migrations
@@ -109,7 +112,7 @@ module DBGeni
       # the most recent one is at the end of the array!!
       apply_migration_list([migrations.last], force, false)
     end
-    
+
     def rollback_until_migration(migration_name, force=nil)
       ensure_initialized
       milestone = find_migration(migration_name)
@@ -123,13 +126,13 @@ module DBGeni
       # This is because we don't want to rollback the final migration as its upto but not including
       apply_migration_list(applied[0...index], force, false)
     end
-    
+
     def rollback_list_of_migrations(migration_list, force=nil)
       ensure_initialized
       migration_files = list_of_migrations(migration_list).reverse
       apply_migration_list(migration_files, force, false)
     end
-    
+
     def rollback_migration(migration, force=nil)
       ensure_initialized
       begin
@@ -137,14 +140,17 @@ module DBGeni
         migration.rollback!(@config, connection, force)
         @logger.info  "Rolledback #{migration.to_s}"
         run_plugin(@after_down_run_plugin, migration)
+      rescue DBGeni::MigratorCouldNotConnect
+        @logger.error "Failed to connect to the database CLI"
+        raise DBGeni::MigrationApplyFailed, migration.to_s
       rescue DBGeni::MigrationApplyFailed
         @logger.error "Failed #{migration.to_s}. Errors in #{migration.logfile}\n\n#{migration.error_messages}\n\n"
         raise DBGeni::MigrationApplyFailed, migration.to_s
       end
     end
-    
+
     private
-    
+
     def apply_migration_list(migration_list, force, up=true)
       # TODO - conflicted about how to handle exceptions.
       # If before_running_migrations throws an exception no
@@ -184,7 +190,7 @@ module DBGeni
       @after_running_plugin   = :after_running_migrations
     end
 
-    
+
     def ensure_initialized
       @base.ensure_initialized
     end
@@ -192,7 +198,7 @@ module DBGeni
     def connection
       @base.connection
     end
-        
-    
+
+
   end
 end

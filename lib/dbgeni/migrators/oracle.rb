@@ -17,22 +17,27 @@ module DBGeni
         has_errors = false
         buffer = []
 
-        File.open(@logfile, 'r').each_line do |l|
-          buffer.push l
-          if buffer.length > 10
-            buffer.shift
+        begin
+          File.open(@logfile, 'r').each_line do |l|
+            buffer.push l
+            if buffer.length > 10
+              buffer.shift
+            end
+            if !has_errors && l =~ /^ERROR at line/
+              has_errors = true
+              next
+            end
+            # After we find the ERROR at line, the next line contains the error
+            # message, so we just want to consume it and then exit.
+            # The line we care about will be in the buffer, so just break and join
+            # the buffer.
+            if has_errors
+              break
+            end
           end
-          if !has_errors && l =~ /^ERROR at line/
-            has_errors = true
-            next
-          end
-          # After we find the ERROR at line, the next line contains the error
-          # message, so we just want to consume it and then exit.
-          # The line we care about will be in the buffer, so just break and join
-          # the buffer.
-          if has_errors
-            break
-          end
+        rescue Errno::ENOENT
+          # assume this means the log was never written as, generally because
+          # sqlplus didn't connect to Oracle. In this case do nothing
         end
         buffer.join("")
       end
@@ -123,7 +128,7 @@ module DBGeni
           p.puts "set define off"
           #            end
           unless force
-            p.puts "whenever sqlerror exit sql.sqlcode"
+            p.puts "whenever sqlerror exit 200"
           end
           #            p.puts "START #{File.basename(file)} #{sql_parameters}"
           p.puts "spool #{@logfile}"
@@ -142,7 +147,10 @@ module DBGeni
           # When the pipe block ends, ruby sets $? with the exit status.  A
           # good exit status is 0 (zero) anything else means it went wrong
           # If $? is anything but zero, raise an exception.
-        if $? != 0
+        if $?.exitstatus != 0
+          if $?.exitstatus != 200
+            raise DBGeni::MigratorCouldNotConnect
+          end
           # Code compile errors never get here as they don't make sqlplus abort.
           # But if the user does not have privs to create the proc / trigger etc,
           # the code will abort to here via a insufficient privs error. Or if the code
