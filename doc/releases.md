@@ -1,3 +1,12 @@
+# 0.10.0
+
+8th August 2013
+
+Download: [dbgeni-0.10.0.gem](/downloads/dbgeni-0.10.0.gem)
+
+ * Allow username and password to be specified on the command line
+ * Fixed error messaging when DBGeni fails to connect to Oracle over sqlplus
+
 # 0.9.0
 
 26th March 2013

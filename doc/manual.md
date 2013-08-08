@@ -77,6 +77,8 @@
  * [Option Switches](#option_switches)
    * [environment-name](#option_switches_environment_name)
    * [config-file](#option_switches_config)
+   * [username](#option_switches_username)
+   * [password](#option_switches_password)
    * [force](#option_switches_force)
    * [help](#option_switches_help)
 
@@ -1158,6 +1160,26 @@ For example:
     $ dbgeni migrations applied -c /home/sodonnel/configs/.dbgeni_config_one
 
 If the config file does not exist an error will be raised.
+
+## --username<a id="option_switches_username"></a>
+
+Specifying --username (-u for short) overrides the username used to connect to the database. It can either be used to override the value in the config file, or to specify the value if it does not exist in the config file.
+
+For example:
+
+    $ dbgeni migrations applied --username install_user
+    $ dbgeni migrations applied -u install_user
+
+
+## --password<a id="option_switches_password"></a>
+
+Specifying --password (-p for short) overrides the password used to connect to the database. It can either be used to override the value in the config file, or to specify the value if it does not exist in the config file.
+
+For example:
+
+    $ dbgeni migrations applied --password f0obar123 install_user
+    $ dbgeni migrations applied -u f0obar123
+
 
 ## --force<a id="option_switches_force"></a>
 
