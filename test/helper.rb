@@ -8,6 +8,9 @@ module TestHelper
   end
   require 'fileutils'
 
+  require 'dbgeni'
+  DBGeni::Logger.suppress_stdout
+
   TEMP_DIR = File.expand_path(File.join(File.dirname(__FILE__), "temp"))
   SQLITE_DB_NAME  = 'sqlite.dbb'
 

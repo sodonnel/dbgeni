@@ -3,7 +3,12 @@ module DBGeni
   class Logger
 
     def self.instance(location=nil)
+      @@suppress_stdout ||= false
       @@singleton_instance ||= self.new(location)
+    end
+
+    def self.suppress_stdout
+      @@suppress_stdout = true
     end
 
     def info(msg)
@@ -39,7 +44,9 @@ module DBGeni
       if @fh && !@fh.closed?
         @fh.puts "#{Time.now.strftime('%Y%m%d %H:%M:%S')} - #{msg}"
       end
-      puts msg
+      unless @@suppress_stdout
+        puts msg
+      end
     end
 
     def initialize(location=nil)

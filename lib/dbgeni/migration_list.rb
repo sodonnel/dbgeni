@@ -75,7 +75,6 @@ module DBGeni
         # The migration filename format is YYYYMMDDHHMM_<up / down >_title.sql
         files = Dir.entries(@migration_directory).grep(/^\d{12}_up_.+\.sql$/).sort
       rescue Exception => e
-        puts "Migrations directory: #{@migrations_directory}"
         raise DBGeni::MigrationDirectoryNotExist, "Migrations directory: #{@migrations_directory}"
       end
       @migrations = Array.new
