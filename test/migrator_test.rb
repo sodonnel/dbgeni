@@ -9,20 +9,16 @@ class TestMigrator < Test::Unit::TestCase
 
   include TestHelper
   def setup
-    @connection       = helper_sqlite_connection
-    @connection_ora   = helper_oracle_connection
-    @config           = helper_sqlite_config
-    @config_ora  =      helper_oracle_config
+    @connection       = Object.new 
   end
 
   def teardown
-    @connection_ora.disconnect
   end
 
   def test_sqlite_migrator_loads
     migrator = nil
     assert_nothing_raised do
-      migrator = DBGeni::Migrator.initialize(@config, @connection)
+      migrator = DBGeni::Migrator.initialize(helper_sqlite_config, @connection)
     end
     assert_equal('DBGeni::Migrator::Sqlite', migrator.class.to_s)
   end
@@ -30,10 +26,25 @@ class TestMigrator < Test::Unit::TestCase
   def test_oracle_migrator_loads
     migrator = nil
     assert_nothing_raised do
-      migrator = DBGeni::Migrator.initialize(@config_ora, @connection_ora)
+      migrator = DBGeni::Migrator.initialize(helper_oracle_config, @connection)
     end
     assert_equal('DBGeni::Migrator::Oracle', migrator.class.to_s)
   end
 
+  def test_sybase_migrator_loads
+    migrator = nil
+    assert_nothing_raised do
+      migrator = DBGeni::Migrator.initialize(helper_sybase_config, @connection)
+    end
+    assert_equal('DBGeni::Migrator::Sybase', migrator.class.to_s)
+  end
+
+  def test_mysql_migrator_loads
+    migrator = nil
+    assert_nothing_raised do
+      migrator = DBGeni::Migrator.initialize(helper_mysql_config, @connection)
+    end
+    assert_equal('DBGeni::Migrator::Mysql', migrator.class.to_s)
+  end
 
 end
