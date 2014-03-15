@@ -7,6 +7,7 @@ require 'test/unit'
 require 'mocha'
 require 'dbgeni/migrators/oracle'
 require 'dbgeni/migrators/mysql'
+require 'dbgeni/migrators/sqlite'
 
 class TestCode < Test::Unit::TestCase
 
@@ -20,9 +21,9 @@ class TestCode < Test::Unit::TestCase
 
 
     # Instance variables are clobbered after each test so store connection in class var
-    @@connection ||= helper_oracle_connection
+    @@connection ||= helper_sqlite_connection # helper_oracle_connection
     @connection = @@connection
-    @config     = helper_oracle_config
+    @config     = helper_sqlite_config
 
     FileUtils.mkdir_p(File.join(TEMP_DIR, 'log'))
     begin
@@ -137,8 +138,8 @@ class TestCode < Test::Unit::TestCase
   ##########
 
   def test_apply_simple_procedure
-    DBGeni::Migrator::Oracle.any_instance.expects(:compile).with(@code)
-    DBGeni::Migrator::Oracle.any_instance.expects(:code_errors).returns('')
+    DBGeni::Migrator::Sqlite.any_instance.expects(:compile).with(@code)
+    DBGeni::Migrator::Sqlite.any_instance.expects(:code_errors).returns('')
 
     assert_nothing_raised do
       @code.apply!(@config, @connection)
@@ -147,8 +148,8 @@ class TestCode < Test::Unit::TestCase
   end
 
   def test_apply_when_current_raises_exception
-    DBGeni::Migrator::Oracle.any_instance.expects(:compile).with(@code)
-    DBGeni::Migrator::Oracle.any_instance.expects(:code_errors).returns('')
+    DBGeni::Migrator::Sqlite.any_instance.expects(:compile).with(@code)
+    DBGeni::Migrator::Sqlite.any_instance.expects(:code_errors).returns('')
 
     assert_nothing_raised do
       @code.apply!(@config, @connection)
@@ -159,8 +160,8 @@ class TestCode < Test::Unit::TestCase
   end
 
   def test_apply_when_current_and_force_does_not_raise_exception
-    DBGeni::Migrator::Oracle.any_instance.stubs(:compile).with(@code)
-    DBGeni::Migrator::Oracle.any_instance.stubs(:code_errors).returns('')
+    DBGeni::Migrator::Sqlite.any_instance.stubs(:compile).with(@code)
+    DBGeni::Migrator::Sqlite.any_instance.stubs(:code_errors).returns('')
 
     assert_nothing_raised do
       @code.apply!(@config, @connection)
@@ -183,7 +184,7 @@ class TestCode < Test::Unit::TestCase
   ###########
 
   def test_no_error_when_remove_procedure_that_doesnt_exist
-    DBGeni::Migrator::Oracle.any_instance.expects(:remove).with(@code)
+    DBGeni::Migrator::Sqlite.any_instance.expects(:remove).with(@code)
 
     assert_nothing_raised do
       @code.remove!(@config, @connection)
@@ -191,9 +192,9 @@ class TestCode < Test::Unit::TestCase
   end
 
   def test_procedure_removed_sucessfully
-    DBGeni::Migrator::Oracle.any_instance.expects(:compile).with(@code)
-    DBGeni::Migrator::Oracle.any_instance.expects(:remove).with(@code)
-    DBGeni::Migrator::Oracle.any_instance.expects(:code_errors).returns('')
+    DBGeni::Migrator::Sqlite.any_instance.expects(:compile).with(@code)
+    DBGeni::Migrator::Sqlite.any_instance.expects(:remove).with(@code)
+    DBGeni::Migrator::Sqlite.any_instance.expects(:code_errors).returns('')
 
     @code.apply!(@config, @connection)
     assert_equal(true, @code.current?(@config, @connection))
@@ -218,9 +219,9 @@ class TestCode < Test::Unit::TestCase
   ###############
 
   def test_logfile_is_available
-    DBGeni::Migrator::Oracle.any_instance.expects(:compile).with(@code)
-    DBGeni::Migrator::Oracle.any_instance.expects(:logfile).returns('somelog.log')
-    DBGeni::Migrator::Oracle.any_instance.expects(:code_errors).returns('')
+    DBGeni::Migrator::Sqlite.any_instance.expects(:compile).with(@code)
+    DBGeni::Migrator::Sqlite.any_instance.expects(:logfile).returns('somelog.log')
+    DBGeni::Migrator::Sqlite.any_instance.expects(:code_errors).returns('')
 
     assert_nothing_raised do
       @code.apply!(@config, @connection)
@@ -229,9 +230,9 @@ class TestCode < Test::Unit::TestCase
   end
 
   def test_error_messages_are_nil_for_good_procedure
-    DBGeni::Migrator::Oracle.any_instance.expects(:compile).with(@code)
-    DBGeni::Migrator::Oracle.any_instance.expects(:logfile).returns('somelog.log')
-    DBGeni::Migrator::Oracle.any_instance.expects(:code_errors).returns(nil)
+    DBGeni::Migrator::Sqlite.any_instance.expects(:compile).with(@code)
+    DBGeni::Migrator::Sqlite.any_instance.expects(:logfile).returns('somelog.log')
+    DBGeni::Migrator::Sqlite.any_instance.expects(:code_errors).returns(nil)
 
     assert_nothing_raised do
       @code.apply!(@config, @connection)
@@ -239,10 +240,15 @@ class TestCode < Test::Unit::TestCase
     assert_nil(@code.error_messages)
   end
 
+
+  # Because the test suit is using a stubbed Sqlite connection for these code tests,
+  # these next three tests are a little light on coverage. In the code class, it handles errors
+  # differently for Oracle vs Sybase / MySql in that it calls either migration_errors or code_errors
+  # in different error scenarios. These tests don't properly test it.
   def test_error_messages_available_for_bad_procedure
-    DBGeni::Migrator::Oracle.any_instance.expects(:compile).with(@code)
-    DBGeni::Migrator::Oracle.any_instance.expects(:logfile).returns('somelog.log')
-    DBGeni::Migrator::Oracle.any_instance.expects(:code_errors).returns('something')
+    DBGeni::Migrator::Sqlite.any_instance.expects(:compile).with(@code)
+    DBGeni::Migrator::Sqlite.any_instance.expects(:logfile).returns('somelog.log')
+    DBGeni::Migrator::Sqlite.any_instance.expects(:code_errors).returns('something')
 
     assert_nothing_raised do
       @code.apply!(@config, @connection)
@@ -251,9 +257,10 @@ class TestCode < Test::Unit::TestCase
   end
 
   def test_migration_error_messages_available_for_bad_procedure_with_exception
-    DBGeni::Migrator::Oracle.any_instance.expects(:compile).with(@code).raises(DBGeni::MigrationContainsErrors)
-    DBGeni::Migrator::Oracle.any_instance.expects(:logfile).returns('somelog.log')
-    DBGeni::Migrator::Oracle.any_instance.expects(:migration_errors).returns('something')
+    DBGeni::Migrator::Sqlite.any_instance.expects(:compile).with(@code).raises(DBGeni::MigrationContainsErrors)
+    DBGeni::Migrator::Sqlite.any_instance.expects(:logfile).returns('somelog.log')
+    DBGeni::Migrator::Sqlite.any_instance.stubs(:migration_errors).returns('something')
+    DBGeni::Migrator::Sqlite.any_instance.stubs(:code_errors).returns('something')
 
     assert_raises(DBGeni::CodeApplyFailed) do
       @code.apply!(@config, @connection)
@@ -262,41 +269,19 @@ class TestCode < Test::Unit::TestCase
   end
 
   def test_migration_error_messages_available_for_bad_procedure_with_exception_and_force
-    DBGeni::Migrator::Oracle.any_instance.expects(:compile).with(@code).raises(DBGeni::MigrationContainsErrors)
-    DBGeni::Migrator::Oracle.any_instance.expects(:logfile).returns('somelog.log')
-    DBGeni::Migrator::Oracle.any_instance.expects(:migration_errors).returns('something')
-
+    DBGeni::Migrator::Sqlite.any_instance.expects(:compile).with(@code).raises(DBGeni::MigrationContainsErrors)
+    DBGeni::Migrator::Sqlite.any_instance.expects(:logfile).returns('somelog.log')
+    DBGeni::Migrator::Sqlite.any_instance.stubs(:migration_errors).returns('something')
+    DBGeni::Migrator::Sqlite.any_instance.stubs(:code_errors).returns('something')
+    
     assert_nothing_raised do
       @code.apply!(@config, @connection, true)
     end
     assert_not_nil(@code.error_messages)
   end
 
-  ##### MYSQL
-  def test_mysql_migration_error_messages_available_for_bad_procedure
-    DBGeni::Migrator::Mysql.any_instance.expects(:compile).with(@code).raises(DBGeni::MigrationContainsErrors)
-    DBGeni::Migrator::Mysql.any_instance.expects(:logfile).returns('somelog.log')
-    DBGeni::Migrator::Mysql.any_instance.expects(:code_errors).returns('something')
-    @config = helper_mysql_config
+  ###### End bad error coverage tests ######
 
-    assert_raises(DBGeni::CodeApplyFailed) do
-      @code.apply!(@config, @connection, false)
-    end
-    assert_not_nil(@code.error_messages)
-  end
-
-  ##### MYSQL
-  def test_mysql_migration_error_messages_available_for_bad_procedure_with_force
-    DBGeni::Migrator::Mysql.any_instance.expects(:compile).with(@code).raises(DBGeni::MigrationContainsErrors)
-    DBGeni::Migrator::Mysql.any_instance.expects(:logfile).returns('somelog.log')
-    DBGeni::Migrator::Mysql.any_instance.expects(:code_errors).returns('something')
-    @config = helper_mysql_config
-
-    assert_nothing_raised do
-      @code.apply!(@config, @connection, true)
-    end
-    assert_not_nil(@code.error_messages)
-  end
 
   def test_convert_code_is_invoked_on_compile
     # This test is a MESS. At the top convert_code is stubbed out, so in this method, it needs to be
@@ -306,8 +291,8 @@ class TestCode < Test::Unit::TestCase
     code.stubs(:ensure_file_exists).returns(true)
     code.stubs(:hash).returns('abcdefgh')
     DBGeni::FileConverter.expects(:convert).returns('newfile')
-    DBGeni::Migrator::Oracle.any_instance.expects(:compile).with(code)
-    DBGeni::Migrator::Oracle.any_instance.expects(:code_errors).returns('')
+    DBGeni::Migrator::Sqlite.any_instance.expects(:compile).with(code)
+    DBGeni::Migrator::Sqlite.any_instance.expects(:code_errors).returns('')
 
     assert_nothing_raised do
       code.apply!(@config, @connection)
