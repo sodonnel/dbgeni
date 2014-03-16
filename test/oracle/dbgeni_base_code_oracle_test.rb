@@ -13,7 +13,7 @@ class TestDBGeniBaseProcOracle < Test::Unit::TestCase
 
   def setup
     # clear down and recreate the working directories.
-    @code_directory = File.expand_path(File.join(File.dirname(__FILE__), "temp", "code"))
+    @code_directory = File.expand_path(File.join(File.dirname(__FILE__), "..", "temp", "code"))
     FileUtils.rm_rf(@code_directory)
     FileUtils.mkdir_p(@code_directory)
     # 5 valid code files and one non code file
