@@ -4,4 +4,4 @@ DBGeni helps you organise and apply changes to your database. If you follow a fe
 
 Currently supports Sqlite, MySQL, Oracle and Sybase.
 
-Checkout (the dbgeni)[http://dbgeni.appsintheopen.com] website for the manual and more information.
+Checkout http://dbgeni.appsintheopen.com for the manual and more information.
