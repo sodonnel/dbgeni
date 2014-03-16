@@ -33,10 +33,7 @@ module TestHelper
   SYBASE_PORT     = '5000'
   SYBASE_SERVICE  = 'LOCALHOST'
 
-
-
-#  CLI = 'ruby C:\Users\sodonnel\code\dbgeni\lib\dbgeni\cli.rb'
-  CLI = 'ruby /home/sodonnel/code/dbgeni/lib/dbgeni/cli.rb'
+  CLI = "ruby " << File.expand_path(File.join(File.dirname(__FILE__), "..", "lib", "dbgeni", "cli.rb")) 
 
   def helper_clean_temp
     FileUtils.rm_rf("#{TEMP_DIR}")
