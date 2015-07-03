@@ -135,7 +135,7 @@ module DBGeni
     def method_missing(meth, *args, &blk)
       if meth.to_s =~ /migration/
         delegate_to_migration_cli(meth.to_s.intern, *args)
-      elsif meth =~ /dml/
+      elsif meth.to_s =~ /dml/
         delegate_to_dml_cli(meth.to_s.gsub(/dml/,'migration').intern, *args)
       else
         super

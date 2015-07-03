@@ -1,6 +1,6 @@
 Gem::Specification.new do |s| 
   s.name = "dbgeni"
-  s.version = "0.10.2"
+  s.version = "0.10.3"
   s.author = "Stephen O'Donnell"
   s.email = "stephen@betteratoracle.com"
   s.homepage = "http://dbgeni.com"
